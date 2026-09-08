@@ -16,7 +16,13 @@ export function Sidebar({ businessName }: { businessName: string }) {
       </div>
       <nav className="flex flex-1 flex-col gap-1 px-3">
         {navItems.map((item) => (
-          <DesktopNavLink key={item.href} item={item} />
+          <DesktopNavLink
+            key={item.href}
+            href={item.href}
+            label={item.label}
+            exact={item.exact}
+            icon={<item.icon className="size-4.5 shrink-0" aria-hidden />}
+          />
         ))}
       </nav>
     </aside>
