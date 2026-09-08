@@ -1,0 +1,56 @@
+@import "tailwindcss";
+
+:root {
+  --background: #fbf7f2;
+  --foreground: #201a17;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-display: var(--font-fraunces);
+  --font-sans: var(--font-inter);
+
+  /* Warm "ember" accent scale — the brand color. */
+  --color-ember-50: #fdf3ee;
+  --color-ember-100: #fbe4d7;
+  --color-ember-200: #f6c6ac;
+  --color-ember-300: #f0a175;
+  --color-ember-400: #e87a44;
+  --color-ember-500: #dd5a20;
+  --color-ember-600: #c1440e;
+  --color-ember-700: #9f350d;
+  --color-ember-800: #802c11;
+  --color-ember-900: #692611;
+  --color-ember-950: #391108;
+
+  /* Warm neutral "charcoal" scale — near-black with a hint of brown, used
+     for text and the admin dashboard chrome. */
+  --color-charcoal-50: #f7f5f3;
+  --color-charcoal-100: #ece7e2;
+  --color-charcoal-200: #d8cec4;
+  --color-charcoal-300: #baaa9a;
+  --color-charcoal-400: #98826e;
+  --color-charcoal-500: #7c6753;
+  --color-charcoal-600: #635143;
+  --color-charcoal-700: #4c3f36;
+  --color-charcoal-800: #362d27;
+  --color-charcoal-900: #201a17;
+  --color-charcoal-950: #140f0d;
+
+  /* Cream — public site background. */
+  --color-cream-50: #fffdfb;
+  --color-cream-100: #fbf7f2;
+  --color-cream-200: #f5ede3;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
