@@ -17,7 +17,7 @@ export function ProductList({
   );
 
   return (
-    <ul className="divide-y divide-charcoal-100">
+    <ul className="divide-y divide-charcoal-800">
       {optimisticProducts.map((product, index) => (
         <ProductRow
           key={product.id}

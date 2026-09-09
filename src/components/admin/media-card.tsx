@@ -40,8 +40,8 @@ export function MediaCard({ media }: { media: Media }) {
   }
 
   return (
-    <div className="overflow-hidden rounded-xl border border-charcoal-100">
-      <div className="relative aspect-square w-full bg-charcoal-100">
+    <div className="overflow-hidden rounded-xl border border-charcoal-800">
+      <div className="relative aspect-square w-full bg-charcoal-800">
         <Image
           src={getPublicMediaUrl(media.storage_path)}
           alt={media.alt_text || media.file_name}
@@ -52,10 +52,10 @@ export function MediaCard({ media }: { media: Media }) {
       </div>
       <div className="space-y-2 p-3">
         <div className="flex items-center justify-between gap-2">
-          <Badge className={cn(media.kind === "gallery" && "bg-ember-100 text-ember-700")}>
+          <Badge className={cn(media.kind === "gallery" && "bg-ember-500/15 text-ember-300")}>
             {kindLabels[media.kind] ?? media.kind}
           </Badge>
-          <span className="text-xs text-charcoal-400">{formatBytes(media.size_bytes)}</span>
+          <span className="text-xs text-charcoal-500">{formatBytes(media.size_bytes)}</span>
         </div>
         <input
           value={altText}
@@ -63,7 +63,7 @@ export function MediaCard({ media }: { media: Media }) {
           onBlur={saveAlt}
           disabled={isPending}
           placeholder="Alt text (for accessibility)"
-          className="w-full rounded-md border border-charcoal-200 px-2 py-1 text-xs text-charcoal-700 focus:border-ember-500 focus:outline-none disabled:opacity-60"
+          className="w-full rounded-md border border-charcoal-700 px-2 py-1 text-xs text-charcoal-200 focus:border-ember-500 focus:outline-none disabled:opacity-60"
         />
         <div className="flex items-center justify-between">
           <VisibilityToggle

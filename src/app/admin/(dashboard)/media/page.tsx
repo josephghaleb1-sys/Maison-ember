@@ -16,8 +16,8 @@ export default async function MediaPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="font-display text-2xl font-semibold text-charcoal-900">Media library</h1>
-        <p className="text-sm text-charcoal-500">
+        <h1 className="font-display text-2xl font-semibold text-cream-50">Media library</h1>
+        <p className="text-sm text-charcoal-400">
           Upload photos for your gallery, logo, and hero banner. Product photos are managed from each product.
         </p>
       </div>

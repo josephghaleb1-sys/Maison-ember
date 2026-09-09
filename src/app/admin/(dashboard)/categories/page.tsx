@@ -25,8 +25,8 @@ export default async function CategoriesPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="font-display text-2xl font-semibold text-charcoal-900">Categories</h1>
-        <p className="text-sm text-charcoal-500">
+        <h1 className="font-display text-2xl font-semibold text-cream-50">Categories</h1>
+        <p className="text-sm text-charcoal-400">
           Organize your menu. Deleting a category never deletes its products.
         </p>
       </div>
@@ -41,7 +41,7 @@ export default async function CategoriesPage() {
               description="Add categories like “Starters” or “Desserts” to organize your menu."
             />
           ) : (
-            <ul className="divide-y divide-charcoal-100">
+            <ul className="divide-y divide-charcoal-800">
               {categories.map((category, index) => (
                 <CategoryRow
                   key={category.id}

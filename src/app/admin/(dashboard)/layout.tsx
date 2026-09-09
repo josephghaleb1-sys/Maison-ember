@@ -7,7 +7,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const { business, email } = await requireBusinessContext();
 
   return (
-    <div className="flex min-h-screen bg-charcoal-50">
+    <div className="flex min-h-screen bg-charcoal-950">
       <Sidebar businessName={business.name} />
       <div className="flex min-w-0 flex-1 flex-col pb-16 md:pb-0">
         <Topbar email={email} siteHref="/" />

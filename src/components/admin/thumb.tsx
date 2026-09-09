@@ -18,7 +18,7 @@ export function Thumb({
     return (
       <div
         className={cn(
-          "flex shrink-0 items-center justify-center rounded-lg bg-charcoal-100 text-charcoal-300",
+          "flex shrink-0 items-center justify-center rounded-lg bg-charcoal-800 text-charcoal-300",
           className,
         )}
         style={{ width: size, height: size }}
@@ -30,7 +30,7 @@ export function Thumb({
 
   return (
     <div
-      className={cn("relative shrink-0 overflow-hidden rounded-lg bg-charcoal-100", className)}
+      className={cn("relative shrink-0 overflow-hidden rounded-lg bg-charcoal-800", className)}
       style={{ width: size, height: size }}
     >
       <Image

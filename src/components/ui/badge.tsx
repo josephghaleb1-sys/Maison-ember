@@ -8,9 +8,9 @@ export function Badge({
   variant?: "neutral" | "success" | "warning";
 }) {
   const variantClasses = {
-    neutral: "bg-charcoal-100 text-charcoal-600",
-    success: "bg-green-100 text-green-700",
-    warning: "bg-amber-100 text-amber-700",
+    neutral: "bg-charcoal-800 text-charcoal-300",
+    success: "bg-green-500/15 text-green-400",
+    warning: "bg-amber-500/15 text-amber-400",
   }[variant];
 
   return (

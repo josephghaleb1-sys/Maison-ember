@@ -81,7 +81,7 @@ export function ProductForm({
               name="image"
               type="file"
               accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml"
-              className="block w-full text-sm text-charcoal-600 file:mr-3 file:rounded-lg file:border-0 file:bg-charcoal-100 file:px-3 file:py-2 file:text-sm file:font-medium file:text-charcoal-700 hover:file:bg-charcoal-200"
+              className="block w-full text-sm text-charcoal-300 file:mr-3 file:rounded-lg file:border-0 file:bg-charcoal-800 file:px-3 file:py-2 file:text-sm file:font-medium file:text-charcoal-200 hover:file:bg-charcoal-700"
               onChange={async (e) => {
                 const input = e.target;
                 const file = input.files?.[0];
@@ -103,36 +103,36 @@ export function ProductForm({
                 }
               }}
             />
-            <p className="mt-1 text-xs text-charcoal-400">
+            <p className="mt-1 text-xs text-charcoal-500">
               {isCompressing ? "Optimizing photo…" : "JPG, PNG, WebP, GIF, or SVG. Max 5MB."}
             </p>
           </div>
         </div>
         {product?.image_path && !preview && (
-          <label className="mt-2 flex items-center gap-2 text-sm text-charcoal-600">
+          <label className="mt-2 flex items-center gap-2 text-sm text-charcoal-300">
             <input
               type="checkbox"
               name="remove_image"
               checked={removeImage}
               onChange={(e) => setRemoveImage(e.target.checked)}
-              className="rounded border-charcoal-300"
+              className="rounded border-charcoal-600"
             />
             <X className="size-3.5" aria-hidden /> Remove current photo
           </label>
         )}
         {!product && !preview && (
-          <p className="mt-2 flex items-center gap-1.5 text-xs text-charcoal-400">
+          <p className="mt-2 flex items-center gap-1.5 text-xs text-charcoal-500">
             <ImagePlus className="size-3.5" aria-hidden /> No photo selected yet — that&apos;s okay, you can add one later.
           </p>
         )}
       </div>
 
-      <label className="flex items-center gap-2 text-sm font-medium text-charcoal-700">
+      <label className="flex items-center gap-2 text-sm font-medium text-charcoal-200">
         <input
           type="checkbox"
           name="is_visible"
           defaultChecked={product?.is_visible ?? true}
-          className="rounded border-charcoal-300"
+          className="rounded border-charcoal-600"
         />
         Visible on public site
       </label>

@@ -26,7 +26,7 @@ export function Hero({
         />
       ) : (
         <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-charcoal-950 via-ember-950 to-charcoal-900">
-          <Flame className="size-40 text-ember-800/40" aria-hidden />
+          <Flame className="size-40 text-ember-600/40" aria-hidden />
         </div>
       )}
       <div className="absolute inset-0 bg-gradient-to-t from-charcoal-950 via-charcoal-950/40 to-transparent" />

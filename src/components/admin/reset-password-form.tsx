@@ -14,8 +14,8 @@ export function ResetPasswordForm() {
   if (state.message) {
     return (
       <div className="space-y-4">
-        <p className="text-sm text-charcoal-700">{state.message}</p>
-        <Link href="/admin/login" className="text-sm font-medium text-ember-600 hover:underline">
+        <p className="text-sm text-charcoal-200">{state.message}</p>
+        <Link href="/admin/login" className="text-sm font-medium text-ember-400 hover:underline">
           Back to sign in
         </Link>
       </div>
@@ -24,7 +24,7 @@ export function ResetPasswordForm() {
 
   return (
     <form action={action} className="space-y-4">
-      <p className="text-sm text-charcoal-500">
+      <p className="text-sm text-charcoal-400">
         Enter your email and we&apos;ll send you a link to reset your password.
       </p>
       <div>
@@ -37,7 +37,7 @@ export function ResetPasswordForm() {
       </Button>
       <Link
         href="/admin/login"
-        className="block text-center text-sm font-medium text-charcoal-500 hover:text-charcoal-700"
+        className="block text-center text-sm font-medium text-charcoal-400 hover:text-charcoal-200"
       >
         Back to sign in
       </Link>

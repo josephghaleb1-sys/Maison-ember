@@ -7,7 +7,7 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
   const businessName = settings?.business_name || business.name;
 
   return (
-    <div className="flex min-h-screen flex-col bg-cream-100">
+    <div className="flex min-h-screen flex-col bg-charcoal-950">
       <SiteHeader businessName={businessName} />
       <main className="flex-1">{children}</main>
       <SiteFooter businessName={businessName} settings={settings} />
