@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input, Textarea, Label, FieldError } from "@/components/ui/input";
 import { Card, CardBody, CardHeader, CardTitle } from "@/components/ui/card";
 import { Thumb } from "@/components/admin/thumb";
+import { compressImageFile } from "@/lib/image-compress";
 
 const initialState: FormState = {};
 
@@ -35,6 +36,7 @@ function ImageField({
 }) {
   const [preview, setPreview] = useState<string | null>(null);
   const [remove, setRemove] = useState(false);
+  const [isCompressing, setIsCompressing] = useState(false);
 
   return (
     <div>
@@ -53,13 +55,28 @@ function ImageField({
             type="file"
             accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml"
             className="block w-full text-sm text-charcoal-600 file:mr-3 file:rounded-lg file:border-0 file:bg-charcoal-100 file:px-3 file:py-2 file:text-sm file:font-medium file:text-charcoal-700 hover:file:bg-charcoal-200"
-            onChange={(e) => {
-              const file = e.target.files?.[0];
+            onChange={async (e) => {
+              const input = e.target;
+              const file = input.files?.[0];
               setRemove(false);
-              setPreview(file ? URL.createObjectURL(file) : null);
+              if (!file) {
+                setPreview(null);
+                return;
+              }
+              setPreview(URL.createObjectURL(file));
+              setIsCompressing(true);
+              const compressed = await compressImageFile(file, {
+                maxDimension: name === "hero" ? 2000 : 800,
+              });
+              setIsCompressing(false);
+              if (compressed !== file) {
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(compressed);
+                input.files = dataTransfer.files;
+              }
             }}
           />
-          <p className="mt-1 text-xs text-charcoal-400">{hint}</p>
+          <p className="mt-1 text-xs text-charcoal-400">{isCompressing ? "Optimizing image…" : hint}</p>
         </div>
       </div>
       {currentPath && !preview && (

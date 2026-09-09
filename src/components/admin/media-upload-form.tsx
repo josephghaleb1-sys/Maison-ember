@@ -1,19 +1,31 @@
 "use client";
 
-import { useRef, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { UploadCloud } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select, Label } from "@/components/ui/input";
 import { uploadMedia } from "@/lib/actions/media";
+import { compressImageFiles } from "@/lib/image-compress";
 
 export function MediaUploadForm() {
   const formRef = useRef<HTMLFormElement>(null);
   const [isPending, startTransition] = useTransition();
+  const [isCompressing, setIsCompressing] = useState(false);
   const router = useRouter();
 
-  function handleSubmit(formData: FormData) {
+  async function handleSubmit(formData: FormData) {
+    const files = formData.getAll("files").filter((f): f is File => f instanceof File && f.size > 0);
+
+    if (files.length > 0) {
+      setIsCompressing(true);
+      const compressed = await compressImageFiles(files);
+      setIsCompressing(false);
+      formData.delete("files");
+      compressed.forEach((file) => formData.append("files", file));
+    }
+
     startTransition(async () => {
       const result = await uploadMedia(formData);
       if (result?.error) {
@@ -48,8 +60,9 @@ export function MediaUploadForm() {
           className="block w-full text-sm text-charcoal-600 file:mr-3 file:rounded-lg file:border-0 file:bg-charcoal-100 file:px-3 file:py-2 file:text-sm file:font-medium file:text-charcoal-700 hover:file:bg-charcoal-200"
         />
       </div>
-      <Button type="submit" loading={isPending}>
-        <UploadCloud className="size-4" aria-hidden /> Upload
+      <Button type="submit" loading={isPending || isCompressing}>
+        <UploadCloud className="size-4" aria-hidden />
+        {isCompressing ? "Optimizing…" : "Upload"}
       </Button>
     </form>
   );

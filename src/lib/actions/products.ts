@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { after } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { requireBusinessContext } from "@/lib/dal";
 import { productSchema } from "@/lib/validation/product";
@@ -39,23 +40,29 @@ export async function createProduct(_prevState: FormState, formData: FormData): 
   }
 
   const supabase = await createClient();
+  const file = formData.get("image");
+  const hasFile = file instanceof File && file.size > 0;
 
-  if (!(await assertCategoryBelongsToBusiness(supabase, business.id, parsed.data.category_id))) {
+  // Category validation, the sort_order count, and the image upload are all
+  // independent of each other — run them concurrently instead of one at a
+  // time. This is the main lever for "adding a product with a photo feels
+  // slow": these three round trips used to be fully sequential.
+  const [categoryOk, countResult, uploadResult] = await Promise.all([
+    assertCategoryBelongsToBusiness(supabase, business.id, parsed.data.category_id),
+    supabase.from("products").select("id", { count: "exact", head: true }).eq("business_id", business.id),
+    hasFile ? uploadBusinessImage(supabase, business.id, userId, "product", file) : Promise.resolve(null),
+  ]);
+
+  const uploadedPath = uploadResult && "path" in uploadResult ? uploadResult.path : null;
+
+  if (!categoryOk) {
+    if (uploadedPath) await deleteBusinessImage(supabase, uploadedPath);
     return { error: "That category doesn't exist." };
   }
 
-  let imagePath: string | null = null;
-  const file = formData.get("image");
-  if (file instanceof File && file.size > 0) {
-    const result = await uploadBusinessImage(supabase, business.id, userId, "product", file);
-    if ("error" in result) return { error: result.error };
-    imagePath = result.path;
+  if (uploadResult && "error" in uploadResult) {
+    return { error: uploadResult.error };
   }
-
-  const { count } = await supabase
-    .from("products")
-    .select("id", { count: "exact", head: true })
-    .eq("business_id", business.id);
 
   const { error } = await supabase.from("products").insert({
     business_id: business.id,
@@ -64,12 +71,12 @@ export async function createProduct(_prevState: FormState, formData: FormData): 
     description: parsed.data.description,
     price: parsed.data.price,
     is_visible: parsed.data.is_visible,
-    image_path: imagePath,
-    sort_order: count ?? 0,
+    image_path: uploadedPath,
+    sort_order: countResult.count ?? 0,
   });
 
   if (error) {
-    if (imagePath) await deleteBusinessImage(supabase, imagePath);
+    if (uploadedPath) await deleteBusinessImage(supabase, uploadedPath);
     return { error: `Couldn't create product: ${error.message}` };
   }
 
@@ -100,21 +107,29 @@ export async function updateProduct(
 
   const supabase = await createClient();
 
-  if (!(await assertCategoryBelongsToBusiness(supabase, business.id, parsed.data.category_id))) {
+  // Category validation doesn't depend on the existing row (or vice versa) —
+  // fetch both concurrently.
+  const [categoryOk, existingResult] = await Promise.all([
+    assertCategoryBelongsToBusiness(supabase, business.id, parsed.data.category_id),
+    supabase
+      .from("products")
+      .select("image_path")
+      .eq("id", productId)
+      .eq("business_id", business.id)
+      .maybeSingle(),
+  ]);
+
+  if (!categoryOk) {
     return { error: "That category doesn't exist." };
   }
 
-  const { data: existing } = await supabase
-    .from("products")
-    .select("image_path")
-    .eq("id", productId)
-    .eq("business_id", business.id)
-    .maybeSingle();
-
+  const existing = existingResult.data;
   if (!existing) {
     return { error: "Product not found." };
   }
 
+  // The new-image-upload / old-image-removal decision genuinely depends on
+  // `existing.image_path`, so this part has to stay sequential.
   let imagePath = existing.image_path;
   const file = formData.get("image");
   const removeImage = formData.get("remove_image") === "on";
@@ -156,24 +171,28 @@ export async function deleteProduct(productId: string): Promise<{ error?: string
   const { business } = await requireBusinessContext();
   const supabase = await createClient();
 
-  const { data: existing } = await supabase
-    .from("products")
-    .select("image_path")
-    .eq("id", productId)
-    .eq("business_id", business.id)
-    .maybeSingle();
-
-  const { error } = await supabase
+  // DELETE ... RETURNING in one round trip instead of SELECT-then-DELETE.
+  const { data: deleted, error } = await supabase
     .from("products")
     .delete()
     .eq("id", productId)
-    .eq("business_id", business.id);
+    .eq("business_id", business.id)
+    .select("image_path")
+    .maybeSingle();
 
   if (error) {
     return { error: `Couldn't delete product: ${error.message}` };
   }
 
-  if (existing?.image_path) await deleteBusinessImage(supabase, existing.image_path);
+  // The product row is already gone — that's the operation the user is
+  // waiting on. Cleaning up its storage file + media row is bookkeeping
+  // that doesn't need to block the response; `after()` runs it once the
+  // response has been sent (Vercel keeps the function alive via waitUntil),
+  // so cleanup still reliably happens without making the user wait for it.
+  const imagePath = deleted?.image_path;
+  if (imagePath) {
+    after(() => deleteBusinessImage(supabase, imagePath));
+  }
 
   revalidatePath("/admin/products");
   revalidatePath("/menu");
