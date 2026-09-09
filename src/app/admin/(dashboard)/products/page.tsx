@@ -23,8 +23,8 @@ export default async function ProductsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4">
         <div>
-          <h1 className="font-display text-2xl font-semibold text-charcoal-900">Products</h1>
-          <p className="text-sm text-charcoal-500">{products.length} total</p>
+          <h1 className="font-display text-2xl font-semibold text-cream-50">Products</h1>
+          <p className="text-sm text-charcoal-400">{products.length} total</p>
         </div>
         <Link href="/admin/products/new">
           <Button size="sm">

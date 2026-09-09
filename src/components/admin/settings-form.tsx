@@ -54,7 +54,7 @@ function ImageField({
             name={`${name}_image`}
             type="file"
             accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml"
-            className="block w-full text-sm text-charcoal-600 file:mr-3 file:rounded-lg file:border-0 file:bg-charcoal-100 file:px-3 file:py-2 file:text-sm file:font-medium file:text-charcoal-700 hover:file:bg-charcoal-200"
+            className="block w-full text-sm text-charcoal-300 file:mr-3 file:rounded-lg file:border-0 file:bg-charcoal-800 file:px-3 file:py-2 file:text-sm file:font-medium file:text-charcoal-200 hover:file:bg-charcoal-700"
             onChange={async (e) => {
               const input = e.target;
               const file = input.files?.[0];
@@ -76,17 +76,17 @@ function ImageField({
               }
             }}
           />
-          <p className="mt-1 text-xs text-charcoal-400">{isCompressing ? "Optimizing image…" : hint}</p>
+          <p className="mt-1 text-xs text-charcoal-500">{isCompressing ? "Optimizing image…" : hint}</p>
         </div>
       </div>
       {currentPath && !preview && (
-        <label className="mt-2 flex items-center gap-2 text-sm text-charcoal-600">
+        <label className="mt-2 flex items-center gap-2 text-sm text-charcoal-300">
           <input
             type="checkbox"
             name={`remove_${name}_image`}
             checked={remove}
             onChange={(e) => setRemove(e.target.checked)}
-            className="rounded border-charcoal-300"
+            className="rounded border-charcoal-600"
           />
           <X className="size-3.5" aria-hidden /> Remove current image
         </label>
@@ -209,7 +209,7 @@ export function SettingsForm({ settings }: { settings: WebsiteSettings | null })
 
       <FieldError>{state.error}</FieldError>
 
-      <div className="sticky bottom-16 flex items-center gap-3 rounded-xl border border-charcoal-100 bg-white/95 p-4 backdrop-blur md:bottom-0">
+      <div className="sticky bottom-16 flex items-center gap-3 rounded-xl border border-charcoal-800 bg-charcoal-900/95 p-4 backdrop-blur md:bottom-0">
         <Button type="submit" loading={isPending}>
           Save changes
         </Button>

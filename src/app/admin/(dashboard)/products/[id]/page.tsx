@@ -19,7 +19,7 @@ export default async function EditProductPage(props: PageProps<"/admin/products/
 
   return (
     <div className="max-w-2xl space-y-6">
-      <h1 className="font-display text-2xl font-semibold text-charcoal-900">Edit product</h1>
+      <h1 className="font-display text-2xl font-semibold text-cream-50">Edit product</h1>
       <ProductForm product={product} categories={categories} action={updateProduct.bind(null, id)} />
     </div>
   );

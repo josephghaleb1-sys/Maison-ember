@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 :root {
-  --background: #fbf7f2;
-  --foreground: #201a17;
+  --background: #0c0a08;
+  --foreground: #f7f1e6;
 }
 
 @theme inline {
@@ -11,21 +11,23 @@
   --font-display: var(--font-fraunces);
   --font-sans: var(--font-inter);
 
-  /* Warm "ember" accent scale — the brand color. */
-  --color-ember-50: #fdf3ee;
-  --color-ember-100: #fbe4d7;
-  --color-ember-200: #f6c6ac;
-  --color-ember-300: #f0a175;
-  --color-ember-400: #e87a44;
-  --color-ember-500: #dd5a20;
-  --color-ember-600: #c1440e;
-  --color-ember-700: #9f350d;
-  --color-ember-800: #802c11;
-  --color-ember-900: #692611;
-  --color-ember-950: #391108;
+  /* "ember" accent scale — luxury gold. 50-400 read well as gold text/icons
+     on dark surfaces; 600-700 are dark enough for white button text. */
+  --color-ember-50: #fbf3e3;
+  --color-ember-100: #f3e2b8;
+  --color-ember-200: #e7c883;
+  --color-ember-300: #ddb158;
+  --color-ember-400: #d4a03a;
+  --color-ember-500: #c08a24;
+  --color-ember-600: #a6741c;
+  --color-ember-700: #8a5f17;
+  --color-ember-800: #6e4b13;
+  --color-ember-900: #543910;
+  --color-ember-950: #33220a;
 
-  /* Warm neutral "charcoal" scale — near-black with a hint of brown, used
-     for text and the admin dashboard chrome. */
+  /* Warm neutral "charcoal" scale — near-black with a hint of brown. The
+     dark end (800-950) is now the page/card surface everywhere; the light
+     end (50-400) is used for text and borders on those dark surfaces. */
   --color-charcoal-50: #f7f5f3;
   --color-charcoal-100: #ece7e2;
   --color-charcoal-200: #d8cec4;
@@ -38,10 +40,11 @@
   --color-charcoal-900: #201a17;
   --color-charcoal-950: #140f0d;
 
-  /* Cream — public site background. */
-  --color-cream-50: #fffdfb;
-  --color-cream-100: #fbf7f2;
-  --color-cream-200: #f5ede3;
+  /* "cream" — warm off-white, used for headings/high-emphasis text on the
+     dark surfaces (not a background anymore). */
+  --color-cream-50: #f7f1e6;
+  --color-cream-100: #ece2cf;
+  --color-cream-200: #ddcdad;
 }
 
 body {

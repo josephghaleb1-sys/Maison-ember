@@ -13,7 +13,7 @@ export default function ProductsLoading() {
       </div>
 
       <Card>
-        <CardBody className="divide-y divide-charcoal-100">
+        <CardBody className="divide-y divide-charcoal-800">
           {Array.from({ length: 6 }).map((_, i) => (
             <div key={i} className="flex items-center gap-3 py-4 first:pt-0 last:pb-0">
               <Skeleton className="size-14 shrink-0 rounded-lg" />

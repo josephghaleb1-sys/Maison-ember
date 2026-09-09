@@ -48,7 +48,7 @@ export function MobileNavLink({ href, label, exact, icon }: NavLinkProps) {
       href={href}
       className={cn(
         "flex flex-1 flex-col items-center gap-0.5 py-2 text-[11px] font-medium",
-        active ? "text-ember-600" : "text-charcoal-400",
+        active ? "text-ember-400" : "text-charcoal-500",
       )}
     >
       {icon}

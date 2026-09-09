@@ -23,10 +23,10 @@ export default async function DashboardOverviewPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="font-display text-2xl font-semibold text-charcoal-900">
+        <h1 className="font-display text-2xl font-semibold text-cream-50">
           Welcome back
         </h1>
-        <p className="text-sm text-charcoal-500">Here&apos;s what&apos;s happening at {business.name}.</p>
+        <p className="text-sm text-charcoal-400">Here&apos;s what&apos;s happening at {business.name}.</p>
       </div>
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
@@ -72,7 +72,7 @@ export default async function DashboardOverviewPage() {
       <Card>
         <CardHeader className="flex items-center justify-between">
           <CardTitle>Recently added products</CardTitle>
-          <Link href="/admin/products" className="text-sm font-medium text-ember-600 hover:underline">
+          <Link href="/admin/products" className="text-sm font-medium text-ember-400 hover:underline">
             View all
           </Link>
         </CardHeader>
@@ -91,13 +91,13 @@ export default async function DashboardOverviewPage() {
               }
             />
           ) : (
-            <ul className="divide-y divide-charcoal-100">
+            <ul className="divide-y divide-charcoal-800">
               {recentProducts.map((product) => (
                 <li key={product.id} className="flex items-center gap-3 py-3 first:pt-0 last:pb-0">
                   <Thumb path={product.image_path} alt={product.name} />
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium text-charcoal-900">{product.name}</p>
-                    <p className="text-sm text-charcoal-500">{formatPrice(product.price)}</p>
+                    <p className="truncate text-sm font-medium text-cream-50">{product.name}</p>
+                    <p className="text-sm text-charcoal-400">{formatPrice(product.price)}</p>
                   </div>
                   {!product.is_visible && <Badge variant="warning">Hidden</Badge>}
                 </li>

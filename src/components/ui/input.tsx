@@ -3,7 +3,7 @@ import type { InputHTMLAttributes, TextareaHTMLAttributes, SelectHTMLAttributes 
 import { cn } from "@/lib/utils";
 
 const fieldClasses =
-  "block w-full rounded-lg border border-charcoal-200 bg-white px-3 py-2 text-sm text-charcoal-900 placeholder:text-charcoal-400 focus:border-ember-500 focus:outline focus:outline-2 focus:outline-ember-100 disabled:bg-charcoal-50 disabled:text-charcoal-400";
+  "block w-full rounded-lg border border-charcoal-700 bg-charcoal-900 px-3 py-2 text-sm text-cream-50 placeholder:text-charcoal-500 focus:border-ember-400 focus:outline focus:outline-2 focus:outline-ember-500 disabled:bg-charcoal-800 disabled:text-charcoal-500";
 
 export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputElement>>(
   ({ className, ...props }, ref) => (
@@ -34,7 +34,7 @@ export function Label({
 }: React.LabelHTMLAttributes<HTMLLabelElement>) {
   return (
     <label
-      className={cn("mb-1.5 block text-sm font-medium text-charcoal-700", className)}
+      className={cn("mb-1.5 block text-sm font-medium text-charcoal-200", className)}
       {...props}
     />
   );

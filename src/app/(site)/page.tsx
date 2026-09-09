@@ -48,15 +48,15 @@ export default async function HomePage() {
 
       {settings?.about_text && (
         <section className="mx-auto max-w-3xl px-4 py-20 text-center sm:px-6">
-          <h2 className="font-display text-3xl font-semibold text-charcoal-900">Our story</h2>
-          <p className="mt-4 text-lg leading-relaxed text-charcoal-600">
+          <h2 className="font-display text-3xl font-semibold text-cream-50">Our story</h2>
+          <p className="mt-4 text-lg leading-relaxed text-charcoal-300">
             {settings.about_text.length > 340
               ? `${settings.about_text.slice(0, 340).trim()}…`
               : settings.about_text}
           </p>
           <Link
             href="/about"
-            className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-ember-600 hover:underline"
+            className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-ember-400 hover:underline"
           >
             Read more <ArrowRight className="size-4" aria-hidden />
           </Link>
@@ -64,11 +64,11 @@ export default async function HomePage() {
       )}
 
       {featuredProducts.length > 0 && (
-        <section className="bg-white py-20">
+        <section className="bg-charcoal-900 py-20">
           <div className="mx-auto max-w-5xl px-4 sm:px-6">
             <div className="flex items-end justify-between gap-4">
-              <h2 className="font-display text-3xl font-semibold text-charcoal-900">From the menu</h2>
-              <Link href="/menu" className="text-sm font-medium text-ember-600 hover:underline">
+              <h2 className="font-display text-3xl font-semibold text-cream-50">From the menu</h2>
+              <Link href="/menu" className="text-sm font-medium text-ember-400 hover:underline">
                 Full menu
               </Link>
             </div>
@@ -87,7 +87,7 @@ export default async function HomePage() {
             {categories.map((category) => (
               <span
                 key={category.id}
-                className="rounded-full border border-ember-200 bg-ember-50 px-4 py-1.5 text-sm font-medium text-ember-700"
+                className="rounded-full border border-ember-700 bg-ember-500/10 px-4 py-1.5 text-sm font-medium text-ember-300"
               >
                 {category.name}
               </span>
@@ -100,14 +100,14 @@ export default async function HomePage() {
         <section className="py-20">
           <div className="mx-auto max-w-5xl px-4 sm:px-6">
             <div className="flex items-end justify-between gap-4">
-              <h2 className="font-display text-3xl font-semibold text-charcoal-900">Inside Maison Ember</h2>
-              <Link href="/gallery" className="text-sm font-medium text-ember-600 hover:underline">
+              <h2 className="font-display text-3xl font-semibold text-cream-50">Inside Maison Ember</h2>
+              <Link href="/gallery" className="text-sm font-medium text-ember-400 hover:underline">
                 View gallery
               </Link>
             </div>
             <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
               {featuredGallery.map((item) => (
-                <div key={item.id} className="relative aspect-square overflow-hidden rounded-xl bg-charcoal-100">
+                <div key={item.id} className="relative aspect-square overflow-hidden rounded-xl bg-charcoal-800">
                   <Image
                     src={getPublicMediaUrl(item.storage_path)}
                     alt={item.alt_text || businessName}

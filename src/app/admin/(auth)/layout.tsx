@@ -11,7 +11,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           <h1 className="font-display text-2xl font-semibold text-white">Maison Ember</h1>
           <p className="text-sm text-charcoal-300">Business dashboard</p>
         </div>
-        <div className="rounded-xl bg-white p-6 shadow-xl sm:p-8">{children}</div>
+        <div className="rounded-xl border border-charcoal-800 bg-charcoal-900 p-6 shadow-xl sm:p-8">{children}</div>
       </div>
     </div>
   );

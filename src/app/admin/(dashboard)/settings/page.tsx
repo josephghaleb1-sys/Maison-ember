@@ -12,8 +12,8 @@ export default async function SettingsPage() {
   return (
     <div className="max-w-2xl space-y-6">
       <div>
-        <h1 className="font-display text-2xl font-semibold text-charcoal-900">Business settings</h1>
-        <p className="text-sm text-charcoal-500">Changes here appear live on your public site.</p>
+        <h1 className="font-display text-2xl font-semibold text-cream-50">Business settings</h1>
+        <p className="text-sm text-charcoal-400">Changes here appear live on your public site.</p>
       </div>
       <SettingsForm settings={settings} />
     </div>
