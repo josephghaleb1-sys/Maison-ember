@@ -6,7 +6,7 @@ import { getProducts, getCategories } from "@/lib/queries/admin";
 import { Card, CardBody } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
-import { ProductRow } from "@/components/admin/product-row";
+import { ProductList } from "@/components/admin/product-list";
 
 export const metadata: Metadata = { title: "Products" };
 
@@ -50,17 +50,7 @@ export default async function ProductsPage() {
               }
             />
           ) : (
-            <ul className="divide-y divide-charcoal-100">
-              {products.map((product, index) => (
-                <ProductRow
-                  key={product.id}
-                  product={product}
-                  categoryName={product.category_id ? categoryNames.get(product.category_id) ?? null : null}
-                  isFirst={index === 0}
-                  isLast={index === products.length - 1}
-                />
-              ))}
-            </ul>
+            <ProductList products={products} categoryNames={categoryNames} />
           )}
         </CardBody>
       </Card>

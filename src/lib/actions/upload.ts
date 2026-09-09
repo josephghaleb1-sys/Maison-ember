@@ -52,8 +52,14 @@ export async function uploadBusinessImage(
   return { path };
 }
 
-/** Removes a storage object and its media library row, if any. Best-effort. */
+/**
+ * Removes a storage object and its media library row, if any. Best-effort,
+ * and the two deletes are independent of each other (neither depends on the
+ * other's result) so they run in parallel rather than one after another.
+ */
 export async function deleteBusinessImage(supabase: Client, path: string) {
-  await supabase.storage.from(MEDIA_BUCKET).remove([path]);
-  await supabase.from("media").delete().eq("storage_path", path);
+  await Promise.all([
+    supabase.storage.from(MEDIA_BUCKET).remove([path]),
+    supabase.from("media").delete().eq("storage_path", path),
+  ]);
 }

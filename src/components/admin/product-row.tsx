@@ -18,11 +18,14 @@ export function ProductRow({
   categoryName,
   isFirst,
   isLast,
+  onOptimisticRemove,
 }: {
   product: Product;
   categoryName: string | null;
   isFirst: boolean;
   isLast: boolean;
+  /** Called synchronously, before the server call, to hide the row immediately. */
+  onOptimisticRemove: () => void;
 }) {
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
@@ -91,7 +94,10 @@ export function ProductRow({
           title="Delete this product?"
           description={`"${product.name}" will be permanently removed, including its photo. This can't be undone.`}
           confirmLabel="Delete"
-          action={() => deleteProduct(product.id)}
+          action={() => {
+            onOptimisticRemove();
+            return deleteProduct(product.id);
+          }}
           successMessage="Product deleted."
         />
       </div>
