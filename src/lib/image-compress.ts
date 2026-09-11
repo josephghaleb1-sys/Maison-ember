@@ -12,6 +12,13 @@
  * - If compression ever fails, or the result isn't actually smaller, the
  *   original file is returned — this must never be the reason an upload
  *   breaks.
+ * - Dimensions are read from a lightweight `<img>` decode first, and the
+ *   actual resize happens via `createImageBitmap`'s `resizeWidth/Height`
+ *   options rather than decoding the full-resolution image into a bitmap
+ *   and scaling it down afterwards — modern phone cameras produce 12-48MP
+ *   photos, and materializing one of those at full size (before it's ever
+ *   downscaled) is enough to crash the tab on memory-constrained mobile
+ *   browsers.
  */
 export async function compressImageFile(
   file: File,
@@ -19,18 +26,24 @@ export async function compressImageFile(
 ): Promise<File> {
   if (file.type === "image/svg+xml" || file.type === "image/gif") return file;
 
+  let objectUrl: string | null = null;
   try {
-    const bitmap = await createImageBitmap(file);
-    const scale = Math.min(1, maxDimension / Math.max(bitmap.width, bitmap.height));
+    objectUrl = URL.createObjectURL(file);
+    const { width: naturalWidth, height: naturalHeight } = await readImageDimensions(objectUrl);
+
+    const scale = Math.min(1, maxDimension / Math.max(naturalWidth, naturalHeight));
     const isLossyType = file.type === "image/jpeg" || file.type === "image/webp";
 
-    if (scale >= 1 && !isLossyType) {
-      bitmap.close();
-      return file;
-    }
+    if (scale >= 1 && !isLossyType) return file;
 
-    const width = Math.max(1, Math.round(bitmap.width * scale));
-    const height = Math.max(1, Math.round(bitmap.height * scale));
+    const width = Math.max(1, Math.round(naturalWidth * scale));
+    const height = Math.max(1, Math.round(naturalHeight * scale));
+
+    const bitmap = await createImageBitmap(file, {
+      resizeWidth: width,
+      resizeHeight: height,
+      resizeQuality: "high",
+    });
 
     const canvas = document.createElement("canvas");
     canvas.width = width;
@@ -40,7 +53,7 @@ export async function compressImageFile(
       bitmap.close();
       return file;
     }
-    ctx.drawImage(bitmap, 0, 0, width, height);
+    ctx.drawImage(bitmap, 0, 0);
     bitmap.close();
 
     const outputType = file.type === "image/png" ? "image/png" : "image/jpeg";
@@ -53,7 +66,18 @@ export async function compressImageFile(
     return new File([blob], file.name, { type: outputType, lastModified: Date.now() });
   } catch {
     return file;
+  } finally {
+    if (objectUrl) URL.revokeObjectURL(objectUrl);
   }
+}
+
+function readImageDimensions(src: string): Promise<{ width: number; height: number }> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve({ width: img.naturalWidth, height: img.naturalHeight });
+    img.onerror = () => reject(new Error("Could not read image dimensions."));
+    img.src = src;
+  });
 }
 
 /** Compresses every file in a FileList-like array, in parallel. */
