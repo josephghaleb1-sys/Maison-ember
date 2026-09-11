@@ -2,6 +2,10 @@ import Image from "next/image";
 import { Flame } from "lucide-react";
 import { getPublicMediaUrl } from "@/lib/storage";
 
+// Horizontal offsets (px, from center) for the rising ember particles behind
+// the hero text — used only when no real hero photo has been uploaded yet.
+const EMBER_OFFSETS = [-72, -34, 8, 46, -54, 64, 22, -14];
+
 export function Hero({
   imagePath,
   title,
@@ -25,11 +29,45 @@ export function Hero({
           className="object-cover opacity-70"
         />
       ) : (
-        <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-charcoal-950 via-ember-950 to-charcoal-900">
-          <Flame className="size-40 text-ember-600/40" aria-hidden />
+        <div
+          className="absolute inset-0 overflow-hidden bg-gradient-to-b from-charcoal-950 via-charcoal-900 to-charcoal-950"
+          aria-hidden
+        >
+          {/* Ambient hearth glow cast onto the dark wall */}
+          <div className="absolute bottom-[-20%] left-[62%] h-[70vh] w-[70vh] -translate-x-1/2 rounded-full bg-ember-600/35 blur-[100px]" />
+          <div className="absolute bottom-[-5%] left-[62%] h-[38vh] w-[38vh] -translate-x-1/2 rounded-full bg-ember-300/30 blur-[60px]" />
+
+          {/* Layered flame silhouette, back (soft glow) to front (bright core) */}
+          <Flame
+            fill="currentColor"
+            className="animate-flame-flicker motion-reduce:animate-none absolute bottom-[26%] left-[62%] size-56 -translate-x-1/2 text-ember-700/70 blur-md sm:bottom-[4%] sm:size-96"
+          />
+          <Flame
+            fill="currentColor"
+            className="animate-flame-flicker motion-reduce:animate-none absolute bottom-[26%] left-[62%] size-40 -translate-x-1/2 text-ember-500/90 sm:bottom-[4%] sm:size-72"
+            style={{ animationDelay: "180ms" }}
+          />
+          <Flame
+            fill="currentColor"
+            className="animate-flame-flicker motion-reduce:animate-none absolute bottom-[26%] left-[62%] size-24 -translate-x-1/2 text-ember-200 sm:bottom-[4%] sm:size-40"
+            style={{ animationDelay: "90ms" }}
+          />
+
+          {/* Rising embers */}
+          {EMBER_OFFSETS.map((offset, i) => (
+            <span
+              key={offset}
+              className="animate-ember-rise motion-reduce:hidden absolute bottom-[16%] block size-1.5 rounded-full bg-ember-300"
+              style={{
+                left: `calc(62% + ${offset}px)`,
+                animationDelay: `${i * 650}ms`,
+                animationDuration: `${3.6 + (i % 3) * 0.5}s`,
+              }}
+            />
+          ))}
         </div>
       )}
-      <div className="absolute inset-0 bg-gradient-to-t from-charcoal-950 via-charcoal-950/40 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-t from-charcoal-950 via-charcoal-950/55 to-transparent" />
       <div className="relative mx-auto w-full max-w-6xl px-4 pb-16 pt-32 sm:px-6">
         <h1 className="animate-fade-up font-display text-4xl font-semibold text-white text-balance sm:text-6xl">
           {title}
