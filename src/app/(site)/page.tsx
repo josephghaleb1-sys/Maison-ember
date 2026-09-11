@@ -12,6 +12,7 @@ import { getPublicMediaUrl } from "@/lib/storage";
 import { Hero } from "@/components/site/hero";
 import { ProductCard } from "@/components/site/product-card";
 import { Button } from "@/components/ui/button";
+import { Reveal } from "@/components/site/reveal";
 
 export default async function HomePage() {
   const [business, settings, categories, products, gallery] = await Promise.all([
@@ -47,7 +48,7 @@ export default async function HomePage() {
       </Hero>
 
       {settings?.about_text && (
-        <section className="mx-auto max-w-3xl px-4 py-20 text-center sm:px-6">
+        <Reveal as="section" className="mx-auto max-w-3xl px-4 py-20 text-center sm:px-6">
           <h2 className="font-display text-3xl font-semibold text-cream-50">Our story</h2>
           <p className="mt-4 text-lg leading-relaxed text-charcoal-300">
             {settings.about_text.length > 340
@@ -60,21 +61,23 @@ export default async function HomePage() {
           >
             Read more <ArrowRight className="size-4" aria-hidden />
           </Link>
-        </section>
+        </Reveal>
       )}
 
       {featuredProducts.length > 0 && (
         <section className="bg-charcoal-900 py-20">
           <div className="mx-auto max-w-5xl px-4 sm:px-6">
-            <div className="flex items-end justify-between gap-4">
+            <Reveal className="flex items-end justify-between gap-4">
               <h2 className="font-display text-3xl font-semibold text-cream-50">From the menu</h2>
               <Link href="/menu" className="text-sm font-medium text-ember-400 hover:underline">
                 Full menu
               </Link>
-            </div>
+            </Reveal>
             <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
-              {featuredProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
+              {featuredProducts.map((product, i) => (
+                <Reveal key={product.id} delay={i * 80}>
+                  <ProductCard product={product} />
+                </Reveal>
               ))}
             </div>
           </div>
@@ -84,13 +87,12 @@ export default async function HomePage() {
       {categories.length > 0 && (
         <section className="mx-auto max-w-5xl px-4 py-12 sm:px-6">
           <div className="flex flex-wrap justify-center gap-3">
-            {categories.map((category) => (
-              <span
-                key={category.id}
-                className="rounded-full border border-ember-700 bg-ember-500/10 px-4 py-1.5 text-sm font-medium text-ember-300"
-              >
-                {category.name}
-              </span>
+            {categories.map((category, i) => (
+              <Reveal key={category.id} delay={i * 60}>
+                <span className="rounded-full border border-ember-700 bg-ember-500/10 px-4 py-1.5 text-sm font-medium text-ember-300 transition-colors hover:bg-ember-500/20">
+                  {category.name}
+                </span>
+              </Reveal>
             ))}
           </div>
         </section>
@@ -99,30 +101,32 @@ export default async function HomePage() {
       {featuredGallery.length > 0 && (
         <section className="py-20">
           <div className="mx-auto max-w-5xl px-4 sm:px-6">
-            <div className="flex items-end justify-between gap-4">
+            <Reveal className="flex items-end justify-between gap-4">
               <h2 className="font-display text-3xl font-semibold text-cream-50">Inside Maison Ember</h2>
               <Link href="/gallery" className="text-sm font-medium text-ember-400 hover:underline">
                 View gallery
               </Link>
-            </div>
+            </Reveal>
             <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
-              {featuredGallery.map((item) => (
-                <div key={item.id} className="relative aspect-square overflow-hidden rounded-xl bg-charcoal-800">
-                  <Image
-                    src={getPublicMediaUrl(item.storage_path)}
-                    alt={item.alt_text || businessName}
-                    fill
-                    sizes="(min-width: 640px) 25vw, 50vw"
-                    className="object-cover"
-                  />
-                </div>
+              {featuredGallery.map((item, i) => (
+                <Reveal key={item.id} delay={i * 80}>
+                  <div className="group relative aspect-square overflow-hidden rounded-xl bg-charcoal-800">
+                    <Image
+                      src={getPublicMediaUrl(item.storage_path)}
+                      alt={item.alt_text || businessName}
+                      fill
+                      sizes="(min-width: 640px) 25vw, 50vw"
+                      className="object-cover transition-transform duration-500 ease-out group-hover:scale-110"
+                    />
+                  </div>
+                </Reveal>
               ))}
             </div>
           </div>
         </section>
       )}
 
-      <section className="bg-charcoal-950 py-16 text-white">
+      <Reveal as="section" className="bg-charcoal-950 py-16 text-white">
         <div className="mx-auto flex max-w-5xl flex-col items-center gap-4 px-4 text-center sm:px-6">
           {settings?.address && (
             <p className="flex items-center gap-2 text-charcoal-200">
@@ -140,7 +144,7 @@ export default async function HomePage() {
             </Button>
           </Link>
         </div>
-      </section>
+      </Reveal>
     </>
   );
 }

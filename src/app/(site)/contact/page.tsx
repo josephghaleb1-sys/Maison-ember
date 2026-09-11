@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Phone, Mail, MapPin } from "lucide-react";
 import { getPublicSettings } from "@/lib/business";
+import { Reveal } from "@/components/site/reveal";
 
 export const metadata: Metadata = { title: "Contact" };
 
@@ -21,13 +22,13 @@ export default async function ContactPage() {
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6">
-      <div className="text-center">
+      <Reveal className="text-center">
         <h1 className="font-display text-4xl font-semibold text-cream-50">Visit us</h1>
         <p className="mt-2 text-charcoal-400">We&apos;d love to have you.</p>
-      </div>
+      </Reveal>
 
       <div className="mt-12 grid grid-cols-1 gap-8 sm:grid-cols-2">
-        <div className="space-y-5">
+        <Reveal className="space-y-5">
           {settings?.address && (
             <a
               href={`https://maps.google.com/?q=${encodeURIComponent(settings.address)}`}
@@ -76,9 +77,9 @@ export default async function ContactPage() {
               )}
             </div>
           )}
-        </div>
+        </Reveal>
 
-        <div className="rounded-xl border border-charcoal-800 bg-charcoal-900 p-5">
+        <Reveal delay={100} className="rounded-xl border border-charcoal-800 bg-charcoal-900 p-5">
           <h2 className="font-display text-lg font-semibold text-cream-50">Hours</h2>
           <ul className="mt-3 divide-y divide-charcoal-800 text-sm">
             {DAY_LABELS.map(([key, label]) => (
@@ -90,7 +91,7 @@ export default async function ContactPage() {
               </li>
             ))}
           </ul>
-        </div>
+        </Reveal>
       </div>
     </div>
   );

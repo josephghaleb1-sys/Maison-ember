@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { UtensilsCrossed } from "lucide-react";
 import { getPublicCategories, getPublicProducts } from "@/lib/business";
 import { ProductCard } from "@/components/site/product-card";
+import { Reveal } from "@/components/site/reveal";
 
 export const metadata: Metadata = { title: "Menu" };
 
@@ -23,10 +24,10 @@ export default async function MenuPage() {
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-16 sm:px-6">
-      <div className="text-center">
+      <Reveal className="text-center">
         <h1 className="font-display text-4xl font-semibold text-cream-50">Menu</h1>
         <p className="mt-2 text-charcoal-400">Everything cooked over live fire.</p>
-      </div>
+      </Reveal>
 
       {sections.length === 0 ? (
         <div className="mt-16 flex flex-col items-center gap-3 text-center text-charcoal-500">
@@ -36,14 +37,16 @@ export default async function MenuPage() {
       ) : (
         <div className="mt-14 space-y-14">
           {sections.map(({ category, items }) => (
-            <section key={category.id}>
+            <Reveal key={category.id} as="section">
               <h2 className="font-display text-2xl font-semibold text-cream-50">{category.name}</h2>
               <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                {items.map((product) => (
-                  <ProductCard key={product.id} product={product} />
+                {items.map((product, i) => (
+                  <Reveal key={product.id} delay={i * 60}>
+                    <ProductCard product={product} />
+                  </Reveal>
                 ))}
               </div>
-            </section>
+            </Reveal>
           ))}
         </div>
       )}

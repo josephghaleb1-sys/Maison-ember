@@ -6,7 +6,7 @@ import { formatPrice } from "@/lib/utils";
 
 export function ProductCard({ product }: { product: Product }) {
   return (
-    <article className="flex gap-4 rounded-xl border border-cream-50/10 bg-charcoal-900/60 p-4">
+    <article className="group flex gap-4 rounded-xl border border-cream-50/10 bg-charcoal-900/60 p-4 transition-colors duration-300 hover:border-ember-700/60">
       <div className="relative size-20 shrink-0 overflow-hidden rounded-lg bg-charcoal-800 sm:size-24">
         {product.image_path ? (
           <Image
@@ -14,7 +14,7 @@ export function ProductCard({ product }: { product: Product }) {
             alt={product.name}
             fill
             sizes="96px"
-            className="object-cover"
+            className="object-cover transition-transform duration-500 ease-out group-hover:scale-110"
           />
         ) : (
           <div className="flex size-full items-center justify-center text-ember-300">

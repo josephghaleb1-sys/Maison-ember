@@ -31,11 +31,23 @@ export function Hero({
       )}
       <div className="absolute inset-0 bg-gradient-to-t from-charcoal-950 via-charcoal-950/40 to-transparent" />
       <div className="relative mx-auto w-full max-w-6xl px-4 pb-16 pt-32 sm:px-6">
-        <h1 className="font-display text-4xl font-semibold text-white text-balance sm:text-6xl">
+        <h1 className="animate-fade-up font-display text-4xl font-semibold text-white text-balance sm:text-6xl">
           {title}
         </h1>
-        <p className="mt-4 max-w-xl text-lg text-charcoal-200">{tagline}</p>
-        {children && <div className="mt-8 flex flex-wrap gap-3">{children}</div>}
+        <p
+          className="animate-fade-up mt-4 max-w-xl text-lg text-charcoal-200"
+          style={{ animationDelay: "150ms" }}
+        >
+          {tagline}
+        </p>
+        {children && (
+          <div
+            className="animate-fade-up mt-8 flex flex-wrap gap-3"
+            style={{ animationDelay: "300ms" }}
+          >
+            {children}
+          </div>
+        )}
       </div>
     </section>
   );
