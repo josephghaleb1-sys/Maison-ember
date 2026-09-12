@@ -88,9 +88,24 @@ body {
     animation: flame-flicker 3.4s ease-in-out infinite;
   }
 
+  @keyframes ambient-glow-pulse {
+    0%,
+    100% {
+      opacity: 0.6;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+
+  .animate-ambient-glow {
+    animation: ambient-glow-pulse 6s ease-in-out infinite;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .animate-fade-up,
-    .animate-flame-flicker {
+    .animate-flame-flicker,
+    .animate-ambient-glow {
       animation: none;
     }
   }
