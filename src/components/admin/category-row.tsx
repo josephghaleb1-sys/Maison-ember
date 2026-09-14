@@ -65,7 +65,7 @@ export function CategoryRow({
             disabled={isFirst || isPending}
             onClick={() => move("up")}
             aria-label="Move up"
-            className="flex size-7 items-center justify-center rounded-md text-charcoal-500 hover:bg-charcoal-800 hover:text-charcoal-200 disabled:opacity-30"
+            className="flex size-7 items-center justify-center rounded-md text-ink-500 hover:bg-ink-800 hover:text-ink-200 disabled:opacity-30"
           >
             <ArrowUp className="size-4" aria-hidden />
           </button>
@@ -74,7 +74,7 @@ export function CategoryRow({
             disabled={isLast || isPending}
             onClick={() => move("down")}
             aria-label="Move down"
-            className="flex size-7 items-center justify-center rounded-md text-charcoal-500 hover:bg-charcoal-800 hover:text-charcoal-200 disabled:opacity-30"
+            className="flex size-7 items-center justify-center rounded-md text-ink-500 hover:bg-ink-800 hover:text-ink-200 disabled:opacity-30"
           >
             <ArrowDown className="size-4" aria-hidden />
           </button>
@@ -113,9 +113,9 @@ export function CategoryRow({
           </div>
         ) : (
           <div>
-            <p className="text-sm font-medium text-cream-50">{category.name}</p>
-            <p className="text-xs text-charcoal-500">
-              {productCount} {productCount === 1 ? "product" : "products"}
+            <p className="text-sm font-medium text-ink-50">{category.name}</p>
+            <p className="text-xs text-ink-500">
+              {productCount} {productCount === 1 ? "item" : "items"}
             </p>
           </div>
         )}

@@ -4,11 +4,21 @@ export function cn(...inputs: ClassValue[]) {
   return clsx(inputs);
 }
 
-export function formatPrice(value: number): string {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-  }).format(value);
+/**
+ * Money, in the business's own currency (website_settings.currency).
+ * Falls back to plain formatting if a currency code is ever invalid, so a bad
+ * setting can never crash a page.
+ */
+export function formatPrice(value: number, currency = "USD"): string {
+  try {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency,
+      maximumFractionDigits: Number.isInteger(value) ? 0 : 2,
+    }).format(value);
+  } catch {
+    return `${currency} ${value.toFixed(2)}`;
+  }
 }
 
 export function formatBytes(bytes: number): string {

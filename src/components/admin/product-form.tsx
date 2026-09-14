@@ -1,13 +1,13 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import Link from "next/link";
-import { ImagePlus, X } from "lucide-react";
-import type { Category, Product } from "@/lib/database.types";
+import { ImagePlus, Images, X } from "lucide-react";
+import type { Category, Media, Product } from "@/lib/database.types";
 import type { FormState } from "@/lib/actions/auth";
-import { Button } from "@/components/ui/button";
+import { Button, ButtonLink } from "@/components/ui/button";
 import { Input, Textarea, Select, Label, FieldError } from "@/components/ui/input";
 import { Thumb } from "@/components/admin/thumb";
+import { MediaPicker } from "@/components/admin/media-picker";
 import { compressImageFile } from "@/lib/image-compress";
 
 const initialState: FormState = {};
@@ -15,16 +15,25 @@ const initialState: FormState = {};
 export function ProductForm({
   product,
   categories,
+  library,
+  currency = "USD",
+  itemNoun = "product",
   action,
 }: {
   product?: Product;
   categories: Category[];
+  /** Existing images the owner can reuse instead of uploading again. */
+  library: Media[];
+  currency?: string;
+  itemNoun?: string;
   action: (prevState: FormState, formData: FormData) => Promise<FormState>;
 }) {
   const [state, formAction, isPending] = useActionState(action, initialState);
   const [preview, setPreview] = useState<string | null>(null);
   const [removeImage, setRemoveImage] = useState(false);
   const [isCompressing, setIsCompressing] = useState(false);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [picked, setPicked] = useState<Media | null>(null);
 
   return (
     <form action={formAction} className="space-y-5">
@@ -40,7 +49,7 @@ export function ProductForm({
 
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
         <div>
-          <Label htmlFor="price">Price (USD)</Label>
+          <Label htmlFor="price">Price ({currency})</Label>
           <Input
             id="price"
             name="price"
@@ -73,7 +82,13 @@ export function ProductForm({
               <img src={preview} alt="Selected preview" className="size-full object-cover" />
             </div>
           ) : (
-            !removeImage && <Thumb path={product?.image_path ?? null} alt={product?.name ?? "Product"} size={64} />
+            !removeImage && (
+              <Thumb
+                path={picked?.storage_path ?? product?.image_path ?? null}
+                alt={product?.name ?? "Product"}
+                size={64}
+              />
+            )
           )}
           <div className="flex-1">
             <input
@@ -81,11 +96,12 @@ export function ProductForm({
               name="image"
               type="file"
               accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml"
-              className="block w-full text-sm text-charcoal-300 file:mr-3 file:rounded-lg file:border-0 file:bg-charcoal-800 file:px-3 file:py-2 file:text-sm file:font-medium file:text-charcoal-200 hover:file:bg-charcoal-700"
+              className="block w-full text-sm text-ink-300 file:mr-3 file:rounded-lg file:border-0 file:bg-ink-800 file:px-3 file:py-2 file:text-sm file:font-medium file:text-ink-200 hover:file:bg-ink-700"
               onChange={async (e) => {
                 const input = e.target;
                 const file = input.files?.[0];
                 setRemoveImage(false);
+                setPicked(null);
                 if (!file) {
                   setPreview(null);
                   return;
@@ -103,36 +119,70 @@ export function ProductForm({
                 }
               }}
             />
-            <p className="mt-1 text-xs text-charcoal-500">
-              {isCompressing ? "Optimizing photo…" : "JPG, PNG, WebP, GIF, or SVG. Max 5MB."}
+            <p className="mt-1 text-xs text-ink-500">
+              {isCompressing ? "Optimising photo…" : "JPG, PNG, WebP, GIF, or SVG. Max 5MB."}
             </p>
           </div>
         </div>
-        {product?.image_path && !preview && (
-          <label className="mt-2 flex items-center gap-2 text-sm text-charcoal-300">
+
+        {/* Reuse an image already in the library instead of uploading twice. */}
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <Button type="button" variant="outline" size="sm" onClick={() => setPickerOpen(true)}>
+            <Images className="size-4" aria-hidden /> Choose from library
+          </Button>
+          {picked && (
+            <span className="inline-flex items-center gap-2 text-xs text-ink-400">
+              Using “{picked.file_name}”
+              <button
+                type="button"
+                onClick={() => setPicked(null)}
+                className="text-ink-300 underline hover:text-ink-100"
+              >
+                clear
+              </button>
+            </span>
+          )}
+        </div>
+        {picked && <input type="hidden" name="library_media_id" value={picked.id} />}
+
+        {pickerOpen && (
+          <MediaPicker
+            media={library}
+            selectedId={picked?.id ?? null}
+            onSelect={(item) => {
+              setPicked(item);
+              setPreview(null);
+              setRemoveImage(false);
+              setPickerOpen(false);
+            }}
+            onClose={() => setPickerOpen(false)}
+          />
+        )}
+        {product?.image_path && !preview && !picked && (
+          <label className="mt-2 flex items-center gap-2 text-sm text-ink-300">
             <input
               type="checkbox"
               name="remove_image"
               checked={removeImage}
               onChange={(e) => setRemoveImage(e.target.checked)}
-              className="rounded border-charcoal-600"
+              className="rounded border-ink-600"
             />
             <X className="size-3.5" aria-hidden /> Remove current photo
           </label>
         )}
-        {!product && !preview && (
-          <p className="mt-2 flex items-center gap-1.5 text-xs text-charcoal-500">
-            <ImagePlus className="size-3.5" aria-hidden /> No photo selected yet — that&apos;s okay, you can add one later.
+        {!product && !preview && !picked && (
+          <p className="mt-2 flex items-center gap-1.5 text-xs text-ink-500">
+            <ImagePlus className="size-3.5" aria-hidden /> No photo yet — you can add one later.
           </p>
         )}
       </div>
 
-      <label className="flex items-center gap-2 text-sm font-medium text-charcoal-200">
+      <label className="flex items-center gap-2 text-sm font-medium text-ink-200">
         <input
           type="checkbox"
           name="is_visible"
           defaultChecked={product?.is_visible ?? true}
-          className="rounded border-charcoal-600"
+          className="rounded border-ink-600"
         />
         Visible on public site
       </label>
@@ -141,13 +191,11 @@ export function ProductForm({
 
       <div className="flex gap-3">
         <Button type="submit" loading={isPending}>
-          {product ? "Save changes" : "Create product"}
+          {product ? "Save changes" : `Create ${itemNoun}`}
         </Button>
-        <Link href="/admin/products">
-          <Button type="button" variant="outline">
-            Cancel
-          </Button>
-        </Link>
+        <ButtonLink href="/admin/products" variant="outline">
+          Cancel
+        </ButtonLink>
       </div>
     </form>
   );

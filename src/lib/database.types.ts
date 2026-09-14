@@ -11,12 +11,33 @@
 // `type`, same as the real `supabase gen types` CLI output.
 
 export type BusinessRole = "owner" | "admin" | "editor";
-export type MediaKind = "product" | "gallery" | "logo" | "hero" | "other";
+export type MediaKind = "product" | "gallery" | "logo" | "hero" | "og" | "other";
+
+/** Drives the site's vocabulary + default sections — see src/lib/industry.ts. */
+export type Industry =
+  | "restaurant"
+  | "cafe"
+  | "beauty"
+  | "barbershop"
+  | "salon"
+  | "gym"
+  | "retail"
+  | "other";
 
 export type Business = {
   id: string;
   slug: string;
   name: string;
+  industry: Industry;
+  is_active: boolean;
+  created_at: string;
+};
+
+export type BusinessDomain = {
+  id: string;
+  business_id: string;
+  hostname: string;
+  is_primary: boolean;
   created_at: string;
 };
 
@@ -104,6 +125,30 @@ export type WebsiteSettings = {
   address: string;
   hours: WebsiteHours;
   social_links: WebsiteSocialLinks;
+  hero_title: string;
+  hero_subtitle: string;
+  hero_cta_label: string;
+  primary_color: string;
+  secondary_color: string;
+  seo_title: string;
+  seo_description: string;
+  og_image_path: string | null;
+  currency: string;
+  whatsapp: string;
+  show_prices: boolean;
+  updated_at: string;
+};
+
+export type Testimonial = {
+  id: string;
+  business_id: string;
+  author_name: string;
+  author_role: string;
+  quote: string;
+  rating: number;
+  is_visible: boolean;
+  sort_order: number;
+  created_at: string;
   updated_at: string;
 };
 
@@ -120,13 +165,71 @@ export type Database = {
           id?: string;
           slug: string;
           name: string;
+          industry?: Industry;
+          is_active?: boolean;
           created_at?: string;
         };
         Update: {
           id?: string;
           slug?: string;
           name?: string;
+          industry?: Industry;
+          is_active?: boolean;
           created_at?: string;
+        };
+        Relationships: [];
+      };
+      business_domains: {
+        Row: BusinessDomain;
+        Insert: {
+          id?: string;
+          business_id: string;
+          hostname: string;
+          is_primary?: boolean;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          business_id?: string;
+          hostname?: string;
+          is_primary?: boolean;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "business_domains_business_id_fkey";
+            columns: ["business_id"];
+            isOneToOne: false;
+            referencedRelation: "businesses";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      testimonials: {
+        Row: Testimonial;
+        Insert: {
+          id?: string;
+          business_id: string;
+          author_name: string;
+          author_role?: string;
+          quote: string;
+          rating?: number;
+          is_visible?: boolean;
+          sort_order?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          business_id?: string;
+          author_name?: string;
+          author_role?: string;
+          quote?: string;
+          rating?: number;
+          is_visible?: boolean;
+          sort_order?: number;
+          created_at?: string;
+          updated_at?: string;
         };
         Relationships: [];
       };
@@ -239,6 +342,17 @@ export type Database = {
           address?: string;
           hours?: WebsiteHours;
           social_links?: WebsiteSocialLinks;
+          hero_title?: string;
+          hero_subtitle?: string;
+          hero_cta_label?: string;
+          primary_color?: string;
+          secondary_color?: string;
+          seo_title?: string;
+          seo_description?: string;
+          og_image_path?: string | null;
+          currency?: string;
+          whatsapp?: string;
+          show_prices?: boolean;
           updated_at?: string;
         };
         Update: {
@@ -254,6 +368,17 @@ export type Database = {
           address?: string;
           hours?: WebsiteHours;
           social_links?: WebsiteSocialLinks;
+          hero_title?: string;
+          hero_subtitle?: string;
+          hero_cta_label?: string;
+          primary_color?: string;
+          secondary_color?: string;
+          seo_title?: string;
+          seo_description?: string;
+          og_image_path?: string | null;
+          currency?: string;
+          whatsapp?: string;
+          show_prices?: boolean;
           updated_at?: string;
         };
         Relationships: [];

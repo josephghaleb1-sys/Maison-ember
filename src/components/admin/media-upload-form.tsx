@@ -57,7 +57,7 @@ export function MediaUploadForm() {
           type="file"
           multiple
           accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml"
-          className="block w-full text-sm text-charcoal-300 file:mr-3 file:rounded-lg file:border-0 file:bg-charcoal-800 file:px-3 file:py-2 file:text-sm file:font-medium file:text-charcoal-200 hover:file:bg-charcoal-700"
+          className="block w-full text-sm text-ink-300 file:mr-3 file:rounded-lg file:border-0 file:bg-ink-800 file:px-3 file:py-2 file:text-sm file:font-medium file:text-ink-200 hover:file:bg-ink-700"
         />
       </div>
       <Button type="submit" loading={isPending || isCompressing}>

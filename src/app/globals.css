@@ -1,55 +1,80 @@
 @import "tailwindcss";
 
+/* ===========================================================================
+   Design tokens
+   ---------------------------------------------------------------------------
+   Two layers, on purpose:
+
+   1. NEUTRALS + shape/typography — fixed, shared by every business on the
+      platform. Named `ink-*`, never after a brand.
+   2. BRAND colours — `--brand-primary` / `--brand-secondary` are injected per
+      request from `website_settings` (see src/lib/theme.ts). The defaults
+      below only apply before/outside that wrapper (e.g. the admin shell).
+
+   Because the brand utilities below are declared with `@theme inline`, the
+   compiled CSS references the variables rather than a baked-in colour — so
+   changing the two hex values in the dashboard re-skins the entire site with
+   no rebuild.
+   =========================================================================== */
+
 :root {
-  --background: #0c0a08;
-  --foreground: #f7f1e6;
+  --background: #08060a;
+  --foreground: #f6efe3;
+
+  /* Overridden per business by the site layout's inline style. */
+  --brand-primary: #6a0f1f;
+  --brand-primary-rgb: 106, 15, 31;
+  --brand-secondary: #d4af37;
+  --brand-secondary-rgb: 212, 175, 55;
+  --brand-on-primary: #fdf8ef;
+  --brand-on-secondary: #14100f;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-display: var(--font-fraunces);
-  --font-sans: var(--font-inter);
+  --font-display: var(--font-display-family);
+  --font-sans: var(--font-sans-family);
 
-  /* "ember" accent scale — luxury gold. 50-400 read well as gold text/icons
-     on dark surfaces; 600-700 are dark enough for white button text. */
-  --color-ember-50: #fbf3e3;
-  --color-ember-100: #f3e2b8;
-  --color-ember-200: #e7c883;
-  --color-ember-300: #ddb158;
-  --color-ember-400: #d4a03a;
-  --color-ember-500: #c08a24;
-  --color-ember-600: #a6741c;
-  --color-ember-700: #8a5f17;
-  --color-ember-800: #6e4b13;
-  --color-ember-900: #543910;
-  --color-ember-950: #33220a;
+  /* ---- Brand (runtime, per business) ------------------------------------ */
+  --color-brand: var(--brand-primary);
+  --color-brand-deep: color-mix(in oklab, var(--brand-primary) 62%, #07050a);
+  --color-brand-soft: color-mix(in oklab, var(--brand-primary) 30%, #07050a);
+  --color-on-brand: var(--brand-on-primary);
 
-  /* Warm neutral "charcoal" scale — near-black with a hint of brown. The
-     dark end (800-950) is now the page/card surface everywhere; the light
-     end (50-400) is used for text and borders on those dark surfaces. */
-  --color-charcoal-50: #f7f5f3;
-  --color-charcoal-100: #ece7e2;
-  --color-charcoal-200: #d8cec4;
-  --color-charcoal-300: #baaa9a;
-  --color-charcoal-400: #98826e;
-  --color-charcoal-500: #7c6753;
-  --color-charcoal-600: #635143;
-  --color-charcoal-700: #4c3f36;
-  --color-charcoal-800: #362d27;
-  --color-charcoal-900: #201a17;
-  --color-charcoal-950: #140f0d;
+  --color-accent: var(--brand-secondary);
+  --color-accent-bright: color-mix(in oklab, var(--brand-secondary) 58%, white);
+  --color-accent-deep: color-mix(in oklab, var(--brand-secondary) 70%, #0b0709);
+  --color-accent-muted: color-mix(in oklab, var(--brand-secondary) 40%, #0b0709);
+  --color-on-accent: var(--brand-on-secondary);
 
-  /* "cream" — warm off-white, used for headings/high-emphasis text on the
-     dark surfaces (not a background anymore). */
-  --color-cream-50: #f7f1e6;
-  --color-cream-100: #ece2cf;
-  --color-cream-200: #ddcdad;
+  /* ---- Neutrals (fixed) -------------------------------------------------- */
+  --color-ink-50: #f8f3ea;
+  --color-ink-100: #ece4d6;
+  --color-ink-200: #d6ccbd;
+  --color-ink-300: #b4a99a;
+  --color-ink-400: #8d8276;
+  --color-ink-500: #6d6359;
+  --color-ink-600: #514942;
+  --color-ink-700: #3a332f;
+  --color-ink-800: #262120;
+  --color-ink-900: #151113;
+  --color-ink-950: #08060a;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Keep long words/URLs from forcing horizontal scroll on narrow phones. */
+h1,
+h2,
+h3,
+p,
+li {
+  overflow-wrap: break-word;
 }
 
 @layer utilities {
@@ -57,56 +82,147 @@ body {
     text-wrap: balance;
   }
 
+  /* Letterspaced small-caps label — used above section headings. */
+  .eyebrow {
+    font-size: 0.6875rem;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+
+  /* Gold foil text: a still gradient, with a slow highlight sweep that only
+     animates `background-position` (compositor-friendly, no layout work). */
+  .text-foil {
+    background-image: linear-gradient(
+      100deg,
+      var(--color-accent-deep) 0%,
+      var(--color-accent) 22%,
+      var(--color-accent-bright) 38%,
+      var(--color-accent) 55%,
+      var(--color-accent-deep) 100%
+    );
+    background-size: 220% 100%;
+    background-position: 0% 0%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: foil-sweep 9s ease-in-out infinite;
+  }
+
+  .hairline-accent {
+    background-image: linear-gradient(
+      90deg,
+      transparent,
+      color-mix(in oklab, var(--brand-secondary) 70%, transparent),
+      transparent
+    );
+  }
+
+  /* ---- Keyframes -------------------------------------------------------- */
+  @keyframes foil-sweep {
+    0%,
+    100% {
+      background-position: 0% 0%;
+    }
+    50% {
+      background-position: 100% 0%;
+    }
+  }
+
   @keyframes fade-up {
     from {
       opacity: 0;
-      transform: translateY(1.25rem);
+      transform: translate3d(0, 1.5rem, 0);
     }
     to {
       opacity: 1;
-      transform: translateY(0);
+      transform: translate3d(0, 0, 0);
     }
   }
 
   .animate-fade-up {
-    animation: fade-up 0.8s ease-out both;
+    animation: fade-up 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
   }
 
-  @keyframes flame-flicker {
+  @keyframes ambient-glow {
     0%,
     100% {
-      transform: scale(1) translateY(0);
-      opacity: 1;
-    }
-    50% {
-      transform: scale(1.05) translateY(-4px);
-      opacity: 0.9;
-    }
-  }
-
-  .animate-flame-flicker {
-    animation: flame-flicker 3.4s ease-in-out infinite;
-  }
-
-  @keyframes ambient-glow-pulse {
-    0%,
-    100% {
-      opacity: 0.6;
+      opacity: 0.55;
+      transform: scale(1);
     }
     50% {
       opacity: 1;
+      transform: scale(1.06);
     }
   }
 
   .animate-ambient-glow {
-    animation: ambient-glow-pulse 6s ease-in-out infinite;
+    animation: ambient-glow 7s ease-in-out infinite;
   }
 
+  /* Slow Y-axis spin for the 3D hero mark. Transform-only: the compositor
+     handles it on its own thread, so it costs no main-thread work. */
+  @keyframes spin-y {
+    from {
+      transform: rotateY(0deg);
+    }
+    to {
+      transform: rotateY(360deg);
+    }
+  }
+
+  @keyframes bob {
+    0%,
+    100% {
+      transform: translate3d(0, -0.6rem, 0);
+    }
+    50% {
+      transform: translate3d(0, 0.6rem, 0);
+    }
+  }
+
+  .animate-bob {
+    animation: bob 6s ease-in-out infinite;
+  }
+
+  @keyframes marquee {
+    from {
+      transform: translate3d(0, 0, 0);
+    }
+    to {
+      transform: translate3d(-50%, 0, 0);
+    }
+  }
+
+  .animate-marquee {
+    animation: marquee 38s linear infinite;
+  }
+
+  /* A single diagonal light sweep across a card on hover. */
+  @keyframes sheen {
+    from {
+      transform: translate3d(-120%, 0, 0) rotate(8deg);
+    }
+    to {
+      transform: translate3d(220%, 0, 0) rotate(8deg);
+    }
+  }
+
+  .animate-sheen {
+    animation: sheen 0.9s ease-out;
+  }
+
+  /* One global switch for every decorative animation. */
   @media (prefers-reduced-motion: reduce) {
+    .text-foil,
     .animate-fade-up,
-    .animate-flame-flicker,
-    .animate-ambient-glow {
-      animation: none;
+    .animate-ambient-glow,
+    .animate-bob,
+    .animate-marquee,
+    .animate-sheen,
+    [data-motion] {
+      animation: none !important;
+      transition: none !important;
     }
   }
 }

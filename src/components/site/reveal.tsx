@@ -1,63 +1,71 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, type ElementType, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 /**
- * Fades + slides a section in the first time it scrolls into view. Pure
- * CSS transition driven by an IntersectionObserver — no animation library.
- * Respects prefers-reduced-motion (see motion-reduce: below).
+ * Fades + lifts an element the first time it enters the viewport.
+ *
+ * One shared IntersectionObserver for every Reveal on the page (rather than
+ * one per element), the observer unobserves each element after it fires, and
+ * the animation itself is a plain CSS transition of opacity + transform.
+ * Nothing re-renders — the class is toggled on the DOM node directly.
  */
+
+let sharedObserver: IntersectionObserver | null = null;
+
+function getObserver() {
+  if (typeof window === "undefined") return null;
+  if (!sharedObserver) {
+    sharedObserver = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          entry.target.setAttribute("data-revealed", "true");
+          sharedObserver?.unobserve(entry.target);
+        }
+      },
+      { threshold: 0.12, rootMargin: "0px 0px -8% 0px" },
+    );
+  }
+  return sharedObserver;
+}
+
 export function Reveal({
   children,
   className,
   delay = 0,
-  as = "div",
+  as: Tag = "div",
 }: {
   children: ReactNode;
   className?: string;
-  /** Stagger delay in ms — handy for animating a list item-by-item. */
+  /** Stagger in ms, for animating a list item by item. */
   delay?: number;
-  as?: "div" | "section";
+  as?: ElementType;
 }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(false);
+  const ref = useRef<HTMLElement>(null);
 
   useEffect(() => {
     const el = ref.current;
-    if (!el) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setVisible(true);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.15, rootMargin: "0px 0px -10% 0px" },
-    );
+    const observer = getObserver();
+    if (!el || !observer) return;
     observer.observe(el);
-    return () => observer.disconnect();
+    return () => observer.unobserve(el);
   }, []);
 
-  const classes = cn(
-    "transition-all duration-700 ease-out motion-reduce:transition-none motion-reduce:opacity-100 motion-reduce:translate-y-0",
-    visible ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0",
-    className,
-  );
-  const style = { transitionDelay: visible ? `${delay}ms` : "0ms" };
-
-  if (as === "section") {
-    return (
-      <section ref={ref} style={style} className={classes}>
-        {children}
-      </section>
-    );
-  }
-
   return (
-    <div ref={ref} style={style} className={classes}>
+    <Tag
+      ref={ref}
+      data-motion
+      style={{ transitionDelay: `${delay}ms` }}
+      className={cn(
+        "translate-y-6 opacity-0 transition-[opacity,transform] duration-[900ms] ease-[cubic-bezier(0.16,1,0.3,1)]",
+        "data-[revealed=true]:translate-y-0 data-[revealed=true]:opacity-100",
+        "motion-reduce:translate-y-0 motion-reduce:opacity-100",
+        className,
+      )}
+    >
       {children}
-    </div>
+    </Tag>
   );
 }

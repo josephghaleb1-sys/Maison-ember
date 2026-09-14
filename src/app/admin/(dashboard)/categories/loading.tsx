@@ -12,7 +12,7 @@ export default function CategoriesLoading() {
       <Card>
         <CardBody className="space-y-5">
           <Skeleton className="h-10 w-full max-w-xs" />
-          <div className="divide-y divide-charcoal-800">
+          <div className="divide-y divide-ink-800">
             {Array.from({ length: 5 }).map((_, i) => (
               <div key={i} className="flex items-center justify-between py-3">
                 <Skeleton className="h-4 w-32" />

@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -9,7 +8,7 @@ import type { Product } from "@/lib/database.types";
 import { Thumb } from "@/components/admin/thumb";
 import { VisibilityToggle } from "@/components/ui/visibility-toggle";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
-import { Button } from "@/components/ui/button";
+import { Button, ButtonLink } from "@/components/ui/button";
 import { formatPrice } from "@/lib/utils";
 import { deleteProduct, setProductVisibility, moveProduct } from "@/lib/actions/products";
 
@@ -18,12 +17,14 @@ export function ProductRow({
   categoryName,
   isFirst,
   isLast,
+  currency,
   onOptimisticRemove,
 }: {
   product: Product;
   categoryName: string | null;
   isFirst: boolean;
   isLast: boolean;
+  currency: string;
   /** Called synchronously, before the server call, to hide the row immediately. */
   onOptimisticRemove: () => void;
 }) {
@@ -43,10 +44,10 @@ export function ProductRow({
       <div className="flex min-w-0 flex-1 items-center gap-3">
         <Thumb path={product.image_path} alt={product.name} size={56} />
         <div className="min-w-0">
-          <p className="truncate text-sm font-medium text-cream-50">{product.name}</p>
-          <p className="text-sm text-charcoal-400">
-            {formatPrice(product.price)}
-            {categoryName && <span className="text-charcoal-500"> · {categoryName}</span>}
+          <p className="truncate text-sm font-medium text-ink-50">{product.name}</p>
+          <p className="text-sm text-ink-400">
+            {formatPrice(product.price, currency)}
+            {categoryName && <span className="text-ink-500"> · {categoryName}</span>}
           </p>
         </div>
       </div>
@@ -58,7 +59,7 @@ export function ProductRow({
             disabled={isFirst || isPending}
             onClick={() => move("up")}
             aria-label="Move up"
-            className="flex size-7 items-center justify-center rounded-md text-charcoal-500 hover:bg-charcoal-800 hover:text-charcoal-200 disabled:opacity-30"
+            className="flex size-7 items-center justify-center rounded-md text-ink-500 hover:bg-ink-800 hover:text-ink-200 disabled:opacity-30"
           >
             <ArrowUp className="size-4" aria-hidden />
           </button>
@@ -67,7 +68,7 @@ export function ProductRow({
             disabled={isLast || isPending}
             onClick={() => move("down")}
             aria-label="Move down"
-            className="flex size-7 items-center justify-center rounded-md text-charcoal-500 hover:bg-charcoal-800 hover:text-charcoal-200 disabled:opacity-30"
+            className="flex size-7 items-center justify-center rounded-md text-ink-500 hover:bg-ink-800 hover:text-ink-200 disabled:opacity-30"
           >
             <ArrowDown className="size-4" aria-hidden />
           </button>
@@ -79,26 +80,29 @@ export function ProductRow({
           action={(next) => setProductVisibility(product.id, next)}
         />
 
-        <Link href={`/admin/products/${product.id}`}>
-          <Button variant="outline" size="sm" aria-label="Edit product">
-            <Pencil className="size-4" aria-hidden />
-          </Button>
-        </Link>
+        <ButtonLink
+          href={`/admin/products/${product.id}`}
+          variant="outline"
+          size="sm"
+          aria-label={`Edit ${product.name}`}
+        >
+          <Pencil className="size-4" aria-hidden />
+        </ButtonLink>
 
         <ConfirmDialog
           trigger={
-            <Button variant="outline" size="sm" aria-label="Delete product">
-              <Trash2 className="size-4 text-red-600" aria-hidden />
+            <Button variant="outline" size="sm" aria-label={`Delete ${product.name}`}>
+              <Trash2 className="size-4 text-red-400" aria-hidden />
             </Button>
           }
-          title="Delete this product?"
-          description={`"${product.name}" will be permanently removed, including its photo. This can't be undone.`}
+          title="Delete this item?"
+          description={`"${product.name}" will be permanently removed from your website. This can't be undone.`}
           confirmLabel="Delete"
           action={() => {
             onOptimisticRemove();
             return deleteProduct(product.id);
           }}
-          successMessage="Product deleted."
+          successMessage="Deleted."
         />
       </div>
     </li>

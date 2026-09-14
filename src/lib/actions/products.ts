@@ -6,8 +6,74 @@ import { after } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { requireBusinessContext } from "@/lib/dal";
 import { productSchema } from "@/lib/validation/product";
+import { CATALOG_PATHS } from "@/lib/industry";
 import { uploadBusinessImage, deleteBusinessImage } from "@/lib/actions/upload";
 import type { FormState } from "@/lib/actions/auth";
+
+/**
+ * Resolves an image chosen from the media library to its storage path,
+ * verifying the media row belongs to *this* business. The client sends a
+ * media id; trusting a client-supplied storage path would let someone point a
+ * product at another business's file.
+ */
+/**
+ * The catalogue is served at /shop, /menu or /services depending on the
+ * business's industry — refresh all of them plus the home page.
+ */
+function revalidateCatalogue() {
+  revalidatePath("/admin/products");
+  revalidatePath("/");
+  for (const path of CATALOG_PATHS) revalidatePath(path);
+}
+
+async function resolveLibraryImage(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  businessId: string,
+  mediaId: string | null,
+): Promise<string | null> {
+  if (!mediaId) return null;
+  const { data } = await supabase
+    .from("media")
+    .select("storage_path")
+    .eq("id", mediaId)
+    .eq("business_id", businessId)
+    .maybeSingle();
+  return data?.storage_path ?? null;
+}
+
+/**
+ * Deletes a product photo's file only when nothing else is using it.
+ *
+ * Every product upload also lands in the media library, and the library
+ * picker lets two products share one image — so a blind delete on replace
+ * would pull the picture out from under another product, or bin a gallery
+ * photo. Gallery/logo/hero assets are never deleted from here at all: those
+ * are managed in the Media library.
+ */
+async function deleteUnusedProductImage(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  businessId: string,
+  path: string,
+) {
+  const [{ count }, { data: media }] = await Promise.all([
+    supabase
+      .from("products")
+      .select("id", { count: "exact", head: true })
+      .eq("business_id", businessId)
+      .eq("image_path", path),
+    supabase
+      .from("media")
+      .select("kind")
+      .eq("business_id", businessId)
+      .eq("storage_path", path)
+      .maybeSingle(),
+  ]);
+
+  if ((count ?? 0) > 0) return;
+  if (media && media.kind !== "product") return;
+
+  await deleteBusinessImage(supabase, path);
+}
 
 async function assertCategoryBelongsToBusiness(
   supabase: Awaited<ReturnType<typeof createClient>>,
@@ -42,6 +108,7 @@ export async function createProduct(_prevState: FormState, formData: FormData): 
   const supabase = await createClient();
   const file = formData.get("image");
   const hasFile = file instanceof File && file.size > 0;
+  const libraryMediaId = (formData.get("library_media_id") as string) || null;
 
   // Category validation, the sort_order count, and the image upload are all
   // independent of each other — run them concurrently instead of one at a
@@ -64,6 +131,10 @@ export async function createProduct(_prevState: FormState, formData: FormData): 
     return { error: uploadResult.error };
   }
 
+  // A fresh upload wins over a library pick if somehow both are sent.
+  const imagePath =
+    uploadedPath ?? (await resolveLibraryImage(supabase, business.id, libraryMediaId));
+
   const { error } = await supabase.from("products").insert({
     business_id: business.id,
     category_id: parsed.data.category_id,
@@ -71,7 +142,7 @@ export async function createProduct(_prevState: FormState, formData: FormData): 
     description: parsed.data.description,
     price: parsed.data.price,
     is_visible: parsed.data.is_visible,
-    image_path: uploadedPath,
+    image_path: imagePath,
     sort_order: countResult.count ?? 0,
   });
 
@@ -80,9 +151,7 @@ export async function createProduct(_prevState: FormState, formData: FormData): 
     return { error: `Couldn't create product: ${error.message}` };
   }
 
-  revalidatePath("/admin/products");
-  revalidatePath("/menu");
-  revalidatePath("/");
+  revalidateCatalogue();
   redirect("/admin/products");
 }
 
@@ -133,14 +202,20 @@ export async function updateProduct(
   let imagePath = existing.image_path;
   const file = formData.get("image");
   const removeImage = formData.get("remove_image") === "on";
+  const libraryMediaId = (formData.get("library_media_id") as string) || null;
 
   if (file instanceof File && file.size > 0) {
     const result = await uploadBusinessImage(supabase, business.id, userId, "product", file);
     if ("error" in result) return { error: result.error };
-    if (existing.image_path) await deleteBusinessImage(supabase, existing.image_path);
     imagePath = result.path;
+    if (existing.image_path && existing.image_path !== imagePath) {
+      await deleteUnusedProductImage(supabase, business.id, existing.image_path);
+    }
+  } else if (libraryMediaId) {
+    const picked = await resolveLibraryImage(supabase, business.id, libraryMediaId);
+    if (!picked) return { error: "That image isn't in your media library." };
+    imagePath = picked;
   } else if (removeImage && existing.image_path) {
-    await deleteBusinessImage(supabase, existing.image_path);
     imagePath = null;
   }
 
@@ -161,9 +236,12 @@ export async function updateProduct(
     return { error: `Couldn't save product: ${error.message}` };
   }
 
-  revalidatePath("/admin/products");
-  revalidatePath("/menu");
-  revalidatePath("/");
+  // Now that the row points elsewhere, the old file may be unused.
+  if (existing.image_path && existing.image_path !== imagePath) {
+    await deleteUnusedProductImage(supabase, business.id, existing.image_path);
+  }
+
+  revalidateCatalogue();
   redirect("/admin/products");
 }
 
@@ -191,12 +269,10 @@ export async function deleteProduct(productId: string): Promise<{ error?: string
   // so cleanup still reliably happens without making the user wait for it.
   const imagePath = deleted?.image_path;
   if (imagePath) {
-    after(() => deleteBusinessImage(supabase, imagePath));
+    after(() => deleteUnusedProductImage(supabase, business.id, imagePath));
   }
 
-  revalidatePath("/admin/products");
-  revalidatePath("/menu");
-  revalidatePath("/");
+  revalidateCatalogue();
   return {};
 }
 
@@ -215,9 +291,7 @@ export async function setProductVisibility(
 
   if (error) return { error: error.message };
 
-  revalidatePath("/admin/products");
-  revalidatePath("/menu");
-  revalidatePath("/");
+  revalidateCatalogue();
   return {};
 }
 
@@ -258,7 +332,6 @@ export async function moveProduct(
 
   if (error1 || error2) return { error: "Couldn't reorder products." };
 
-  revalidatePath("/admin/products");
-  revalidatePath("/menu");
+  revalidateCatalogue();
   return {};
 }

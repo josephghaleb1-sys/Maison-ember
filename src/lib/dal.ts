@@ -2,6 +2,7 @@ import "server-only";
 import { cache } from "react";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { getIndustryPreset, type IndustryPreset } from "@/lib/industry";
 import type { Business, BusinessRole } from "@/lib/database.types";
 
 export interface AuthedContext {
@@ -9,6 +10,8 @@ export interface AuthedContext {
   email: string | null;
   business: Business;
   role: BusinessRole;
+  /** Industry vocabulary, so the dashboard says "Services"/"Menu"/"Products". */
+  preset: IndustryPreset;
 }
 
 /**
@@ -34,7 +37,7 @@ export const requireBusinessContext = cache(async (): Promise<AuthedContext> => 
 
   const { data: membership, error: membershipError } = await supabase
     .from("business_members")
-    .select("role, business:businesses(id, slug, name, created_at)")
+    .select("role, business:businesses(id, slug, name, industry, is_active, created_at)")
     .eq("user_id", user.id)
     .limit(1)
     .maybeSingle();
@@ -52,5 +55,6 @@ export const requireBusinessContext = cache(async (): Promise<AuthedContext> => 
     email: user.email ?? null,
     business,
     role: membership.role,
+    preset: getIndustryPreset(business.industry),
   };
 });

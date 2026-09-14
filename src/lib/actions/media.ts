@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireBusinessContext } from "@/lib/dal";
 import { uploadBusinessImage, deleteBusinessImage } from "@/lib/actions/upload";
+import { CATALOG_PATHS } from "@/lib/industry";
 import type { MediaKind } from "@/lib/database.types";
 
 const VALID_KINDS: MediaKind[] = ["product", "gallery", "logo", "hero", "other"];
@@ -11,6 +12,7 @@ const VALID_KINDS: MediaKind[] = ["product", "gallery", "logo", "hero", "other"]
 function revalidateAll() {
   revalidatePath("/admin/media");
   revalidatePath("/gallery");
+  revalidatePath("/about");
   revalidatePath("/");
 }
 
@@ -54,8 +56,42 @@ export async function deleteMedia(mediaId: string): Promise<{ error?: string }> 
 
   if (!existing) return { error: "File not found." };
 
-  await deleteBusinessImage(supabase, existing.storage_path);
+  // Anything still pointing at this file would render as a broken image, so
+  // clear those references first — products that used it simply fall back to
+  // the designed placeholder.
+  const path = existing.storage_path;
+  const { data: settings } = await supabase
+    .from("website_settings")
+    .select("logo_path, hero_image_path, og_image_path")
+    .eq("business_id", business.id)
+    .maybeSingle();
+
+  await Promise.all([
+    supabase
+      .from("products")
+      .update({ image_path: null })
+      .eq("business_id", business.id)
+      .eq("image_path", path),
+    settings &&
+    (settings.logo_path === path ||
+      settings.hero_image_path === path ||
+      settings.og_image_path === path)
+      ? supabase
+          .from("website_settings")
+          .update({
+            logo_path: settings.logo_path === path ? null : settings.logo_path,
+            hero_image_path: settings.hero_image_path === path ? null : settings.hero_image_path,
+            og_image_path: settings.og_image_path === path ? null : settings.og_image_path,
+          })
+          .eq("business_id", business.id)
+      : Promise.resolve(),
+  ]);
+
+  await deleteBusinessImage(supabase, path);
+
   revalidateAll();
+  revalidatePath("/admin/products");
+  for (const catalogPath of CATALOG_PATHS) revalidatePath(catalogPath);
   return {};
 }
 

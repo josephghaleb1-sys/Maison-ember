@@ -49,26 +49,26 @@ export function ConfirmDialog({
       <span onClick={() => setOpen(true)}>{trigger}</span>
       {open && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-charcoal-950/50 p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-ink-950/50 p-4"
           role="dialog"
           aria-modal="true"
           onClick={(e) => {
             if (e.target === e.currentTarget && !isPending) setOpen(false);
           }}
         >
-          <div className="w-full max-w-sm rounded-xl bg-charcoal-900 p-6 shadow-xl">
+          <div className="w-full max-w-sm rounded-xl bg-ink-900 p-6 shadow-xl">
             <div className="flex items-start gap-3">
               <div
                 className={cn(
                   "flex size-10 shrink-0 items-center justify-center rounded-full",
-                  danger ? "bg-red-500/15 text-red-400" : "bg-ember-500/15 text-ember-300",
+                  danger ? "bg-red-500/15 text-red-400" : "bg-accent/15 text-accent",
                 )}
               >
                 <AlertTriangle className="size-5" aria-hidden />
               </div>
               <div>
-                <h2 className="text-base font-semibold text-cream-50">{title}</h2>
-                <p className="mt-1 text-sm text-charcoal-300">{description}</p>
+                <h2 className="text-base font-semibold text-ink-50">{title}</h2>
+                <p className="mt-1 text-sm text-ink-300">{description}</p>
               </div>
             </div>
             <div className="mt-6 flex justify-end gap-2">

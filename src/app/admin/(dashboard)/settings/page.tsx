@@ -1,21 +1,23 @@
 import type { Metadata } from "next";
 import { requireBusinessContext } from "@/lib/dal";
 import { getWebsiteSettings } from "@/lib/queries/admin";
-import { SettingsForm } from "@/components/admin/settings-form";
+import { BusinessInfoForm } from "@/components/admin/business-info-form";
 
-export const metadata: Metadata = { title: "Settings" };
+export const metadata: Metadata = { title: "Business info" };
 
-export default async function SettingsPage() {
+export default async function BusinessInfoPage() {
   const { business } = await requireBusinessContext();
   const settings = await getWebsiteSettings(business.id);
 
   return (
-    <div className="max-w-2xl space-y-6">
+    <div className="max-w-3xl space-y-6">
       <div>
-        <h1 className="font-display text-2xl font-semibold text-cream-50">Business settings</h1>
-        <p className="text-sm text-charcoal-400">Changes here appear live on your public site.</p>
+        <h1 className="font-display text-2xl font-semibold text-ink-50">Business info</h1>
+        <p className="text-sm text-ink-400">
+          Name, contact details, hours and social links. These appear across your public site.
+        </p>
       </div>
-      <SettingsForm settings={settings} />
+      <BusinessInfoForm business={business} settings={settings} />
     </div>
   );
 }

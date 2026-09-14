@@ -1,89 +1,138 @@
 import Image from "next/image";
-import { Flame } from "lucide-react";
 import { getPublicMediaUrl } from "@/lib/storage";
-import { EmberParticles } from "@/components/site/ember-particles";
-import { HeroParallax } from "@/components/site/hero-parallax";
+import { BrandOrb } from "@/components/site/brand-orb";
+import { DustField } from "@/components/site/dust-field";
+import { getInitials } from "@/components/site/brand-mark";
+import type { BrandTheme } from "@/lib/theme";
 
+/**
+ * The hero.
+ *
+ * Two modes, both driven by data: if the owner has uploaded a hero image it
+ * becomes the backdrop; otherwise the built-in 3D scene (velvet gradient
+ * stage + orbiting rings + drifting motes) carries the page, so a brand-new
+ * business still looks finished. Either way the copy comes from
+ * website_settings.
+ */
 export function Hero({
   imagePath,
+  eyebrow,
   title,
-  tagline,
+  subtitle,
+  businessName,
+  theme,
   children,
 }: {
   imagePath: string | null;
+  eyebrow?: string;
   title: string;
-  tagline: string;
+  subtitle: string;
+  businessName: string;
+  theme: BrandTheme;
   children?: React.ReactNode;
 }) {
+  const hasPhoto = Boolean(imagePath);
+
   return (
-    <section className="relative flex min-h-[70vh] items-end overflow-hidden bg-charcoal-950 sm:min-h-[80vh]">
-      <HeroParallax>
-        {imagePath ? (
+    <section className="relative isolate flex min-h-[92svh] items-center overflow-hidden">
+      {/* ---- Backdrop ---- */}
+      {hasPhoto ? (
+        <>
           <Image
-            src={getPublicMediaUrl(imagePath)}
-            alt={title}
+            src={getPublicMediaUrl(imagePath!)}
+            alt=""
             fill
             priority
             sizes="100vw"
-            className="object-cover opacity-70"
+            className="-z-10 object-cover"
           />
-        ) : (
           <div
-            className="absolute inset-0 overflow-hidden bg-gradient-to-b from-charcoal-950 via-charcoal-900 to-charcoal-950"
+            className="absolute inset-0 -z-10"
+            style={{
+              background:
+                "linear-gradient(105deg, rgba(8,6,10,0.92) 0%, rgba(8,6,10,0.72) 45%, rgba(8,6,10,0.45) 100%)",
+            }}
             aria-hidden
-          >
-            {/* Ambient hearth glow cast onto the dark wall */}
-            <div className="animate-ambient-glow motion-reduce:animate-none absolute bottom-[-20%] left-[62%] h-[70vh] w-[70vh] -translate-x-1/2 rounded-full bg-ember-600/35 blur-[100px]" />
-            <div className="animate-ambient-glow motion-reduce:animate-none absolute bottom-[-5%] left-[62%] h-[38vh] w-[38vh] -translate-x-1/2 rounded-full bg-ember-300/30 blur-[60px]" style={{ animationDelay: "1.2s" }} />
+          />
+        </>
+      ) : (
+        <div className="absolute inset-0 -z-10" aria-hidden>
+          {/* Velvet stage: a deep brand-coloured wash with soft folds. Pure
+              CSS gradients — no image weight, no layout cost. */}
+          <div
+            className="absolute inset-0"
+            style={{
+              background:
+                "radial-gradient(120% 90% at 78% 12%, color-mix(in oklab, var(--brand-primary) 78%, #08060a) 0%, #08060a 62%), radial-gradient(90% 70% at 10% 100%, color-mix(in oklab, var(--brand-primary) 42%, #08060a) 0%, transparent 70%)",
+            }}
+          />
+          <div
+            className="absolute inset-0 opacity-[0.5]"
+            style={{
+              background:
+                "repeating-linear-gradient(104deg, rgba(255,255,255,0.035) 0px, rgba(255,255,255,0) 3px, rgba(0,0,0,0.05) 7px, rgba(255,255,255,0) 12px)",
+            }}
+          />
+        </div>
+      )}
 
-            {/* Layered flame silhouette, back (soft glow) to front (bright core) */}
-            <Flame
-              fill="currentColor"
-              className="animate-flame-flicker motion-reduce:animate-none absolute bottom-[26%] left-[62%] size-56 -translate-x-1/2 text-ember-700/70 blur-md sm:bottom-[4%] sm:size-96"
-            />
-            <Flame
-              fill="currentColor"
-              className="animate-flame-flicker motion-reduce:animate-none absolute bottom-[26%] left-[62%] size-40 -translate-x-1/2 text-ember-500/90 sm:bottom-[4%] sm:size-72"
-              style={{ animationDelay: "180ms" }}
-            />
-            <Flame
-              fill="currentColor"
-              className="animate-flame-flicker motion-reduce:animate-none absolute bottom-[26%] left-[62%] size-24 -translate-x-1/2 text-ember-200 sm:bottom-[4%] sm:size-40"
-              style={{ animationDelay: "90ms" }}
-            />
-          </div>
-        )}
-      </HeroParallax>
-      {/* Whole-scene ambient firelight, breathing gently across everything */}
+      <DustField rgb={theme.secondaryRgb} density={hasPhoto ? 22 : 38} className="-z-10" />
+
+      {/* Vignette keeps the copy readable over either backdrop. */}
       <div
-        className="animate-ambient-glow motion-reduce:animate-none pointer-events-none absolute inset-0"
-        style={{
-          background: "radial-gradient(ellipse at 62% 70%, rgba(166, 116, 28, 0.18), transparent 60%)",
-          animationDelay: "0.6s",
-        }}
+        className="absolute inset-0 -z-10 bg-gradient-to-t from-ink-950 via-ink-950/35 to-ink-950/60"
         aria-hidden
       />
-      <EmberParticles />
-      <div className="absolute inset-0 bg-gradient-to-t from-charcoal-950 via-charcoal-950/55 to-transparent" />
-      <div className="relative mx-auto w-full max-w-6xl px-4 pb-16 pt-32 sm:px-6">
-        <h1 className="animate-fade-up font-display text-4xl font-semibold text-white text-balance sm:text-6xl">
-          {title}
-        </h1>
-        <p
-          className="animate-fade-up mt-4 max-w-xl text-lg text-charcoal-200"
-          style={{ animationDelay: "150ms" }}
-        >
-          {tagline}
-        </p>
-        {children && (
-          <div
-            className="animate-fade-up mt-8 flex flex-wrap gap-3"
-            style={{ animationDelay: "300ms" }}
+
+      <div className="mx-auto grid w-full max-w-6xl grid-cols-1 items-center gap-10 px-4 pb-20 pt-28 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:gap-6 lg:pb-28 lg:pt-32">
+        <div className="max-w-xl">
+          {eyebrow && (
+            <p className="animate-fade-up eyebrow text-accent">{eyebrow}</p>
+          )}
+          <h1
+            className="animate-fade-up mt-5 font-display text-[clamp(2.75rem,8.5vw,5.25rem)] font-semibold leading-[0.98] tracking-[-0.01em] text-ink-50 text-balance"
+            style={{ animationDelay: "90ms" }}
           >
-            {children}
+            {title}
+          </h1>
+          {subtitle && (
+            <p
+              className="animate-fade-up mt-6 max-w-lg text-base leading-relaxed text-ink-200 sm:text-lg"
+              style={{ animationDelay: "200ms" }}
+            >
+              {subtitle}
+            </p>
+          )}
+          {children && (
+            <div
+              className="animate-fade-up mt-9 flex flex-wrap items-center gap-3"
+              style={{ animationDelay: "320ms" }}
+            >
+              {children}
+            </div>
+          )}
+        </div>
+
+        {/* The 3D mark only earns its place when there's no hero photo
+            competing with it. */}
+        {!hasPhoto && (
+          <div className="flex justify-center lg:justify-end">
+            <BrandOrb monogram={getInitials(businessName)} />
           </div>
         )}
       </div>
+
+      {/* Scroll cue — a slow travelling highlight inside a hairline. */}
+      <div
+        className="absolute inset-x-0 bottom-8 hidden justify-center sm:flex"
+        aria-hidden
+      >
+        <span className="flex h-10 w-6 items-start justify-center rounded-full border border-accent/35 p-1.5">
+          <span className="animate-bob block size-1.5 rounded-full bg-accent" />
+        </span>
+      </div>
+
+      <div className="hairline-accent absolute inset-x-0 bottom-0 h-px" aria-hidden />
     </section>
   );
 }

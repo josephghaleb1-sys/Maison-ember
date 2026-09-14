@@ -1,45 +1,106 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import { getPublicBusiness, getPublicSettings } from "@/lib/business";
+import { getPublicGalleryMedia, getSiteContext } from "@/lib/business";
 import { getPublicMediaUrl } from "@/lib/storage";
+import { BrandMark } from "@/components/site/brand-mark";
 import { Reveal } from "@/components/site/reveal";
+import { Section } from "@/components/site/section";
+import { Tilt } from "@/components/site/tilt";
+import { ButtonLink } from "@/components/ui/button";
 
-export const metadata: Metadata = { title: "About" };
+export async function generateMetadata(): Promise<Metadata> {
+  const { businessName, settings } = await getSiteContext();
+  return {
+    title: "About",
+    description: settings?.tagline || `About ${businessName}.`,
+    alternates: { canonical: "/about" },
+  };
+}
 
 export default async function AboutPage() {
-  const [business, settings] = await Promise.all([getPublicBusiness(), getPublicSettings()]);
-  const businessName = settings?.business_name || business.name;
+  const [{ businessName, settings, preset }, gallery] = await Promise.all([
+    getSiteContext(),
+    getPublicGalleryMedia(),
+  ]);
+
   const paragraphs = (settings?.about_text || "").split(/\n+/).filter(Boolean);
+  const collage = gallery.slice(0, 3);
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6">
-      <Reveal className="flex flex-col items-center">
-        {settings?.logo_path && (
-          <div className="relative mx-auto mb-6 size-20 overflow-hidden rounded-full bg-charcoal-900 shadow">
-            <Image
-              src={getPublicMediaUrl(settings.logo_path)}
-              alt={`${businessName} logo`}
-              fill
-              sizes="80px"
-              className="object-cover"
-            />
-          </div>
-        )}
-        <h1 className="text-center font-display text-4xl font-semibold text-cream-50">
-          About {businessName}
-        </h1>
-        {settings?.tagline && (
-          <p className="mt-3 text-center text-lg text-ember-300">{settings.tagline}</p>
-        )}
-      </Reveal>
+    <>
+      <Section className="pb-0 pt-32 sm:pt-36">
+        <Reveal className="mx-auto flex max-w-2xl flex-col items-center text-center">
+          <BrandMark name={businessName} logoPath={settings?.logo_path ?? null} size={72} />
+          <h1 className="mt-7 font-display text-4xl font-semibold text-ink-50 text-balance sm:text-5xl">
+            About {businessName}
+          </h1>
+          {settings?.tagline && (
+            <p className="eyebrow mt-5 text-accent">{settings.tagline}</p>
+          )}
+        </Reveal>
+      </Section>
 
-      <Reveal delay={100} className="mt-10 space-y-5 text-lg leading-relaxed text-charcoal-200">
-        {paragraphs.length > 0 ? (
-          paragraphs.map((paragraph, i) => <p key={i}>{paragraph}</p>)
-        ) : (
-          <p className="text-charcoal-500">More about us is coming soon.</p>
-        )}
-      </Reveal>
-    </div>
+      <Section className="pt-14">
+        <div
+          className={
+            collage.length > 0
+              ? "grid grid-cols-1 gap-14 lg:grid-cols-[1.1fr_0.9fr]"
+              : "mx-auto max-w-3xl"
+          }
+        >
+          <Reveal className="space-y-6 text-lg leading-relaxed text-ink-200">
+            {paragraphs.length > 0 ? (
+              paragraphs.map((paragraph, index) => <p key={index}>{paragraph}</p>)
+            ) : (
+              <p className="text-ink-400">Our story is coming soon.</p>
+            )}
+            <div className="flex flex-wrap gap-3 pt-4">
+              <ButtonLink href={preset.catalogPath}>{preset.heroCta}</ButtonLink>
+              <ButtonLink href="/contact" variant="outline">
+                {preset.contactHeading}
+              </ButtonLink>
+            </div>
+          </Reveal>
+
+          {collage.length > 0 && (
+            <Reveal delay={140} className="grid grid-cols-2 gap-4">
+              {collage.map((item, index) => (
+                <Tilt
+                  key={item.id}
+                  strength={6}
+                  className={index === 0 ? "col-span-2" : undefined}
+                >
+                  <div
+                    className={`relative overflow-hidden rounded-2xl border border-ink-800 ${
+                      index === 0 ? "aspect-[16/10]" : "aspect-square"
+                    }`}
+                  >
+                    <Image
+                      src={getPublicMediaUrl(item.storage_path)}
+                      alt={item.alt_text || businessName}
+                      fill
+                      sizes="(min-width: 1024px) 40vw, 90vw"
+                      className="object-cover"
+                    />
+                  </div>
+                </Tilt>
+              ))}
+            </Reveal>
+          )}
+        </div>
+      </Section>
+
+      <Section className="pt-0">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          {preset.highlights.map((highlight, index) => (
+            <Reveal key={highlight} delay={index * 90}>
+              <div className="rounded-2xl border border-ink-800 bg-ink-900/50 p-6 text-center">
+                <p className="font-display text-xl text-accent">{highlight}</p>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+      </Section>
+    </>
   );
 }

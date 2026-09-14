@@ -7,9 +7,11 @@ import { ProductRow } from "@/components/admin/product-row";
 export function ProductList({
   products,
   categoryNames,
+  currency,
 }: {
   products: Product[];
   categoryNames: Map<string, string>;
+  currency: string;
 }) {
   const [optimisticProducts, removeOptimistic] = useOptimistic(
     products,
@@ -17,7 +19,7 @@ export function ProductList({
   );
 
   return (
-    <ul className="divide-y divide-charcoal-800">
+    <ul className="divide-y divide-ink-800">
       {optimisticProducts.map((product, index) => (
         <ProductRow
           key={product.id}
@@ -25,6 +27,7 @@ export function ProductList({
           categoryName={product.category_id ? categoryNames.get(product.category_id) ?? null : null}
           isFirst={index === 0}
           isLast={index === optimisticProducts.length - 1}
+          currency={currency}
           onOptimisticRemove={() => removeOptimistic(product.id)}
         />
       ))}

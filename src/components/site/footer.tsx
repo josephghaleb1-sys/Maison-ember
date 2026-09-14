@@ -1,6 +1,10 @@
 import Link from "next/link";
-import { Phone, Mail, MapPin, Flame } from "lucide-react";
+import { Mail, MapPin, Phone } from "lucide-react";
 import type { WebsiteSettings } from "@/lib/database.types";
+import { BrandMark } from "@/components/site/brand-mark";
+import { SOCIAL_META, WhatsAppIcon } from "@/components/site/social-icons";
+import type { NavLink } from "@/components/site/header";
+import { whatsappHref } from "@/lib/contact";
 
 const DAY_LABELS: [keyof NonNullable<WebsiteSettings["hours"]>, string][] = [
   ["mon", "Mon"],
@@ -12,94 +16,129 @@ const DAY_LABELS: [keyof NonNullable<WebsiteSettings["hours"]>, string][] = [
   ["sun", "Sun"],
 ];
 
-const SOCIAL_LABELS: [keyof NonNullable<WebsiteSettings["social_links"]>, string][] = [
-  ["instagram", "Instagram"],
-  ["facebook", "Facebook"],
-  ["twitter", "Twitter / X"],
-  ["tiktok", "TikTok"],
-  ["yelp", "Yelp"],
-];
-
 export function SiteFooter({
   businessName,
   settings,
+  links,
 }: {
   businessName: string;
   settings: WebsiteSettings | null;
+  links: NavLink[];
 }) {
-  const hours = settings?.hours ?? {};
   const social = settings?.social_links ?? {};
-  const socialEntries = SOCIAL_LABELS.filter(([key]) => social[key]);
+  const socialEntries = SOCIAL_META.filter(({ key }) => social[key]);
+  const hourEntries = DAY_LABELS.filter(([key]) => settings?.hours?.[key]);
+  const whatsapp = whatsappHref(settings?.whatsapp || settings?.phone);
 
   return (
-    <footer className="border-t border-charcoal-900/10 bg-charcoal-950 text-charcoal-300">
-      <div className="mx-auto grid max-w-6xl grid-cols-1 gap-8 px-4 py-12 sm:px-6 md:grid-cols-3">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="flex size-8 items-center justify-center rounded-full bg-ember-600 text-white">
-              <Flame className="size-4" aria-hidden />
+    <footer className="relative mt-10 border-t border-accent/15 bg-ink-950">
+      <div className="hairline-accent absolute inset-x-0 top-0 h-px" aria-hidden />
+      <div className="mx-auto grid max-w-6xl grid-cols-1 gap-10 px-4 py-14 sm:px-6 md:grid-cols-4 md:gap-8">
+        <div className="md:col-span-2 md:max-w-sm">
+          <div className="flex items-center gap-3">
+            <BrandMark name={businessName} logoPath={settings?.logo_path ?? null} size={44} />
+            <span className="font-display text-lg font-semibold uppercase tracking-[0.24em] text-ink-50">
+              {businessName}
             </span>
-            <span className="font-display text-base font-semibold text-white">{businessName}</span>
           </div>
-          {settings?.tagline && <p className="mt-3 text-sm">{settings.tagline}</p>}
+          {settings?.tagline && (
+            <p className="mt-4 text-sm leading-relaxed text-ink-300">{settings.tagline}</p>
+          )}
           {socialEntries.length > 0 && (
-            <ul className="mt-4 flex flex-wrap gap-3">
-              {socialEntries.map(([key, label]) => (
+            <ul className="mt-6 flex flex-wrap gap-2.5">
+              {socialEntries.map(({ key, label, Icon }) => (
                 <li key={key}>
-                  <Link
+                  <a
                     href={social[key]!}
                     target="_blank"
-                    rel="noreferrer"
-                    className="text-sm text-charcoal-300 hover:text-ember-400"
+                    rel="noreferrer noopener"
+                    aria-label={label}
+                    className="flex size-10 items-center justify-center rounded-full border border-ink-700 text-ink-200 transition-colors hover:border-accent/60 hover:text-accent"
                   >
-                    {label}
-                  </Link>
+                    <Icon className="size-4.5" />
+                  </a>
                 </li>
               ))}
+              {whatsapp && (
+                <li>
+                  <a
+                    href={whatsapp}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    aria-label="WhatsApp"
+                    className="flex size-10 items-center justify-center rounded-full border border-ink-700 text-ink-200 transition-colors hover:border-accent/60 hover:text-accent"
+                  >
+                    <WhatsAppIcon className="size-4.5" />
+                  </a>
+                </li>
+              )}
             </ul>
           )}
         </div>
 
-        <div className="space-y-2 text-sm">
-          <h3 className="font-medium text-white">Contact</h3>
-          {settings?.address && (
-            <p className="flex items-start gap-2">
-              <MapPin className="mt-0.5 size-4 shrink-0" aria-hidden />
-              {settings.address}
-            </p>
-          )}
-          {settings?.phone && (
-            <p className="flex items-center gap-2">
-              <Phone className="size-4 shrink-0" aria-hidden />
-              <a href={`tel:${settings.phone}`} className="hover:text-ember-400">
-                {settings.phone}
-              </a>
-            </p>
-          )}
-          {settings?.email && (
-            <p className="flex items-center gap-2">
-              <Mail className="size-4 shrink-0" aria-hidden />
-              <a href={`mailto:${settings.email}`} className="hover:text-ember-400">
-                {settings.email}
-              </a>
-            </p>
-          )}
-        </div>
-
-        <div className="text-sm">
-          <h3 className="font-medium text-white">Hours</h3>
-          <ul className="mt-2 space-y-1">
-            {DAY_LABELS.map(([key, label]) => (
-              <li key={key} className="flex justify-between gap-4">
-                <span>{label}</span>
-                <span className="text-charcoal-400">{hours[key] || "—"}</span>
+        <div>
+          <h3 className="eyebrow text-accent">Explore</h3>
+          <ul className="mt-4 space-y-2.5 text-sm">
+            {links.map((link) => (
+              <li key={link.href}>
+                <Link href={link.href} className="text-ink-300 transition-colors hover:text-accent-bright">
+                  {link.label}
+                </Link>
               </li>
             ))}
           </ul>
         </div>
+
+        <div>
+          <h3 className="eyebrow text-accent">Contact</h3>
+          <ul className="mt-4 space-y-3 text-sm text-ink-300">
+            {settings?.address && (
+              <li className="flex items-start gap-2.5">
+                <MapPin className="mt-0.5 size-4 shrink-0 text-accent/70" aria-hidden />
+                <span>{settings.address}</span>
+              </li>
+            )}
+            {settings?.phone && (
+              <li className="flex items-center gap-2.5">
+                <Phone className="size-4 shrink-0 text-accent/70" aria-hidden />
+                <a href={`tel:${settings.phone}`} className="transition-colors hover:text-accent-bright">
+                  {settings.phone}
+                </a>
+              </li>
+            )}
+            {settings?.email && (
+              <li className="flex items-center gap-2.5">
+                <Mail className="size-4 shrink-0 text-accent/70" aria-hidden />
+                <a
+                  href={`mailto:${settings.email}`}
+                  className="break-all transition-colors hover:text-accent-bright"
+                >
+                  {settings.email}
+                </a>
+              </li>
+            )}
+          </ul>
+
+          {hourEntries.length > 0 && (
+            <>
+              <h3 className="eyebrow mt-8 text-accent">Hours</h3>
+              <ul className="mt-4 space-y-1.5 text-sm">
+                {hourEntries.map(([key, label]) => (
+                  <li key={key} className="flex justify-between gap-4">
+                    <span className="text-ink-400">{label}</span>
+                    <span className="text-ink-200">{settings?.hours?.[key]}</span>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+        </div>
       </div>
-      <div className="border-t border-white/10 px-4 py-4 text-center text-xs text-charcoal-500 sm:px-6">
-        © {new Date().getFullYear()} {businessName}. All rights reserved.
+
+      <div className="border-t border-ink-800/70 px-4 py-5 sm:px-6">
+        <p className="mx-auto max-w-6xl text-center text-xs text-ink-500">
+          © {new Date().getFullYear()} {businessName}. All rights reserved.
+        </p>
       </div>
     </footer>
   );

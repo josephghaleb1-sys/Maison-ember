@@ -9,7 +9,7 @@ export default async function LoginPage(props: PageProps<"/admin/login">) {
 
   return (
     <>
-      <h2 className="mb-6 text-lg font-semibold text-cream-50">Sign in</h2>
+      <h2 className="mb-6 text-lg font-semibold text-ink-50">Sign in</h2>
       <LoginForm redirectTo={redirectTo} />
     </>
   );

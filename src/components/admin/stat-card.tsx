@@ -16,11 +16,11 @@ export function StatCard({
     <Card>
       <CardBody className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-sm text-charcoal-400">{label}</p>
-          <p className="mt-1 text-2xl font-semibold text-cream-50">{value}</p>
-          {hint && <p className="mt-1 text-xs text-charcoal-500">{hint}</p>}
+          <p className="text-sm text-ink-400">{label}</p>
+          <p className="mt-1 text-2xl font-semibold text-ink-50">{value}</p>
+          {hint && <p className="mt-1 text-xs text-ink-500">{hint}</p>}
         </div>
-        <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-ember-500/15 text-ember-300">
+        <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-accent/15 text-accent">
           <Icon className="size-5" aria-hidden />
         </div>
       </CardBody>

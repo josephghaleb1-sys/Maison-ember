@@ -3,16 +3,28 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireBusinessContext } from "@/lib/dal";
-import { settingsSchema } from "@/lib/validation/settings";
+import { businessInfoSchema, websiteSettingsSchema } from "@/lib/validation/settings";
 import { uploadBusinessImage, deleteBusinessImage } from "@/lib/actions/upload";
 import type { FormState } from "@/lib/actions/auth";
-import type { WebsiteHours, WebsiteSocialLinks } from "@/lib/database.types";
+import type { MediaKind, WebsiteHours, WebsiteSocialLinks } from "@/lib/database.types";
 
+/** Public pages that can change when settings change. */
+function revalidatePublicSite() {
+  revalidatePath("/", "layout");
+}
+
+type ImageKind = Extract<MediaKind, "logo" | "hero" | "og">;
+
+/**
+ * Handles one optional image field on a settings form: a new upload replaces
+ * (and deletes) the old file, a "remove" checkbox clears it, and doing
+ * neither leaves it untouched.
+ */
 async function handleImageField(
   supabase: Awaited<ReturnType<typeof createClient>>,
   businessId: string,
   userId: string,
-  kind: "logo" | "hero",
+  kind: ImageKind,
   formData: FormData,
   currentPath: string | null,
 ): Promise<{ path: string | null } | { error: string }> {
@@ -34,41 +46,19 @@ async function handleImageField(
   return { path: currentPath };
 }
 
-export async function updateSettings(_prevState: FormState, formData: FormData): Promise<FormState> {
-  const { business, userId } = await requireBusinessContext();
+/** Dashboard -> Business info. */
+export async function updateBusinessInfo(
+  _prevState: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  const { business } = await requireBusinessContext();
 
-  const parsed = settingsSchema.safeParse(Object.fromEntries(formData.entries()));
+  const parsed = businessInfoSchema.safeParse(Object.fromEntries(formData.entries()));
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Check the form for errors." };
   }
 
   const supabase = await createClient();
-
-  const { data: existing } = await supabase
-    .from("website_settings")
-    .select("logo_path, hero_image_path")
-    .eq("business_id", business.id)
-    .maybeSingle();
-
-  const logoResult = await handleImageField(
-    supabase,
-    business.id,
-    userId,
-    "logo",
-    formData,
-    existing?.logo_path ?? null,
-  );
-  if ("error" in logoResult) return { error: logoResult.error };
-
-  const heroResult = await handleImageField(
-    supabase,
-    business.id,
-    userId,
-    "hero",
-    formData,
-    existing?.hero_image_path ?? null,
-  );
-  if ("error" in heroResult) return { error: heroResult.error };
 
   const hours: WebsiteHours = {
     mon: parsed.data.hours_mon,
@@ -88,6 +78,9 @@ export async function updateSettings(_prevState: FormState, formData: FormData):
     yelp: parsed.data.social_yelp || undefined,
   };
 
+  // business_id is taken from the session's membership, never from the form —
+  // a client can't aim this write at someone else's business, and RLS would
+  // reject it even if it tried.
   const { error } = await supabase.from("website_settings").upsert(
     {
       business_id: business.id,
@@ -95,27 +88,96 @@ export async function updateSettings(_prevState: FormState, formData: FormData):
       tagline: parsed.data.tagline,
       about_text: parsed.data.about_text,
       phone: parsed.data.phone,
+      whatsapp: parsed.data.whatsapp,
       email: parsed.data.email,
       address: parsed.data.address,
       hours,
       social_links,
-      logo_path: logoResult.path,
-      hero_image_path: heroResult.path,
     },
     { onConflict: "business_id" },
   );
 
-  if (error) {
-    return { error: `Couldn't save settings: ${error.message}` };
+  if (error) return { error: `Couldn't save business info: ${error.message}` };
+
+  const { error: businessError } = await supabase
+    .from("businesses")
+    .update({ name: parsed.data.business_name, industry: parsed.data.industry })
+    .eq("id", business.id);
+
+  if (businessError) return { error: `Couldn't save business info: ${businessError.message}` };
+
+  revalidatePath("/admin", "layout");
+  revalidatePublicSite();
+  return { message: "Business info saved." };
+}
+
+/** Dashboard -> Website (branding, hero copy, SEO, images). */
+export async function updateWebsiteSettings(
+  _prevState: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  const { business, userId } = await requireBusinessContext();
+
+  const parsed = websiteSettingsSchema.safeParse({
+    ...Object.fromEntries(formData.entries()),
+    show_prices: formData.get("show_prices") === "on",
+  });
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Check the form for errors." };
   }
 
-  // Business name in `businesses` mirrors website_settings.business_name for display.
-  await supabase.from("businesses").update({ name: parsed.data.business_name }).eq("id", business.id);
+  const supabase = await createClient();
 
-  revalidatePath("/admin/settings");
-  revalidatePath("/");
-  revalidatePath("/about");
-  revalidatePath("/contact");
+  const { data: existing } = await supabase
+    .from("website_settings")
+    .select("logo_path, hero_image_path, og_image_path, business_name")
+    .eq("business_id", business.id)
+    .maybeSingle();
 
-  return { message: "Settings saved." };
+  const images: Record<ImageKind, string | null> = {
+    logo: existing?.logo_path ?? null,
+    hero: existing?.hero_image_path ?? null,
+    og: existing?.og_image_path ?? null,
+  };
+
+  for (const kind of ["logo", "hero", "og"] as ImageKind[]) {
+    const result = await handleImageField(
+      supabase,
+      business.id,
+      userId,
+      kind,
+      formData,
+      images[kind],
+    );
+    if ("error" in result) return { error: result.error };
+    images[kind] = result.path;
+  }
+
+  const { error } = await supabase.from("website_settings").upsert(
+    {
+      business_id: business.id,
+      // Keep the NOT NULL business_name satisfied if this row is created here
+      // before Business info has ever been saved.
+      business_name: existing?.business_name || business.name,
+      hero_title: parsed.data.hero_title,
+      hero_subtitle: parsed.data.hero_subtitle,
+      hero_cta_label: parsed.data.hero_cta_label,
+      primary_color: parsed.data.primary_color.toLowerCase(),
+      secondary_color: parsed.data.secondary_color.toLowerCase(),
+      seo_title: parsed.data.seo_title,
+      seo_description: parsed.data.seo_description,
+      currency: parsed.data.currency,
+      show_prices: parsed.data.show_prices,
+      logo_path: images.logo,
+      hero_image_path: images.hero,
+      og_image_path: images.og,
+    },
+    { onConflict: "business_id" },
+  );
+
+  if (error) return { error: `Couldn't save website settings: ${error.message}` };
+
+  revalidatePath("/admin", "layout");
+  revalidatePublicSite();
+  return { message: "Website settings saved." };
 }

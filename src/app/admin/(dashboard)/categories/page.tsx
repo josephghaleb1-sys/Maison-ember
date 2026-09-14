@@ -10,7 +10,7 @@ import { CategoryRow } from "@/components/admin/category-row";
 export const metadata: Metadata = { title: "Categories" };
 
 export default async function CategoriesPage() {
-  const { business } = await requireBusinessContext();
+  const { business, preset } = await requireBusinessContext();
   const [categories, products] = await Promise.all([
     getCategories(business.id),
     getProducts(business.id),
@@ -25,9 +25,10 @@ export default async function CategoriesPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="font-display text-2xl font-semibold text-cream-50">Categories</h1>
-        <p className="text-sm text-charcoal-400">
-          Organize your menu. Deleting a category never deletes its products.
+        <h1 className="font-display text-2xl font-semibold text-ink-50">Categories</h1>
+        <p className="text-sm text-ink-400">
+          Group your {preset.itemNounPlural}. Deleting a category never deletes the{" "}
+          {preset.itemNounPlural} inside it — they simply become uncategorised.
         </p>
       </div>
 
@@ -38,10 +39,10 @@ export default async function CategoriesPage() {
             <EmptyState
               icon={Tags}
               title="No categories yet"
-              description="Add categories like “Starters” or “Desserts” to organize your menu."
+              description={`Categories keep your ${preset.itemNounPlural} tidy and give visitors a way to browse.`}
             />
           ) : (
-            <ul className="divide-y divide-charcoal-800">
+            <ul className="divide-y divide-ink-800">
               {categories.map((category, index) => (
                 <CategoryRow
                   key={category.id}

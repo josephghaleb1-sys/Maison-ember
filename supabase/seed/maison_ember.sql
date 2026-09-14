@@ -1,3 +1,12 @@
+-- DEMO DATA — "Maison Ember", a fictional restaurant.
+--
+-- Kept alongside the Veloura Lab seed as a *second* tenant: it proves the same
+-- application serves a completely different industry (note industry =
+-- 'restaurant', which moves the catalogue to /menu and switches the wording),
+-- and it is what the RLS isolation checks in README "Security" run against.
+-- Delete it freely for a single-customer deployment.
+--
+-- Original header follows.
 -- Demo data for the fictional restaurant "Maison Ember".
 -- Safe to re-run: upserts by slug/business_id, so running it twice does not
 -- duplicate rows.
@@ -17,24 +26,36 @@ declare
   cat_drinks uuid;
 begin
   -- ---- business -----------------------------------------------------------
-  insert into public.businesses (slug, name)
-  values ('maison-ember', 'Maison Ember')
-  on conflict (slug) do update set name = excluded.name
+  insert into public.businesses (slug, name, industry)
+  values ('maison-ember', 'Maison Ember', 'restaurant')
+  on conflict (slug) do update
+    set name = excluded.name, industry = excluded.industry
   returning id into biz_id;
 
   -- ---- website settings -----------------------------------------------------
   insert into public.website_settings (
     business_id, business_name, tagline, about_text,
-    phone, email, address, hours, social_links
+    hero_title, hero_subtitle, hero_cta_label,
+    primary_color, secondary_color, seo_title, seo_description,
+    phone, whatsapp, email, address, currency, hours, social_links
   )
   values (
     biz_id,
     'Maison Ember',
     'Wood-fired cooking, modern French soul.',
     'Maison Ember began as a single cast-iron hearth and a stubborn belief that fire is the oldest and best seasoning there is. Every dish that leaves our kitchen passes over live oak and applewood coals before it reaches your table. Our chefs blend classic French technique with the char, smoke, and spontaneity of open-flame cooking — small plates built for sharing, mains built for lingering, and a wine list built for both. Pull up a seat at the hearth.',
-    '(415) 555-0142',
-    'hello@maisonember.com',
+    'Cooked over live fire',
+    'Small plates built for sharing, mains built for lingering — everything cooked over live oak and applewood.',
+    'View the menu',
+    '#7a2412',
+    '#d9a441',
+    'Maison Ember | Wood-Fired Restaurant',
+    'Live-fire cooking with modern French technique. Book a table or browse the menu.',
+    '(415) 555-0142',                      -- PLACEHOLDER (demo)
+    '14155550142',                         -- PLACEHOLDER (demo)
+    'hello@maisonember.example',           -- PLACEHOLDER (demo)
     '214 Kindling Lane, San Francisco, CA 94110',
+    'USD',
     '{"mon": "Closed", "tue": "5:00 PM - 10:00 PM", "wed": "5:00 PM - 10:00 PM", "thu": "5:00 PM - 10:00 PM", "fri": "5:00 PM - 11:00 PM", "sat": "5:00 PM - 11:00 PM", "sun": "11:00 AM - 9:00 PM"}'::jsonb,
     '{"instagram": "https://instagram.com/maisonember", "facebook": "https://facebook.com/maisonember"}'::jsonb
   )
@@ -42,7 +63,16 @@ begin
     business_name = excluded.business_name,
     tagline = excluded.tagline,
     about_text = excluded.about_text,
+    hero_title = excluded.hero_title,
+    hero_subtitle = excluded.hero_subtitle,
+    hero_cta_label = excluded.hero_cta_label,
+    primary_color = excluded.primary_color,
+    secondary_color = excluded.secondary_color,
+    seo_title = excluded.seo_title,
+    seo_description = excluded.seo_description,
     phone = excluded.phone,
+    whatsapp = excluded.whatsapp,
+    currency = excluded.currency,
     email = excluded.email,
     address = excluded.address,
     hours = excluded.hours,

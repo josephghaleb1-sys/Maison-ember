@@ -1,37 +1,41 @@
 import type { Metadata } from "next";
-import { Fraunces, Inter } from "next/font/google";
-import { Toaster } from "sonner";
+import { Cormorant_Garamond, Inter } from "next/font/google";
 import "./globals.css";
 
-const fraunces = Fraunces({
-  variable: "--font-fraunces",
+/**
+ * Two faces only: a high-contrast serif for display type and a neutral sans
+ * for everything functional. `display: "swap"` plus Next's self-hosting means
+ * no render-blocking font request and no layout shift on load.
+ */
+const display = Cormorant_Garamond({
+  variable: "--font-display-family",
   subsets: ["latin"],
-  axes: ["opsz"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
 });
 
-const inter = Inter({
-  variable: "--font-inter",
+const sans = Inter({
+  variable: "--font-sans-family",
   subsets: ["latin"],
+  display: "swap",
 });
 
+/**
+ * Fallback metadata only. The public site overrides all of this per business
+ * in src/app/(site)/layout.tsx, reading from the database — nothing here is
+ * specific to any one customer.
+ */
 export const metadata: Metadata = {
-  title: {
-    default: "Maison Ember",
-    template: "%s | Maison Ember",
-  },
-  description: "Wood-fired cooking, modern French soul.",
+  title: "Business website",
+  description: "A website powered by the platform.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html
-      lang="en"
-      className={`${fraunces.variable} ${inter.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col font-sans">
-        {children}
-        <Toaster position="top-right" richColors closeButton />
-      </body>
+    <html lang="en" className={`${display.variable} ${sans.variable} h-full antialiased`}>
+      {/* The toast host lives in the admin layout, not here: the public site
+          never raises toasts, and this keeps its JS payload smaller. */}
+      <body className="flex min-h-full flex-col font-sans">{children}</body>
     </html>
   );
 }

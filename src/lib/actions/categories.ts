@@ -4,12 +4,14 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireBusinessContext } from "@/lib/dal";
 import { categorySchema } from "@/lib/validation/category";
+import { CATALOG_PATHS } from "@/lib/industry";
 
 function revalidateAll() {
   revalidatePath("/admin/categories");
   revalidatePath("/admin/products");
-  revalidatePath("/menu");
   revalidatePath("/");
+  // The catalogue lives at whichever path this business's industry uses.
+  for (const path of CATALOG_PATHS) revalidatePath(path);
 }
 
 export async function createCategory(formData: FormData): Promise<{ error?: string }> {
