@@ -36,7 +36,7 @@ export function AddToCartButton({
         type="button"
         onClick={handleClick}
         className={cn(
-          "inline-flex h-11 w-full items-center justify-center gap-2 rounded-full bg-accent px-5 text-[0.8125rem] font-medium uppercase tracking-[0.14em] text-on-accent transition-colors hover:bg-accent-bright",
+          "inline-flex h-11 w-full items-center justify-center gap-2 rounded-full bg-accent-solid px-5 text-[0.8125rem] font-medium uppercase tracking-[0.14em] text-on-accent transition-colors hover:bg-accent-bright",
           className,
         )}
       >

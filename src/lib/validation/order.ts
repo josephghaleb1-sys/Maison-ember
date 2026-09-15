@@ -42,6 +42,8 @@ export const checkoutSchema = z.object({
     .max(300),
   address_details: z.string().trim().max(300).optional().default(""),
   notes: z.string().trim().max(1000).optional().default(""),
+  /** Whish transfer reference, when the customer pays that way. */
+  payment_reference: z.string().trim().max(120).optional().default(""),
   /** Honeypot: a real person never fills a hidden field. */
   website: z.string().max(0).optional().default(""),
 });

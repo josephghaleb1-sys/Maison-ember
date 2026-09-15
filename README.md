@@ -61,8 +61,8 @@ button. Orders land in the dashboard with the customer's phone and address.
 | Categories | Create, rename, reorder, hide, delete (never orphans items) |
 | Media | Upload, preview, hide, delete images; reuse them as item photos |
 | Reviews | Add/hide/delete testimonials shown on the homepage |
-| Delivery | Delivery areas and fees, free-delivery threshold, minimum order, the note shown at checkout, and a switch to stop taking orders |
-| Website | Brand colours (live preview), hero copy, logo/hero/social images, currency, SEO, custom domains |
+| Delivery | Delivery areas and fees, free-delivery threshold, minimum order, the note shown at checkout, payment methods (cash on delivery, Whish + the number to send to), and a switch to stop taking orders |
+| Website | Light or dark site palette, brand colours (live preview), hero copy, logo/hero/social images, currency, where order emails go, SEO, custom domains |
 | Business info | Name, industry, tagline, about, phone, WhatsApp, email, address, hours, social links |
 
 Everything persists in Postgres. Edit in the dashboard, refresh the public
@@ -113,6 +113,9 @@ cp .env.example .env.local
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | yes | Public anon key (RLS still applies) |
 | `NEXT_PUBLIC_BUSINESS_SLUG` | yes | Business to serve when the hostname isn't mapped |
 | `NEXT_PUBLIC_SITE_URL` | no | Override the origin used for canonical/reset links |
+| `RESEND_API_KEY` | no | Turns on new-order emails to the owner (resend.com) |
+| `ORDER_EMAIL_FROM` | no | Sender for those emails; needs a domain verified with Resend |
+| `RESEND_API_URL` | no | Override the mail endpoint (testing or a self-hosted relay) |
 
 `.env*` is git-ignored except `.env.example`. Never commit real keys.
 
@@ -146,6 +149,7 @@ CLI). All of them are safe to re-run.
 | `supabase/migrations/0002_perf_indexes.sql` | Composite index for membership lookups |
 | `supabase/migrations/0003_platform_extensions.sql` | Industry, custom domains, branding/SEO columns, testimonials |
 | `supabase/migrations/0004_checkout.sql` | Orders, order items, delivery zones, checkout settings, `place_order()` and `get_order_by_token()` |
+| `supabase/migrations/0005_theme_payments_email.sql` | Light/dark site palette, order-notification address, Whish payment |
 
 Then load demo data (optional but recommended for a first run):
 
@@ -319,9 +323,17 @@ Everything below is editable in the dashboard — no deploy required:
 
 - **Business info** — name, industry, tagline, about text, phone, WhatsApp,
   email, address, opening hours, social links.
-- **Website** — primary and accent colour (live preview), hero headline,
-  supporting text and button label, logo, hero background, social share image,
-  currency, show/hide prices, SEO title and description, custom domains.
+- **Website** — a light (ivory/blush) or dark (near-black) site palette,
+  primary and accent colour with a live preview, hero headline, supporting text
+  and button label, logo, hero background, social share image, currency,
+  show/hide prices, where order emails go, SEO title and description, custom
+  domains.
+
+  Pick the palette to suit the *photography*: pale packshots — skincare,
+  jewellery, bridal — sit badly on near-black, and moody food or interiors sit
+  badly on ivory. The neutral scale is semantic, so the whole site, including
+  the 3D hero, re-tunes itself either way, and accent colours are automatically
+  darkened or lightened until they pass WCAG AA on the surface you chose.
 - **Catalogue, categories, media, reviews** — as described in
   [What it does](#1-what-it-does).
 
@@ -389,8 +401,9 @@ processor, no online payment, no account to create.
 2. Opens `/checkout` and fills one form: name, phone, email (optional),
    **area** — each with its delivery fee shown — city, street and building,
    and any notes.
-3. Picks *Cash on delivery* and confirms. The total updates live as they
-   change area.
+3. Picks how to pay — *Cash on delivery*, or *Whish transfer* if the shop has
+   turned it on, which shows the shop's Whish number and a box for the
+   transfer reference. The total updates live as they change area.
 4. Lands on a receipt with an order number, everything they ordered, the
    address, and a **Confirm on WhatsApp** button pre-filled with the order
    number. The link is theirs to keep — it shows the live status as the order
@@ -398,6 +411,12 @@ processor, no online payment, no account to create.
 
 **What the owner does**
 
+- **Gets an email the moment an order lands** (when `RESEND_API_KEY` is set),
+  with the items, totals, phone, address, note and payment method — and a
+  button that opens that order in the dashboard to confirm or cancel it.
+  Replies go to the customer. The address is set in Dashboard → Website →
+  Order notifications; leave it empty to switch the emails off. Sending happens
+  after the response, so a mail outage can never cost an order.
 - **Orders** lists every order newest first, filterable by stage, showing the
   customer, phone, area and total at a glance.
 - Opening one shows the items, the full address, the customer's note, and
@@ -415,6 +434,9 @@ processor, no online payment, no account to create.
 - Free delivery over an amount, a minimum order, the note shown at checkout,
   and a switch that stops the website taking orders entirely (the cart
   disappears and the site points customers to WhatsApp instead).
+- Payment methods: cash on delivery is always on; Whish is a toggle plus the
+  number customers should send to and an optional instruction line. The
+  database refuses a Whish order if the shop hasn't enabled it.
 
 **Why the prices can't be tampered with**
 
@@ -442,6 +464,9 @@ means one more `payment_method` value and a payment step before
   checkout form is rate-limited per phone number and carries a honeypot field.
 - Customers' orders are unreadable to anonymous visitors; a receipt is reachable
   only with its unguessable token.
+- The mail API key is server-only and never reaches the browser; the
+  notification link points at the dashboard, which requires a sign-in, so the
+  email itself grants nothing.
 - All form input is validated with Zod on the server (lengths, emails, URLs,
   hex colours, currency codes, hostnames, price ranges).
 - Uploads are restricted by MIME type and size at three layers.
@@ -555,6 +580,15 @@ application build:
   receipt, and another business not seeing any of it.
 - 4 "ordering switched off" checks — cart hidden, cards falling back to
   WhatsApp, `/checkout` 404, and `place_order()` refusing a direct call.
+- 6 Whish checks — the option appearing only when enabled, the shop's number
+  shown, the reference stored on the order and surfaced in the dashboard, and
+  the database refusing Whish when the shop hasn't turned it on.
+- 14 order-email checks against a captured send — recipient, sender, API key,
+  subject, reply-to, phone, address, note, items, totals, payment method, and
+  a confirmation link that opens exactly that order in the dashboard; plus a
+  run with no mail configured, proving checkout is unaffected.
+- A contrast audit that measures every rendered text colour against its real
+  background on all public pages: all pass WCAG AA.
 - 5 media checks — upload, gallery visibility, picking a library image for an
   item, public rendering, hiding.
 - 10 RLS assertions (`supabase/tests/rls_checks.sql`) and 10 checkout
@@ -577,10 +611,11 @@ application build:
   replace the `PLACEHOLDER` demo values.
 - Roles beyond `owner` exist in the schema (`admin`, `editor`) but every role
   currently has the same permissions; narrowing them is a policy change.
-- Checkout is cash on delivery only; there is no card payment and no stock
-  tracking (an out-of-stock item is hidden rather than counted down).
-- Order confirmation is not emailed or SMS'd: the customer keeps the receipt
-  link and the owner calls or WhatsApps them, which is how these shops work.
-  Wiring an email or SMS provider would be an addition to `place_order()`.
+- Payment is cash on delivery or a Whish transfer the shop reconciles by hand
+  (the customer types the reference). There is no card processor and no stock
+  tracking — an out-of-stock item is hidden rather than counted down.
+- The *owner* is emailed on every order; the *customer* is not. They keep the
+  receipt link and get a phone call, which is how these shops work. Emailing
+  the customer too would be a second `sendEmail()` call in the same place.
 - Email delivery for password resets uses Supabase's built-in SMTP; configure
   a custom SMTP provider before relying on it in production.

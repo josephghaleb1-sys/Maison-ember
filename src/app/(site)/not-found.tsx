@@ -14,13 +14,13 @@ export default function SiteNotFound() {
       <div className="mt-8 flex flex-wrap justify-center gap-3">
         <Link
           href="/"
-          className="inline-flex h-11 items-center rounded-full bg-accent px-6 text-[0.8125rem] font-medium uppercase tracking-[0.14em] text-on-accent transition-colors hover:bg-accent-bright"
+          className="inline-flex h-11 items-center rounded-full bg-accent-solid px-6 text-[0.8125rem] font-medium uppercase tracking-[0.14em] text-on-accent transition-colors hover:bg-accent-bright"
         >
           Back home
         </Link>
         <Link
           href="/contact"
-          className="inline-flex h-11 items-center rounded-full border border-accent/50 px-6 text-[0.8125rem] font-medium uppercase tracking-[0.14em] text-accent transition-colors hover:bg-accent hover:text-on-accent"
+          className="inline-flex h-11 items-center rounded-full border border-accent/50 px-6 text-[0.8125rem] font-medium uppercase tracking-[0.14em] text-accent transition-colors hover:bg-accent-solid hover:text-on-accent"
         >
           Contact us
         </Link>

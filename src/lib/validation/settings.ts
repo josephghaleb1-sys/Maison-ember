@@ -84,6 +84,16 @@ export const websiteSettingsSchema = z.object({
     .optional()
     .default("USD"),
   show_prices: z.coerce.boolean().optional().default(false),
+  color_mode: z.enum(["dark", "light"]).optional().default("dark"),
+  order_email: z
+    .string()
+    .trim()
+    .optional()
+    .default("")
+    .refine(
+      (value) => value === "" || z.email().safeParse(value).success,
+      "Enter a valid email address, or leave it empty.",
+    ),
 });
 
 export type WebsiteSettingsInput = z.infer<typeof websiteSettingsSchema>;

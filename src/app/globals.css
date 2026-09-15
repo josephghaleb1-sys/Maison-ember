@@ -18,16 +18,38 @@
    =========================================================================== */
 
 :root {
+  /* Defaults for anything rendered outside a business wrapper (the admin
+     shell). The site layout overrides all of these per business, including the
+     whole neutral scale — see src/lib/theme.ts. */
   --background: #08060a;
-  --foreground: #f6efe3;
+  --foreground: #f8f3ea;
 
-  /* Overridden per business by the site layout's inline style. */
   --brand-primary: #6a0f1f;
   --brand-primary-rgb: 106, 15, 31;
+  --brand-primary-text: #d98a99;
   --brand-secondary: #d4af37;
   --brand-secondary-rgb: 212, 175, 55;
+  --brand-accent-text: #d4af37;
+  --brand-accent-display: #d4af37;
   --brand-on-primary: #fdf8ef;
   --brand-on-secondary: #14100f;
+  --stage-mix: 78%;
+  --stage-mix-soft: 42%;
+
+  /* Neutral scale, semantic rather than literal: 50 is nearest the
+     foreground, 950 nearest the background. Light-mode businesses invert it,
+     so components never need to know which mode they are in. */
+  --ink-50: #f8f3ea;
+  --ink-100: #ece4d6;
+  --ink-200: #d6ccbd;
+  --ink-300: #b4a99a;
+  --ink-400: #8d8276;
+  --ink-500: #6d6359;
+  --ink-600: #514942;
+  --ink-700: #3a332f;
+  --ink-800: #262120;
+  --ink-900: #151113;
+  --ink-950: #08060a;
 }
 
 @theme inline {
@@ -38,28 +60,34 @@
 
   /* ---- Brand (runtime, per business) ------------------------------------ */
   --color-brand: var(--brand-primary);
-  --color-brand-deep: color-mix(in oklab, var(--brand-primary) 62%, #07050a);
-  --color-brand-soft: color-mix(in oklab, var(--brand-primary) 30%, #07050a);
+  --color-brand-deep: color-mix(in oklab, var(--brand-primary) 62%, var(--ink-950));
+  --color-brand-soft: color-mix(in oklab, var(--brand-primary) 30%, var(--ink-950));
+  --color-brand-text: var(--brand-primary-text);
   --color-on-brand: var(--brand-on-primary);
 
-  --color-accent: var(--brand-secondary);
+  /* `accent` is the contrast-checked value, safe as text on this business's
+     surface; `accent-solid` is the raw brand colour, for filled buttons and
+     badges where the foreground is computed separately. */
+  --color-accent: var(--brand-accent-text);
+  --color-accent-display: var(--brand-accent-display);
+  --color-accent-solid: var(--brand-secondary);
   --color-accent-bright: color-mix(in oklab, var(--brand-secondary) 58%, white);
-  --color-accent-deep: color-mix(in oklab, var(--brand-secondary) 70%, #0b0709);
-  --color-accent-muted: color-mix(in oklab, var(--brand-secondary) 40%, #0b0709);
+  --color-accent-deep: color-mix(in oklab, var(--brand-secondary) 70%, var(--ink-950));
+  --color-accent-muted: color-mix(in oklab, var(--brand-secondary) 40%, var(--ink-950));
   --color-on-accent: var(--brand-on-secondary);
 
-  /* ---- Neutrals (fixed) -------------------------------------------------- */
-  --color-ink-50: #f8f3ea;
-  --color-ink-100: #ece4d6;
-  --color-ink-200: #d6ccbd;
-  --color-ink-300: #b4a99a;
-  --color-ink-400: #8d8276;
-  --color-ink-500: #6d6359;
-  --color-ink-600: #514942;
-  --color-ink-700: #3a332f;
-  --color-ink-800: #262120;
-  --color-ink-900: #151113;
-  --color-ink-950: #08060a;
+  /* ---- Neutrals (per business: dark or light, see src/lib/theme.ts) ------ */
+  --color-ink-50: var(--ink-50);
+  --color-ink-100: var(--ink-100);
+  --color-ink-200: var(--ink-200);
+  --color-ink-300: var(--ink-300);
+  --color-ink-400: var(--ink-400);
+  --color-ink-500: var(--ink-500);
+  --color-ink-600: var(--ink-600);
+  --color-ink-700: var(--ink-700);
+  --color-ink-800: var(--ink-800);
+  --color-ink-900: var(--ink-900);
+  --color-ink-950: var(--ink-950);
 }
 
 body {
@@ -96,9 +124,9 @@ li {
     background-image: linear-gradient(
       100deg,
       var(--color-accent-deep) 0%,
-      var(--color-accent) 22%,
+      var(--color-accent-display) 22%,
       var(--color-accent-bright) 38%,
-      var(--color-accent) 55%,
+      var(--color-accent-display) 55%,
       var(--color-accent-deep) 100%
     );
     background-size: 220% 100%;

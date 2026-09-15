@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import type { WebsiteSettings } from "@/lib/database.types";
+import type { ColorMode, WebsiteSettings } from "@/lib/database.types";
 import type { FormState } from "@/lib/actions/auth";
 import { updateWebsiteSettings } from "@/lib/actions/settings";
 import { Button } from "@/components/ui/button";
@@ -58,14 +58,69 @@ export function WebsiteForm({ settings }: { settings: WebsiteSettings | null }) 
   const [state, formAction, isPending] = useActionState(updateWebsiteSettings, initialState);
   const [primary, setPrimary] = useState(settings?.primary_color || DEFAULT_PRIMARY);
   const [secondary, setSecondary] = useState(settings?.secondary_color || DEFAULT_SECONDARY);
+  const [mode, setMode] = useState<ColorMode>(settings?.color_mode === "light" ? "light" : "dark");
 
   return (
     <form action={formAction} className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Brand colours</CardTitle>
+          <CardTitle>Look</CardTitle>
         </CardHeader>
         <CardBody className="space-y-5">
+          <div>
+            <Label htmlFor="color_mode">Website background</Label>
+            <div className="mt-1 grid grid-cols-2 gap-3">
+              {(
+                [
+                  {
+                    value: "light" as const,
+                    title: "Light",
+                    hint: "Ivory and blush. Best for pale product photos — skincare, beauty, jewellery.",
+                    swatch: "#fbf6f3",
+                    ink: "#1b1211",
+                  },
+                  {
+                    value: "dark" as const,
+                    title: "Dark",
+                    hint: "Near-black and deep colour. Best for rich, moody photography.",
+                    swatch: "#08060a",
+                    ink: "#f8f3ea",
+                  },
+                ]
+              ).map((option) => (
+                <label
+                  key={option.value}
+                  className={`cursor-pointer rounded-xl border p-4 transition-colors ${
+                    mode === option.value
+                      ? "border-accent bg-accent/10"
+                      : "border-ink-700 hover:border-ink-600"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="color_mode"
+                    value={option.value}
+                    checked={mode === option.value}
+                    onChange={() => setMode(option.value)}
+                    className="sr-only"
+                  />
+                  <span
+                    className="flex h-14 items-center justify-center rounded-lg border border-ink-700 font-display text-lg"
+                    style={{ background: option.swatch, color: option.ink }}
+                  >
+                    Aa
+                  </span>
+                  <span className="mt-2.5 block text-sm font-medium text-ink-50">
+                    {option.title}
+                  </span>
+                  <span className="mt-0.5 block text-xs leading-relaxed text-ink-500">
+                    {option.hint}
+                  </span>
+                </label>
+              ))}
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
             <ColorField
               name="primary_color"
@@ -88,17 +143,24 @@ export function WebsiteForm({ settings }: { settings: WebsiteSettings | null }) 
           {/* Live preview of exactly what the site will use. */}
           <div
             className="overflow-hidden rounded-xl border border-ink-800"
-            style={{ background: `linear-gradient(120deg, ${primary} 0%, #0b0709 75%)` }}
+            style={{
+              background: `linear-gradient(120deg, ${primary} 0%, ${
+                mode === "light" ? "#fbf6f3" : "#0b0709"
+              } 75%)`,
+            }}
           >
             <div className="flex flex-wrap items-center justify-between gap-3 p-5">
               <div>
                 <p
                   className="text-[0.6875rem] uppercase tracking-[0.3em]"
-                  style={{ color: secondary }}
+                  style={{ color: mode === "light" ? primary : secondary }}
                 >
                   Preview
                 </p>
-                <p className="mt-1 font-display text-2xl text-ink-50">
+                <p
+                  className="mt-1 font-display text-2xl"
+                  style={{ color: mode === "light" ? "#1b1211" : "#f8f3ea" }}
+                >
                   {settings?.business_name || "Your business"}
                 </p>
               </div>
@@ -204,6 +266,26 @@ export function WebsiteForm({ settings }: { settings: WebsiteSettings | null }) 
             />
             Show prices on the public website
           </label>
+        </CardBody>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Order notifications</CardTitle>
+        </CardHeader>
+        <CardBody>
+          <Label htmlFor="order_email">Send new orders to</Label>
+          <Input
+            id="order_email"
+            name="order_email"
+            type="email"
+            defaultValue={settings?.order_email}
+            placeholder="you@example.com"
+          />
+          <p className="mt-1 text-xs text-ink-500">
+            Every new order is emailed here with the customer&apos;s details and a button that
+            opens it in this dashboard to confirm or cancel. Leave empty to turn the emails off.
+          </p>
         </CardBody>
       </Card>
 

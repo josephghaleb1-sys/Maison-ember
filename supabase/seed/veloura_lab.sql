@@ -49,7 +49,7 @@ begin
   insert into public.website_settings (
     business_id, business_name, tagline, about_text,
     hero_title, hero_subtitle, hero_cta_label,
-    primary_color, secondary_color,
+    primary_color, secondary_color, color_mode,
     seo_title, seo_description,
     phone, whatsapp, email, address, currency, show_prices,
     hours, social_links
@@ -64,8 +64,9 @@ begin
     'The Touch of Luxury',
     'Premium beauty tools and skincare, curated for everyday ritual — delivered across Lebanon with cash on delivery.',
     'Shop the collection',
-    '#6b1020',
-    '#d8b26a',
+    '#7d1230',                             -- wine, from the logo's velvet
+    '#b8893b',                             -- gold, from the wordmark
+    'light',                               -- ivory surface: the product photography is pale
     'Veloura Lab | Premium Beauty & Skincare',
     'Discover beauty, skincare, makeup, and self-care essentials at Veloura Lab. Shop quality beauty products in Lebanon and find your new favorites.',
     '+961 70 349 245',
@@ -87,6 +88,7 @@ begin
     hero_cta_label = excluded.hero_cta_label,
     primary_color = excluded.primary_color,
     secondary_color = excluded.secondary_color,
+    color_mode = excluded.color_mode,
     seo_title = excluded.seo_title,
     seo_description = excluded.seo_description,
     phone = excluded.phone,
@@ -191,7 +193,13 @@ begin
      set checkout_enabled = true,
          free_delivery_over = 75,          -- PLACEHOLDER
          min_order_total = 0,
-         order_notice = 'Cash on delivery all over Lebanon. We call to confirm every order before it ships — usually within a few hours.'
+         order_notice = 'Cash on delivery all over Lebanon. We call to confirm every order before it ships — usually within a few hours.',
+         -- PLACEHOLDER: set the real inbox in Dashboard -> Website, and the
+         -- real Whish number in Dashboard -> Delivery, before going live.
+         order_email = 'orders@velouralab.example',
+         whish_enabled = true,
+         whish_number = '70 349 245',
+         whish_note = 'Send the exact total on Whish, then add the reference below so we can match your transfer.'
    where business_id = biz_id;
 end;
 $$;

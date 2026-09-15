@@ -62,7 +62,7 @@ export function Hero({
             className="absolute inset-0 -z-10"
             style={{
               background:
-                "linear-gradient(105deg, rgba(8,6,10,0.92) 0%, rgba(8,6,10,0.72) 45%, rgba(8,6,10,0.45) 100%)",
+                "linear-gradient(105deg, color-mix(in srgb, var(--ink-950) 92%, transparent) 0%, color-mix(in srgb, var(--ink-950) 70%, transparent) 45%, color-mix(in srgb, var(--ink-950) 40%, transparent) 100%)",
             }}
             aria-hidden
           />
@@ -79,20 +79,25 @@ export function Hero({
             className="absolute inset-0"
             style={{
               background:
-                "radial-gradient(120% 90% at 78% 12%, color-mix(in oklab, var(--brand-primary) 78%, #08060a) 0%, #08060a 62%), radial-gradient(90% 70% at 10% 100%, color-mix(in oklab, var(--brand-primary) 42%, #08060a) 0%, transparent 70%)",
+                "radial-gradient(120% 90% at 78% 12%, color-mix(in oklab, var(--brand-primary) var(--stage-mix), var(--ink-950)) 0%, var(--ink-950) 62%), radial-gradient(90% 70% at 10% 100%, color-mix(in oklab, var(--brand-primary) var(--stage-mix-soft), var(--ink-950)) 0%, transparent 70%)",
             }}
           />
           <div
-            className="absolute inset-0 opacity-[0.5]"
+            className="absolute inset-0 opacity-[0.45] mix-blend-soft-light"
             style={{
               background:
-                "repeating-linear-gradient(104deg, rgba(255,255,255,0.035) 0px, rgba(255,255,255,0) 3px, rgba(0,0,0,0.05) 7px, rgba(255,255,255,0) 12px)",
+                "repeating-linear-gradient(104deg, rgba(255,255,255,0.06) 0px, rgba(255,255,255,0) 3px, rgba(0,0,0,0.05) 7px, rgba(255,255,255,0) 12px)",
             }}
           />
         </div>
       )}
 
-      <DustField rgb={theme.secondaryRgb} density={hasPhoto ? 22 : 38} className="-z-10" />
+      <DustField
+        rgb={theme.mode === "light" ? theme.accentTextRgb : theme.secondaryRgb}
+        brightRgb={theme.mode === "light" ? theme.primaryRgb : undefined}
+        density={hasPhoto ? 22 : 38}
+        className="-z-10"
+      />
 
       {/* Vignette keeps the copy readable over either backdrop. */}
       <div
@@ -158,7 +163,7 @@ export function Hero({
         aria-hidden
       >
         <span className="flex h-10 w-6 items-start justify-center rounded-full border border-accent/35 p-1.5">
-          <span className="animate-bob block size-1.5 rounded-full bg-accent" />
+          <span className="animate-bob block size-1.5 rounded-full bg-accent-solid" />
         </span>
       </div>
 

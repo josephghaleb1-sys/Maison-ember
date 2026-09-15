@@ -35,14 +35,14 @@ export default function SiteError({
         <button
           type="button"
           onClick={reset}
-          className="inline-flex h-11 items-center gap-2 rounded-full bg-accent px-6 text-[0.8125rem] font-medium uppercase tracking-[0.14em] text-on-accent transition-colors hover:bg-accent-bright"
+          className="inline-flex h-11 items-center gap-2 rounded-full bg-accent-solid px-6 text-[0.8125rem] font-medium uppercase tracking-[0.14em] text-on-accent transition-colors hover:bg-accent-bright"
         >
           <RefreshCw className="size-4" aria-hidden />
           Try again
         </button>
         <Link
           href="/contact"
-          className="inline-flex h-11 items-center rounded-full border border-accent/50 px-6 text-[0.8125rem] font-medium uppercase tracking-[0.14em] text-accent transition-colors hover:bg-accent hover:text-on-accent"
+          className="inline-flex h-11 items-center rounded-full border border-accent/50 px-6 text-[0.8125rem] font-medium uppercase tracking-[0.14em] text-accent transition-colors hover:bg-accent-solid hover:text-on-accent"
         >
           Contact us
         </Link>

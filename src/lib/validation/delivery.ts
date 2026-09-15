@@ -26,7 +26,23 @@ export const checkoutSettingsSchema = z.object({
     .optional()
     .default(0),
   order_notice: z.string().trim().max(500).optional().default(""),
-});
+  whish_enabled: z.coerce.boolean().optional().default(false),
+  whish_number: z
+    .string()
+    .trim()
+    .max(40)
+    .optional()
+    .default("")
+    .refine(
+      (value) => value === "" || value.replace(/\D/g, "").length >= 7,
+      "Enter the Whish number people should send to.",
+    ),
+  whish_note: z.string().trim().max(300).optional().default(""),
+})
+  .refine((data) => !data.whish_enabled || data.whish_number !== "", {
+    message: "Add your Whish number before turning Whish payments on.",
+    path: ["whish_number"],
+  });
 
 export type DeliveryZoneInput = z.infer<typeof deliveryZoneSchema>;
 export type CheckoutSettingsInput = z.infer<typeof checkoutSettingsSchema>;

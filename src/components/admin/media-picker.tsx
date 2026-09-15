@@ -77,7 +77,7 @@ export function MediaPicker({
                         className="object-cover"
                       />
                       {isSelected && (
-                        <span className="absolute right-1 top-1 flex size-5 items-center justify-center rounded-full bg-accent text-on-accent">
+                        <span className="absolute right-1 top-1 flex size-5 items-center justify-center rounded-full bg-accent-solid text-on-accent">
                           <Check className="size-3" aria-hidden />
                         </span>
                       )}

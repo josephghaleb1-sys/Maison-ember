@@ -64,12 +64,13 @@ function spawn(width: number, height: number, fromBottom: boolean): Mote {
 
 export function DustField({
   rgb = "212, 175, 55",
-  brightRgb = "255, 244, 214",
+  brightRgb,
   density = 34,
   className = "",
 }: {
   /** "r, g, b" of the drifting motes — usually the brand's accent colour. */
   rgb?: string;
+  /** Colour of the occasional brighter mote; defaults to a warm near-white. */
   brightRgb?: string;
   /** Mote count at ~1280px wide; scaled down proportionally on phones. */
   density?: number;
@@ -86,7 +87,7 @@ export function DustField({
     if (!ctx) return;
 
     const sprite = makeSprite(rgb, 0.9);
-    const brightSprite = makeSprite(brightRgb, 1);
+    const brightSprite = makeSprite(brightRgb ?? "255, 244, 214", 1);
 
     let width = 0;
     let height = 0;

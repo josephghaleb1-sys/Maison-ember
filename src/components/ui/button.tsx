@@ -9,11 +9,11 @@ type Size = "sm" | "md" | "lg";
 
 const variantClasses: Record<Variant, string> = {
   primary:
-    "bg-accent text-on-accent hover:bg-accent-bright focus-visible:outline-accent disabled:opacity-60",
+    "bg-accent-solid text-on-accent hover:bg-accent-bright focus-visible:outline-accent disabled:opacity-60",
   secondary:
     "bg-brand text-on-brand hover:bg-brand-deep focus-visible:outline-brand disabled:opacity-60",
   outline:
-    "border border-accent/45 text-accent hover:bg-accent hover:text-on-accent focus-visible:outline-accent disabled:opacity-50",
+    "border border-accent/45 text-accent hover:bg-accent-solid hover:text-on-accent focus-visible:outline-accent disabled:opacity-50",
   ghost: "text-ink-200 hover:bg-ink-800 focus-visible:outline-ink-400 disabled:opacity-50",
   danger: "bg-red-600 text-white hover:bg-red-500 focus-visible:outline-red-600 disabled:opacity-60",
 };

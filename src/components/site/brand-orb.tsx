@@ -64,10 +64,13 @@ export function BrandOrb({ monogram }: { monogram: string }) {
       aria-hidden
     >
       {/* Ambient light cast behind the orb */}
-      <div className="animate-ambient-glow absolute inset-[12%] rounded-full bg-brand/45 blur-[70px]" />
       <div
-        className="animate-ambient-glow absolute inset-[26%] rounded-full bg-accent/25 blur-[60px]"
-        style={{ animationDelay: "1.4s" }}
+        className="animate-ambient-glow absolute inset-[14%] rounded-full bg-brand/40 blur-[70px]"
+        style={{ opacity: "var(--glow-opacity, 1)" }}
+      />
+      <div
+        className="animate-ambient-glow absolute inset-[28%] rounded-full bg-accent-solid/25 blur-[60px]"
+        style={{ animationDelay: "1.4s", opacity: "var(--glow-opacity, 1)" }}
       />
 
       <div
@@ -94,7 +97,8 @@ export function BrandOrb({ monogram }: { monogram: string }) {
                   "polygon(50% 0%, 82% 28%, 100% 34%, 50% 100%, 0% 34%, 18% 28%)",
                 background:
                   "conic-gradient(from 210deg at 50% 38%, color-mix(in oklab, var(--brand-secondary) 55%, #120a06) 0deg, var(--brand-secondary) 70deg, color-mix(in oklab, var(--brand-secondary) 72%, white) 130deg, var(--brand-secondary) 190deg, color-mix(in oklab, var(--brand-secondary) 45%, #120a06) 260deg, color-mix(in oklab, var(--brand-secondary) 70%, white) 320deg, color-mix(in oklab, var(--brand-secondary) 55%, #120a06) 360deg)",
-                filter: "drop-shadow(0 12px 28px rgba(var(--brand-secondary-rgb), 0.35))",
+                filter:
+                  "drop-shadow(0 10px 24px color-mix(in srgb, var(--brand-secondary) calc(30% * var(--glow-opacity, 1)), transparent))",
               }}
             />
           </div>
@@ -104,7 +108,7 @@ export function BrandOrb({ monogram }: { monogram: string }) {
             className="absolute inset-0 flex items-center justify-center"
             style={{ transform: "translateZ(104px)" }}
           >
-            <span className="font-display text-[clamp(2.2rem,7vw,3.6rem)] font-semibold tracking-[0.3em] text-ink-50/95 drop-shadow-[0_2px_18px_rgba(0,0,0,0.55)]">
+            <span className="font-display text-[clamp(2.2rem,7vw,3.6rem)] font-semibold tracking-[0.3em] text-ink-950/85 drop-shadow-[0_2px_14px_color-mix(in_srgb,var(--ink-50)_45%,transparent)]">
               {monogram}
             </span>
           </div>
@@ -112,7 +116,10 @@ export function BrandOrb({ monogram }: { monogram: string }) {
       </div>
 
       {/* Reflection on the "floor" below the orb */}
-      <div className="absolute inset-x-[18%] bottom-[2%] h-6 rounded-[100%] bg-accent/20 blur-xl" />
+      <div
+        className="absolute inset-x-[18%] bottom-[2%] h-6 rounded-[100%] bg-accent-solid/20 blur-xl"
+        style={{ opacity: "var(--glow-opacity, 1)" }}
+      />
     </div>
   );
 }
@@ -145,7 +152,8 @@ function Ring({
         style={{
           inset,
           opacity,
-          boxShadow: "0 0 24px rgba(var(--brand-secondary-rgb), 0.35)",
+          boxShadow:
+            "0 0 24px color-mix(in srgb, var(--brand-secondary) calc(32% * var(--glow-opacity, 1)), transparent)",
           animation: `spin-y ${duration} linear infinite${reverse ? " reverse" : ""}`,
         }}
       >

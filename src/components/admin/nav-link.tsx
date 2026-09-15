@@ -29,7 +29,7 @@ export function DesktopNavLink({ href, label, exact, icon }: NavLinkProps) {
       className={cn(
         "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
         active
-          ? "bg-accent text-on-accent"
+          ? "bg-accent-solid text-on-accent"
           : "text-ink-300 hover:bg-ink-800 hover:text-ink-50",
       )}
     >

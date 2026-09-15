@@ -104,7 +104,9 @@ export default async function OrderConfirmationPage(props: PageProps<"/order/[to
             </dd>
           </div>
           <div className="flex items-baseline justify-between border-t border-ink-800 pt-3">
-            <dt className="uppercase tracking-[0.14em] text-ink-300">Pay on delivery</dt>
+            <dt className="uppercase tracking-[0.14em] text-ink-300">
+              {order.payment_method === "whish" ? "Paid by Whish" : "Pay on delivery"}
+            </dt>
             <dd className="font-display text-2xl text-accent">
               {formatPrice(order.total, currency)}
             </dd>
@@ -135,7 +137,12 @@ export default async function OrderConfirmationPage(props: PageProps<"/order/[to
           <ol className="mt-3 space-y-2 text-ink-300">
             <li>1. We call you to confirm the order.</li>
             <li>2. It ships with our courier.</li>
-            <li>3. You pay cash when it arrives.</li>
+            <li>
+              3.{" "}
+              {order.payment_method === "whish"
+                ? "Your Whish transfer covers it — nothing to pay the courier."
+                : "You pay cash when it arrives."}
+            </li>
           </ol>
           {settings?.order_notice && (
             <p className="mt-3 text-xs leading-relaxed text-ink-500">{settings.order_notice}</p>

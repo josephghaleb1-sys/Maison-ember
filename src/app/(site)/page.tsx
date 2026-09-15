@@ -215,7 +215,7 @@ export default async function HomePage() {
           className="absolute inset-0"
           style={{
             background:
-              "radial-gradient(90% 120% at 50% 0%, color-mix(in oklab, var(--brand-primary) 62%, #08060a) 0%, #08060a 70%)",
+              "radial-gradient(90% 120% at 50% 0%, color-mix(in oklab, var(--brand-primary) var(--stage-mix), var(--ink-950)) 0%, var(--ink-950) 70%)",
           }}
           aria-hidden
         />

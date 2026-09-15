@@ -168,6 +168,8 @@ export async function updateWebsiteSettings(
       seo_description: parsed.data.seo_description,
       currency: parsed.data.currency,
       show_prices: parsed.data.show_prices,
+      color_mode: parsed.data.color_mode,
+      order_email: parsed.data.order_email,
       logo_path: images.logo,
       hero_image_path: images.hero,
       og_image_path: images.og,

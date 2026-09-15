@@ -125,8 +125,16 @@ export default async function OrderDetailPage(props: PageProps<"/admin/orders/[i
               </p>
             )}
             <p className="text-xs uppercase tracking-[0.14em] text-ink-500">
-              Payment: cash on delivery
+              Payment: {order.payment_method === "whish" ? "Whish transfer" : "cash on delivery"}
             </p>
+            {order.payment_reference && (
+              <p className="text-sm text-ink-200">
+                <span className="text-xs uppercase tracking-[0.14em] text-ink-500">
+                  Whish reference:
+                </span>{" "}
+                {order.payment_reference}
+              </p>
+            )}
           </CardBody>
         </Card>
       </div>

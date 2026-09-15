@@ -122,6 +122,9 @@ export async function updateCheckoutSettings(
     free_delivery_over: formData.get("free_delivery_over"),
     min_order_total: formData.get("min_order_total") || 0,
     order_notice: formData.get("order_notice"),
+    whish_enabled: formData.get("whish_enabled") === "on",
+    whish_number: formData.get("whish_number"),
+    whish_note: formData.get("whish_note"),
   });
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Check the form." };
@@ -142,6 +145,9 @@ export async function updateCheckoutSettings(
       free_delivery_over: parsed.data.free_delivery_over,
       min_order_total: parsed.data.min_order_total,
       order_notice: parsed.data.order_notice,
+      whish_enabled: parsed.data.whish_enabled,
+      whish_number: parsed.data.whish_number,
+      whish_note: parsed.data.whish_note,
     },
     { onConflict: "business_id" },
   );

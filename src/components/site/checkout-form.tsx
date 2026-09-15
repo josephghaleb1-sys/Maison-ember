@@ -3,7 +3,7 @@
 import { useActionState, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Banknote, Loader2, ShieldCheck, ShoppingBag, Truck } from "lucide-react";
+import { Banknote, Loader2, ShieldCheck, ShoppingBag, Smartphone, Truck } from "lucide-react";
 import { useCart } from "@/components/site/cart/cart-context";
 import { buildCartView, resolveDeliveryFee, type CatalogEntry } from "@/lib/cart";
 import { placeOrder } from "@/lib/actions/orders";
@@ -47,6 +47,9 @@ export function CheckoutForm({
   orderNotice,
   catalogPath,
   catalogLabel,
+  whishEnabled,
+  whishNumber,
+  whishNote,
 }: {
   catalog: CatalogEntry[];
   zones: DeliveryZone[];
@@ -56,10 +59,14 @@ export function CheckoutForm({
   orderNotice: string;
   catalogPath: string;
   catalogLabel: string;
+  whishEnabled: boolean;
+  whishNumber: string;
+  whishNote: string;
 }) {
   const { lines, ready } = useCart();
   const [state, formAction, isPending] = useActionState(placeOrder, initialState);
   const [zoneId, setZoneId] = useState(zones[0]?.id ?? "");
+  const [payment, setPayment] = useState<"cod" | "whish">("cod");
 
   const { items, subtotal } = useMemo(() => buildCartView(lines, catalog), [lines, catalog]);
   const zone = zones.find((candidate) => candidate.id === zoneId) ?? null;
@@ -83,7 +90,7 @@ export function CheckoutForm({
         <p className="text-ink-300">Your cart is empty.</p>
         <Link
           href={catalogPath}
-          className="rounded-full border border-accent/50 px-6 py-2.5 text-xs font-medium uppercase tracking-[0.16em] text-accent transition-colors hover:bg-accent hover:text-on-accent"
+          className="rounded-full border border-accent/50 px-6 py-2.5 text-xs font-medium uppercase tracking-[0.16em] text-accent transition-colors hover:bg-accent-solid hover:text-on-accent"
         >
           Browse {catalogLabel.toLowerCase()}
         </Link>
@@ -219,24 +226,91 @@ export function CheckoutForm({
 
         <section>
           <h2 className="eyebrow text-accent">3 · Payment</h2>
-          <label className="mt-5 flex cursor-pointer items-start gap-4 rounded-2xl border border-accent/40 bg-brand/10 p-5">
-            <input
-              type="radio"
-              name="payment_method"
-              value="cod"
-              defaultChecked
-              className="mt-1 accent-[var(--brand-secondary)]"
-            />
-            <span>
-              <span className="flex items-center gap-2 font-medium text-ink-50">
-                <Banknote className="size-4 text-accent" aria-hidden />
-                Cash on delivery
+          <div className="mt-5 space-y-3">
+            <label
+              className={`flex cursor-pointer items-start gap-4 rounded-2xl border p-5 transition-colors ${
+                payment === "cod" ? "border-accent/50 bg-brand/10" : "border-ink-800"
+              }`}
+            >
+              <input
+                type="radio"
+                name="payment_method"
+                value="cod"
+                checked={payment === "cod"}
+                onChange={() => setPayment("cod")}
+                className="mt-1 accent-[var(--brand-secondary)]"
+              />
+              <span>
+                <span className="flex items-center gap-2 font-medium text-ink-50">
+                  <Banknote className="size-4 text-accent" aria-hidden />
+                  Cash on delivery
+                </span>
+                <span className="mt-1 block text-sm text-ink-300">
+                  Pay the courier in cash when your order arrives. No card needed.
+                </span>
               </span>
-              <span className="mt-1 block text-sm text-ink-300">
-                Pay the courier in cash when your order arrives. No card needed.
-              </span>
-            </span>
-          </label>
+            </label>
+
+            {whishEnabled && (
+              <label
+                className={`flex cursor-pointer items-start gap-4 rounded-2xl border p-5 transition-colors ${
+                  payment === "whish" ? "border-accent/50 bg-brand/10" : "border-ink-800"
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="payment_method"
+                  value="whish"
+                  checked={payment === "whish"}
+                  onChange={() => setPayment("whish")}
+                  className="mt-1 accent-[var(--brand-secondary)]"
+                />
+                <span className="min-w-0 flex-1">
+                  <span className="flex items-center gap-2 font-medium text-ink-50">
+                    <Smartphone className="size-4 text-accent" aria-hidden />
+                    Whish transfer
+                  </span>
+                  <span className="mt-1 block text-sm text-ink-300">
+                    Send the total on Whish, then add the transfer reference below.
+                  </span>
+
+                  {payment === "whish" && (
+                    <span className="mt-4 block rounded-xl border border-accent/30 bg-ink-900/60 p-4">
+                      <span className="block text-xs uppercase tracking-[0.14em] text-ink-500">
+                        Send to
+                      </span>
+                      <span className="mt-1 block font-display text-2xl text-accent">
+                        {whishNumber || "Ask us for the number"}
+                      </span>
+                      {whishNote && (
+                        <span className="mt-2 block text-xs leading-relaxed text-ink-400">
+                          {whishNote}
+                        </span>
+                      )}
+                      <span className="mt-4 block">
+                        <label
+                          htmlFor="payment_reference"
+                          className="mb-1.5 block text-xs uppercase tracking-[0.14em] text-ink-400"
+                        >
+                          Transfer reference
+                        </label>
+                        <input
+                          id="payment_reference"
+                          name="payment_reference"
+                          maxLength={120}
+                          placeholder="The number Whish shows after you send"
+                          className="block w-full rounded-xl border border-ink-700 bg-ink-900/70 px-4 py-3 text-base text-ink-50 placeholder:text-ink-600 focus:border-accent focus:outline focus:outline-2 focus:outline-accent/40"
+                        />
+                        <span className="mt-1.5 block text-xs text-ink-500">
+                          Optional — you can also send us the screenshot on WhatsApp.
+                        </span>
+                      </span>
+                    </span>
+                  )}
+                </span>
+              </label>
+            )}
+          </div>
         </section>
       </div>
 
@@ -262,7 +336,7 @@ export function CheckoutForm({
                       <ShoppingBag className="size-4" aria-hidden />
                     </span>
                   )}
-                  <span className="absolute -right-1 -top-1 flex size-5 items-center justify-center rounded-full bg-accent text-[0.625rem] font-semibold text-on-accent">
+                  <span className="absolute -right-1 -top-1 flex size-5 items-center justify-center rounded-full bg-accent-solid text-[0.625rem] font-semibold text-on-accent">
                     {item.quantity}
                   </span>
                 </div>
@@ -312,7 +386,7 @@ export function CheckoutForm({
           <button
             type="submit"
             disabled={isPending || belowMinimum || zones.length === 0}
-            className="mt-5 flex h-13 w-full items-center justify-center gap-2 rounded-full bg-accent text-sm font-semibold uppercase tracking-[0.16em] text-on-accent transition-colors hover:bg-accent-bright disabled:cursor-not-allowed disabled:opacity-60"
+            className="mt-5 flex h-13 w-full items-center justify-center gap-2 rounded-full bg-accent-solid text-sm font-semibold uppercase tracking-[0.16em] text-on-accent transition-colors hover:bg-accent-bright disabled:cursor-not-allowed disabled:opacity-60"
           >
             {isPending && <Loader2 className="size-4 animate-spin" aria-hidden />}
             {isPending ? "Placing order…" : "Confirm order"}
@@ -327,7 +401,9 @@ export function CheckoutForm({
             </li>
             <li className="flex items-center gap-2">
               <ShieldCheck className="size-3.5 text-accent/70" aria-hidden />
-              No payment online — you pay on delivery
+              {payment === "whish"
+                ? "Pay by Whish transfer — no card details taken"
+                : "No payment online — you pay on delivery"}
             </li>
           </ul>
 

@@ -18,7 +18,7 @@ export function CartButton({ label = "Cart" }: { label?: string }) {
       {/* Only render the badge after the stored cart is read, so the server
           and client markup agree on the first paint. */}
       {ready && count > 0 && (
-        <span className="absolute -right-1 -top-1 flex min-w-5 items-center justify-center rounded-full bg-accent px-1 text-[0.6875rem] font-semibold leading-5 text-on-accent">
+        <span className="absolute -right-1 -top-1 flex min-w-5 items-center justify-center rounded-full bg-accent-solid px-1 text-[0.6875rem] font-semibold leading-5 text-on-accent">
           {count > 99 ? "99+" : count}
         </span>
       )}

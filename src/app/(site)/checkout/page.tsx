@@ -55,6 +55,9 @@ export default async function CheckoutPage() {
         orderNotice={settings?.order_notice ?? ""}
         catalogPath={preset.catalogPath}
         catalogLabel={preset.catalogLabel}
+        whishEnabled={(settings?.whish_enabled ?? false) && Boolean(settings?.whish_number)}
+        whishNumber={settings?.whish_number ?? ""}
+        whishNote={settings?.whish_note ?? ""}
       />
     </Section>
   );

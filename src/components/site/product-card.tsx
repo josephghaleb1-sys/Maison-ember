@@ -22,7 +22,9 @@ function placeholderBackground(id: string): string {
   const x = 30 + seed * 40;
   const y = 28 + (1 - seed) * 30;
   const strength = 42 + seed * 26;
-  return `radial-gradient(70% 60% at ${x}% ${y}%, color-mix(in oklab, var(--brand-primary) ${strength}%, #0b0709), #0b0709)`;
+  // Mixes the brand colour into the business's own surface, so the fallback
+  // tile suits a light site as readily as a dark one.
+  return `radial-gradient(70% 60% at ${x}% ${y}%, color-mix(in oklab, var(--brand-primary) calc(${strength}% * 0.55 + var(--stage-mix) * 0.45), var(--ink-900)), var(--ink-900))`;
 }
 
 interface ProductCardProps {

@@ -90,7 +90,7 @@ export function SiteHeader({
                   {link.label}
                   <span
                     className={cn(
-                      "absolute -bottom-0.5 left-0 h-px w-full origin-left bg-accent transition-transform duration-300",
+                      "absolute -bottom-0.5 left-0 h-px w-full origin-left bg-accent-solid transition-transform duration-300",
                       active ? "scale-x-100" : "scale-x-0",
                     )}
                     aria-hidden
@@ -103,7 +103,7 @@ export function SiteHeader({
           <div className="flex items-center gap-2">
             <Link
               href={ctaHref}
-              className="hidden rounded-full border border-accent/50 px-5 py-2 text-[0.75rem] font-medium uppercase tracking-[0.18em] text-accent transition-colors hover:bg-accent hover:text-on-accent lg:inline-flex"
+              className="hidden rounded-full border border-accent/50 px-5 py-2 text-[0.75rem] font-medium uppercase tracking-[0.18em] text-accent transition-colors hover:bg-accent-solid hover:text-on-accent lg:inline-flex"
             >
               {ctaLabel}
             </Link>
@@ -151,7 +151,7 @@ export function SiteHeader({
             href={ctaHref}
             onClick={() => setOpen(false)}
             tabIndex={open ? 0 : -1}
-            className="mt-8 inline-flex items-center justify-center rounded-full bg-accent px-6 py-3.5 text-sm font-semibold uppercase tracking-[0.18em] text-on-accent"
+            className="mt-8 inline-flex items-center justify-center rounded-full bg-accent-solid px-6 py-3.5 text-sm font-semibold uppercase tracking-[0.18em] text-on-accent"
           >
             {ctaLabel}
           </Link>

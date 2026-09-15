@@ -35,7 +35,7 @@ export default function DashboardError({
         <button
           type="button"
           onClick={reset}
-          className="inline-flex h-10 items-center gap-2 rounded-full bg-accent px-5 text-xs font-medium uppercase tracking-[0.14em] text-on-accent transition-colors hover:bg-accent-bright"
+          className="inline-flex h-10 items-center gap-2 rounded-full bg-accent-solid px-5 text-xs font-medium uppercase tracking-[0.14em] text-on-accent transition-colors hover:bg-accent-bright"
         >
           <RefreshCw className="size-4" aria-hidden />
           Try again

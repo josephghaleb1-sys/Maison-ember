@@ -140,8 +140,16 @@ export type WebsiteSettings = {
   free_delivery_over: number | null;
   min_order_total: number;
   order_notice: string;
+  color_mode: ColorMode;
+  order_email: string;
+  whish_enabled: boolean;
+  whish_number: string;
+  whish_note: string;
   updated_at: string;
 };
+
+export type ColorMode = "dark" | "light";
+export type PaymentMethod = "cod" | "whish";
 
 export type OrderStatus =
   | "new"
@@ -177,7 +185,8 @@ export type Order = {
   address_line: string;
   address_details: string;
   notes: string;
-  payment_method: "cod";
+  payment_method: PaymentMethod;
+  payment_reference: string;
   status: OrderStatus;
   admin_note: string;
   subtotal: number;
@@ -200,6 +209,31 @@ export type OrderItem = {
   created_at: string;
 };
 
+/** Shape returned by the public.place_order() RPC. */
+export type PlacedOrder = {
+  order_id: string;
+  order_number: number;
+  public_token: string;
+  subtotal: number;
+  delivery_fee: number;
+  total: number;
+  currency: string;
+  payment_method: PaymentMethod;
+  payment_reference: string;
+  customer_name: string;
+  customer_phone: string;
+  customer_email: string;
+  delivery_zone_name: string;
+  city: string;
+  address_line: string;
+  address_details: string;
+  notes: string;
+  /** Where the owner wants new-order emails, from website_settings. */
+  order_email: string;
+  business_name: string;
+  items: { name: string; unit_price: number; quantity: number; line_total: number }[];
+};
+
 /** Shape returned by the public.get_order_by_token() RPC. */
 export type OrderConfirmation = {
   order_number: number;
@@ -211,6 +245,8 @@ export type OrderConfirmation = {
   address_line: string;
   address_details: string;
   notes: string;
+  payment_method: PaymentMethod;
+  payment_reference: string;
   subtotal: number;
   delivery_fee: number;
   total: number;
@@ -487,6 +523,11 @@ export type Database = {
           free_delivery_over?: number | null;
           min_order_total?: number;
           order_notice?: string;
+          color_mode?: ColorMode;
+          order_email?: string;
+          whish_enabled?: boolean;
+          whish_number?: string;
+          whish_note?: string;
           updated_at?: string;
         };
         Update: {
@@ -517,6 +558,11 @@ export type Database = {
           free_delivery_over?: number | null;
           min_order_total?: number;
           order_notice?: string;
+          color_mode?: ColorMode;
+          order_email?: string;
+          whish_enabled?: boolean;
+          whish_number?: string;
+          whish_note?: string;
           updated_at?: string;
         };
         Relationships: [];
@@ -567,15 +613,10 @@ export type Database = {
           p_notes?: string;
           p_customer_phone_alt?: string;
           p_customer_email?: string;
+          p_payment_method?: PaymentMethod;
+          p_payment_reference?: string;
         };
-        Returns: {
-          order_number: number;
-          public_token: string;
-          subtotal: number;
-          delivery_fee: number;
-          total: number;
-          currency: string;
-        };
+        Returns: PlacedOrder;
       };
       get_order_by_token: {
         Args: { p_token: string };

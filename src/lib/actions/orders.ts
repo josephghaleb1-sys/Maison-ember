@@ -2,12 +2,14 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { after } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { getPublicBusiness } from "@/lib/business";
+import { getPublicBusiness, getSiteUrl } from "@/lib/business";
+import { buildOrderEmail, sendEmail } from "@/lib/email";
 import { requireBusinessContext } from "@/lib/dal";
 import { checkoutSchema, cartItemsSchema } from "@/lib/validation/order";
 import type { FormState } from "@/lib/actions/auth";
-import type { OrderStatus } from "@/lib/database.types";
+import type { OrderStatus, PlacedOrder } from "@/lib/database.types";
 
 /**
  * Places a cash-on-delivery order.
@@ -38,6 +40,8 @@ export async function placeOrder(_prevState: FormState, formData: FormData): Pro
   const business = await getPublicBusiness();
   const supabase = await createClient();
 
+  const paymentMethod = formData.get("payment_method") === "whish" ? "whish" : "cod";
+
   const { data, error } = await supabase.rpc("place_order", {
     p_business_slug: business.slug,
     p_customer_name: parsed.data.customer_name,
@@ -49,6 +53,8 @@ export async function placeOrder(_prevState: FormState, formData: FormData): Pro
     p_address_details: parsed.data.address_details,
     p_notes: parsed.data.notes,
     p_customer_email: parsed.data.customer_email,
+    p_payment_method: paymentMethod,
+    p_payment_reference: parsed.data.payment_reference,
   });
 
   if (error) {
@@ -57,13 +63,34 @@ export async function placeOrder(_prevState: FormState, formData: FormData): Pro
     return { error: error.message || "We couldn't place your order. Please try again." };
   }
 
-  const token = data?.public_token;
-  if (!token) {
+  const order = data as PlacedOrder | null;
+  if (!order?.public_token) {
     return { error: "We couldn't place your order. Please try again." };
   }
 
+  // Tell the owner. This runs *after* the response: the customer is never kept
+  // waiting on an email provider, and a provider outage can't lose an order
+  // that is already safely in the database.
+  const siteUrl = await getSiteUrl();
+  after(async () => {
+    if (!order.order_email) {
+      console.info(`Order #${order.order_number}: no notification email configured.`);
+      return;
+    }
+    const message = buildOrderEmail(order, `${siteUrl}/admin/orders/${order.order_id}`);
+    const result = await sendEmail({
+      to: order.order_email,
+      replyTo: order.customer_email || undefined,
+      ...message,
+    });
+    if (!result.sent) {
+      console.error(`Order #${order.order_number}: notification not sent — ${result.reason}`);
+    }
+  });
+
   revalidatePath("/admin/orders");
-  redirect(`/order/${token}`);
+  revalidatePath("/admin");
+  redirect(`/order/${order.public_token}`);
 }
 
 /** Dashboard: move an order along its lifecycle. */

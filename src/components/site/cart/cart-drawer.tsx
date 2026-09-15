@@ -80,7 +80,7 @@ export function CartDrawer({
             <Link
               href={catalogPath}
               onClick={close}
-              className="rounded-full border border-accent/50 px-5 py-2 text-xs font-medium uppercase tracking-[0.16em] text-accent transition-colors hover:bg-accent hover:text-on-accent"
+              className="rounded-full border border-accent/50 px-5 py-2 text-xs font-medium uppercase tracking-[0.16em] text-accent transition-colors hover:bg-accent-solid hover:text-on-accent"
             >
               Browse {catalogLabel.toLowerCase()}
             </Link>
@@ -170,7 +170,7 @@ export function CartDrawer({
                 <Link
                   href="/checkout"
                   onClick={close}
-                  className="mt-4 flex h-12 items-center justify-center rounded-full bg-accent text-sm font-semibold uppercase tracking-[0.16em] text-on-accent transition-colors hover:bg-accent-bright"
+                  className="mt-4 flex h-12 items-center justify-center rounded-full bg-accent-solid text-sm font-semibold uppercase tracking-[0.16em] text-on-accent transition-colors hover:bg-accent-bright"
                 >
                   Checkout
                 </Link>

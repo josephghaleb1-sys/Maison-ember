@@ -19,7 +19,7 @@ import { Card, CardBody, CardHeader, CardTitle } from "@/components/ui/card";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { VisibilityToggle } from "@/components/ui/visibility-toggle";
 import { EmptyState } from "@/components/ui/empty-state";
-import { Truck } from "lucide-react";
+import { Banknote, Truck } from "lucide-react";
 import { formatPrice, toNumber } from "@/lib/utils";
 
 const initialState: FormState = {};
@@ -256,6 +256,61 @@ export function DeliveryManager({
                 defaultValue={settings?.order_notice}
                 placeholder="e.g. Cash on delivery all over Lebanon. We call to confirm every order."
               />
+            </div>
+          </CardBody>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Payment methods</CardTitle>
+          </CardHeader>
+          <CardBody className="space-y-5">
+            <div className="flex items-start gap-3 rounded-xl border border-ink-800 p-4 text-sm text-ink-300">
+              <Banknote className="mt-0.5 size-4 shrink-0 text-accent" aria-hidden />
+              <span>
+                <span className="font-medium text-ink-50">Cash on delivery</span> is always
+                available — it&apos;s how most customers pay.
+              </span>
+            </div>
+
+            <label className="flex items-start gap-3 text-sm text-ink-200">
+              <input
+                type="checkbox"
+                name="whish_enabled"
+                defaultChecked={settings?.whish_enabled ?? false}
+                className="mt-0.5 rounded border-ink-600"
+              />
+              <span>
+                <span className="font-medium">Also accept Whish transfers</span>
+                <span className="mt-0.5 block text-xs text-ink-500">
+                  Customers see your Whish number at checkout, send the total, and can type the
+                  transfer reference into their order.
+                </span>
+              </span>
+            </label>
+
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div>
+                <Label htmlFor="whish_number">Your Whish number</Label>
+                <Input
+                  id="whish_number"
+                  name="whish_number"
+                  type="tel"
+                  inputMode="tel"
+                  defaultValue={settings?.whish_number}
+                  placeholder="71 000 000"
+                />
+              </div>
+              <div>
+                <Label htmlFor="whish_note">Instructions (optional)</Label>
+                <Input
+                  id="whish_note"
+                  name="whish_note"
+                  maxLength={300}
+                  defaultValue={settings?.whish_note}
+                  placeholder="e.g. Send the exact total and keep the reference."
+                />
+              </div>
             </div>
           </CardBody>
         </Card>
