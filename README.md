@@ -178,6 +178,7 @@ Then load demo data (optional but recommended for a first run):
 | `supabase/seed/maison_ember.sql` | Second demo business (restaurant) — delete if you don't want it |
 | `supabase/seed/new_business.sql` | Template for adding a real customer |
 | `supabase/seed/link_owner.sql` | Give a user ownership of a business |
+| `supabase/seed/link_owner_auto.sql` | Same, with nothing to edit — links the project's only auth user |
 
 Demo values that must be replaced before going live are marked `PLACEHOLDER`
 in the seed files (email address, prices, opening hours, reviews). Product and
