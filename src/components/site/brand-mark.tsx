@@ -54,6 +54,10 @@ export function BrandMark({
   }
 
   const initials = getInitials(name);
+  // Engraved detail only survives above a certain size; in a 40px header the
+  // rule and the diamond just turn to mush, so the small version is the
+  // cartouche and the initials alone.
+  const detailed = size >= 56;
 
   return (
     <span
@@ -61,67 +65,83 @@ export function BrandMark({
       style={{ width: size, height: size }}
       aria-hidden
     >
-      <svg viewBox="0 0 48 48" className="size-full" role="presentation">
-        {/* Outer hairline ring, and a second one inside it — the engraved,
-            stamped-foil look you see on cosmetics packaging. */}
-        <circle
-          cx="24"
-          cy="24"
-          r="22.2"
-          fill="none"
+      {/* A cartouche — the tall, soft-cornered seal stamped on cosmetics and
+          perfume packaging. Taller than it is wide, so it reads as a mark
+          rather than a button, and drawn in hairlines so it sits quietly next
+          to the wordmark instead of competing with product photography. */}
+      <svg viewBox="0 0 34 44" className="size-full" role="presentation">
+        <defs>
+          <linearGradient id="brand-mark-fill" x1="0" y1="0" x2="0" y2="1">
+            <stop
+              offset="0%"
+              stopColor="color-mix(in oklab, var(--brand-primary) 22%, transparent)"
+            />
+            <stop
+              offset="100%"
+              stopColor="color-mix(in oklab, var(--brand-primary) 7%, transparent)"
+            />
+          </linearGradient>
+        </defs>
+
+        {/* Outer seal: rounded top and bottom, straight sides. */}
+        <path
+          d="M17 1.2c6.4 0 11.4 3.6 11.4 8.3v24.2c0 4.7-5 8.3-11.4 8.3S5.6 38.4 5.6 33.7V9.5C5.6 4.8 10.6 1.2 17 1.2z"
+          fill="url(#brand-mark-fill)"
           stroke="var(--brand-accent-display, currentColor)"
           strokeWidth="0.9"
-          opacity="0.75"
         />
-        <circle
-          cx="24"
-          cy="24"
-          r="19.4"
-          fill="color-mix(in oklab, var(--brand-primary) 16%, transparent)"
-          stroke="var(--brand-accent-display, currentColor)"
-          strokeWidth="0.45"
-          opacity="0.5"
-        />
-
-        {/* Petal finial at the crown — a small botanical nod, rotated 45°
-            so it reads as a diamond at a glance. */}
-        <g transform="translate(24 5.4) rotate(45)">
-          <rect
-            x="-2.1"
-            y="-2.1"
-            width="4.2"
-            height="4.2"
-            rx="1"
-            fill="var(--brand-accent-display, currentColor)"
+        {/* Inner rule, the engraved second line. */}
+        {detailed && (
+          <path
+            d="M17 3.6c5.2 0 9.2 2.9 9.2 6.6v23.6c0 3.7-4 6.6-9.2 6.6s-9.2-2.9-9.2-6.6V10.2C7.8 6.5 11.8 3.6 17 3.6z"
+            fill="none"
+            stroke="var(--brand-accent-display, currentColor)"
+            strokeWidth="0.4"
+            opacity="0.55"
           />
-        </g>
+        )}
 
         <text
-          x="24"
-          y="24"
+          x="17"
+          y={detailed ? 21.5 : 23}
           textAnchor="middle"
           dominantBaseline="central"
           fill="var(--brand-accent-display, currentColor)"
           style={{
             fontFamily: "var(--font-display-family), Georgia, serif",
-            fontSize: initials.length > 1 ? "15px" : "19px",
+            fontSize: initials.length > 1 ? (detailed ? "12.5px" : "14px") : "17px",
             fontWeight: 500,
-            letterSpacing: "0.12em",
-            // The letterspacing pushes the glyphs right; nudge them back.
-            transform: "translateX(0.9px)",
+            letterSpacing: "0.1em",
+            transform: "translateX(0.6px)",
           }}
         >
           {initials}
         </text>
 
-        {/* Two small rules either side of the base, like a wordmark's rule. */}
-        <path
-          d="M15 40.2h6M27 40.2h6"
-          stroke="var(--brand-accent-display, currentColor)"
-          strokeWidth="0.7"
-          strokeLinecap="round"
-          opacity="0.6"
-        />
+        {/* A short rule and a diamond point below the initials — the small
+            flourish that makes a monogram look set rather than typed. */}
+        {detailed && (
+          <>
+            <path
+              d="M12.4 27.4h9.2"
+              stroke="var(--brand-accent-display, currentColor)"
+              strokeWidth="0.55"
+              strokeLinecap="round"
+              opacity="0.8"
+            />
+            <g transform="translate(17 31.6) rotate(45)">
+              <rect
+                x="-1.5"
+                y="-1.5"
+                width="3"
+                height="3"
+                rx="0.6"
+                fill="var(--brand-accent-display, currentColor)"
+                opacity="0.9"
+              />
+            </g>
+          </>
+        )}
       </svg>
     </span>
   );

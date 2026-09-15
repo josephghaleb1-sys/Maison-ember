@@ -1,10 +1,10 @@
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import {
-  ALLOWED_IMAGE_TYPES,
-  MAX_UPLOAD_BYTES,
   MEDIA_BUCKET,
   buildStoragePath,
+  describeUploadError,
+  validateImageFile,
 } from "@/lib/storage";
 import type { Database, MediaKind } from "@/lib/database.types";
 
@@ -17,12 +17,8 @@ export async function uploadBusinessImage(
   kind: MediaKind,
   file: File,
 ): Promise<{ path: string } | { error: string }> {
-  if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
-    return { error: "Unsupported file type. Upload a JPG, PNG, WebP, GIF, or SVG." };
-  }
-  if (file.size > MAX_UPLOAD_BYTES) {
-    return { error: "File is too large. Max size is 5MB." };
-  }
+  const invalid = validateImageFile(file);
+  if (invalid) return { error: invalid };
 
   const path = buildStoragePath(businessId, kind, file.name);
   const { error: uploadError } = await supabase.storage.from(MEDIA_BUCKET).upload(path, file, {
@@ -31,7 +27,7 @@ export async function uploadBusinessImage(
   });
 
   if (uploadError) {
-    return { error: `Upload failed: ${uploadError.message}` };
+    return { error: describeUploadError(uploadError.message) };
   }
 
   const { error: insertError } = await supabase.from("media").insert({

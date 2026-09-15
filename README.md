@@ -388,6 +388,52 @@ project pointing at the same database (`NEXT_PUBLIC_BUSINESS_SLUG` decides).
 - Deleting an item's photo only removes the file when nothing else uses it, so
   a shared library image is never pulled out from under another item.
 
+**How uploads travel.** Photos in the Media library go **straight from the
+browser to Supabase Storage**, one at a time, and a small Server Action then
+records them. They do not pass through the Next.js server: a handful of phone
+photos comfortably exceeds the Server Action body limit, and one oversized
+file would otherwise fail the entire batch. Each file now reports its own
+progress and its own error. Storage RLS still decides who may write where —
+the first path segment is the business id — and the recording step re-checks
+every path server-side, so a client cannot register a file outside its own
+business's folder.
+
+### If photo uploads fail
+
+Two things must exist in Supabase, and `0001_init.sql` creates both — but some
+projects refuse to let the SQL Editor touch the storage tables, in which case
+the migration prints a notice instead of failing. Check these first:
+
+1. **The bucket.** Storage → there should be a bucket called `media`, marked
+   **Public**. If not: *New bucket* → name `media` → Public **on** → file size
+   limit 5MB.
+2. **Four policies on `storage.objects`.** Storage → Policies → *New policy*
+   (choose "For full customization") on the `objects` table:
+
+   | Name | Operation | Target roles | Expression |
+   | --- | --- | --- | --- |
+   | `media_bucket_public_read` | SELECT | anon, authenticated | `bucket_id = 'media'` |
+   | `media_bucket_member_insert` | INSERT | authenticated | `bucket_id = 'media' and public.is_business_member(((storage.foldername(name))[1])::uuid)` |
+   | `media_bucket_member_update` | UPDATE | authenticated | same as insert |
+   | `media_bucket_member_delete` | DELETE | authenticated | same as insert |
+
+   (INSERT policies put the expression in *WITH CHECK*; UPDATE needs it in
+   both boxes.)
+
+The dashboard translates the common failures into plain language — "Storage
+permissions aren't set up yet", "The media bucket is missing", "That photo is
+too large even after optimising" — so the message on screen usually names the
+fix.
+
+**iPhone photos.** If a photo is rejected as HEIC, either set *Settings →
+Camera → Formats → Most Compatible* on the phone, or send the photo to
+yourself on WhatsApp first; both produce a JPG. Photos picked from the iOS
+photo library are converted automatically and work as-is.
+
+**SVG is not accepted.** It can carry script and Supabase serves it from a
+shared origin; for a shop's photos and logo, JPG/PNG/WebP/GIF is all that is
+needed.
+
 ---
 
 ## 17. Checkout and orders
@@ -591,6 +637,11 @@ application build:
   background on all public pages: all pass WCAG AA.
 - 5 media checks — upload, gallery visibility, picking a library image for an
   item, public rendering, hiding.
+- 10 upload checks — three photos in one batch, each recorded with its name,
+  type and size inside the right business folder, an oversized file refused on
+  its own while the rest of the batch still uploads, public rendering with no
+  broken images, a product photo through the form, and an oversized logo
+  explained before the form is saved.
 - 10 RLS assertions (`supabase/tests/rls_checks.sql`) and 10 checkout
   assertions (`supabase/tests/checkout_checks.sql`), each with a mutation test
   proving the suite fails when a policy is loosened.
@@ -612,7 +663,11 @@ application build:
 - Roles beyond `owner` exist in the schema (`admin`, `editor`) but every role
   currently has the same permissions; narrowing them is a policy change.
 - Payment is cash on delivery or a Whish transfer the shop reconciles by hand
-  (the customer types the reference). There is no card processor and no stock
+  (the customer types the reference). This is *not* a live Whish Pay
+  integration: Whish does offer a merchant gateway, but it needs a Whish
+  merchant account and their integration credentials, which the shop has to
+  obtain first. The `payment_method` column and the checkout's payment step
+  are where that would slot in. There is no card processor and no stock
   tracking — an out-of-stock item is hidden rather than counted down.
 - The *owner* is emailed on every order; the *customer* is not. They keep the
   receipt link and get a phone call, which is how these shops work. Emailing

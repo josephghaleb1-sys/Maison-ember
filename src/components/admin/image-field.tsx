@@ -5,6 +5,7 @@ import { X } from "lucide-react";
 import { Label } from "@/components/ui/input";
 import { Thumb } from "@/components/admin/thumb";
 import { compressImageFile } from "@/lib/image-compress";
+import { IMAGE_ACCEPT, validateImageFile } from "@/lib/storage";
 
 /**
  * File input for one branding image (logo / hero / social preview).
@@ -30,6 +31,7 @@ export function ImageField({
   const [preview, setPreview] = useState<string | null>(null);
   const [remove, setRemove] = useState(false);
   const [isCompressing, setIsCompressing] = useState(false);
+  const [problem, setProblem] = useState<string | null>(null);
 
   return (
     <div>
@@ -46,12 +48,13 @@ export function ImageField({
             id={`${name}_image`}
             name={`${name}_image`}
             type="file"
-            accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml"
+            accept={IMAGE_ACCEPT}
             className="block w-full text-sm text-ink-300 file:mr-3 file:rounded-lg file:border-0 file:bg-ink-800 file:px-3 file:py-2 file:text-sm file:font-medium file:text-ink-200 hover:file:bg-ink-700"
             onChange={async (event) => {
               const input = event.target;
               const file = input.files?.[0];
               setRemove(false);
+              setProblem(null);
               if (!file) {
                 setPreview(null);
                 return;
@@ -60,6 +63,17 @@ export function ImageField({
               setIsCompressing(true);
               const compressed = await compressImageFile(file, { maxDimension });
               setIsCompressing(false);
+
+              // Catch anything storage would reject *before* the form is sent,
+              // so the owner isn't told after waiting for an upload.
+              const invalid = validateImageFile(compressed);
+              if (invalid) {
+                setProblem(invalid);
+                setPreview(null);
+                input.value = "";
+                return;
+              }
+
               if (compressed !== file) {
                 const dataTransfer = new DataTransfer();
                 dataTransfer.items.add(compressed);
@@ -70,6 +84,7 @@ export function ImageField({
           <p className="mt-1 text-xs text-ink-500">
             {isCompressing ? "Optimising image…" : hint}
           </p>
+          {problem && <p className="mt-1 text-xs text-red-400">{problem}</p>}
         </div>
       </div>
       {currentPath && !preview && (

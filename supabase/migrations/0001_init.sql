@@ -308,52 +308,77 @@ create policy "website_settings_member_write"
 -- Storage: "media" bucket + object-level policies
 -- ============================================================================
 
-insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
-values (
-  'media',
-  'media',
-  true,
-  5242880, -- 5 MB
-  array['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml']
-)
-on conflict (id) do update
-  set public = excluded.public,
-      file_size_limit = excluded.file_size_limit,
-      allowed_mime_types = excluded.allowed_mime_types;
+-- Creating the bucket and its policies needs ownership of the storage tables.
+-- In most Supabase projects the SQL Editor's `postgres` role has it; in some it
+-- does not, and the statements fail with "must be owner of table objects".
+-- Rather than abort the whole migration, each step reports what to do instead
+-- (Dashboard -> Storage -> Policies). Uploads will not work until the four
+-- policies below exist, so the notices matter — read the output of this file.
 
-drop policy if exists "media_bucket_public_read" on storage.objects;
-create policy "media_bucket_public_read"
-  on storage.objects for select
-  to anon, authenticated
-  using (bucket_id = 'media');
-
-drop policy if exists "media_bucket_member_insert" on storage.objects;
-create policy "media_bucket_member_insert"
-  on storage.objects for insert
-  to authenticated
-  with check (
-    bucket_id = 'media'
-    and public.is_business_member(((storage.foldername(name))[1])::uuid)
-  );
-
-drop policy if exists "media_bucket_member_update" on storage.objects;
-create policy "media_bucket_member_update"
-  on storage.objects for update
-  to authenticated
-  using (
-    bucket_id = 'media'
-    and public.is_business_member(((storage.foldername(name))[1])::uuid)
+do $$
+begin
+  insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+  values (
+    'media',
+    'media',
+    true,
+    5242880, -- 5 MB
+    array['image/jpeg', 'image/png', 'image/webp', 'image/gif']
   )
-  with check (
-    bucket_id = 'media'
-    and public.is_business_member(((storage.foldername(name))[1])::uuid)
-  );
+  on conflict (id) do update
+    set public = excluded.public,
+        file_size_limit = excluded.file_size_limit,
+        allowed_mime_types = excluded.allowed_mime_types;
+exception
+  when insufficient_privilege then
+    raise notice 'Could not create the "media" bucket from SQL. Create it in the Dashboard: Storage -> New bucket -> name "media", Public ON, file size limit 5MB.';
+end;
+$$;
 
-drop policy if exists "media_bucket_member_delete" on storage.objects;
-create policy "media_bucket_member_delete"
-  on storage.objects for delete
-  to authenticated
-  using (
-    bucket_id = 'media'
-    and public.is_business_member(((storage.foldername(name))[1])::uuid)
-  );
+do $$
+begin
+  -- Public read: the website's images are public by definition.
+  drop policy if exists "media_bucket_public_read" on storage.objects;
+  create policy "media_bucket_public_read"
+    on storage.objects for select
+    to anon, authenticated
+    using (bucket_id = 'media');
+
+  -- Writes are scoped by the first path segment, which is the business id:
+  -- "{business_id}/{kind}/{file}". A member can only write inside their own
+  -- business's folder, so uploads can never cross businesses.
+  drop policy if exists "media_bucket_member_insert" on storage.objects;
+  create policy "media_bucket_member_insert"
+    on storage.objects for insert
+    to authenticated
+    with check (
+      bucket_id = 'media'
+      and public.is_business_member(((storage.foldername(name))[1])::uuid)
+    );
+
+  drop policy if exists "media_bucket_member_update" on storage.objects;
+  create policy "media_bucket_member_update"
+    on storage.objects for update
+    to authenticated
+    using (
+      bucket_id = 'media'
+      and public.is_business_member(((storage.foldername(name))[1])::uuid)
+    )
+    with check (
+      bucket_id = 'media'
+      and public.is_business_member(((storage.foldername(name))[1])::uuid)
+    );
+
+  drop policy if exists "media_bucket_member_delete" on storage.objects;
+  create policy "media_bucket_member_delete"
+    on storage.objects for delete
+    to authenticated
+    using (
+      bucket_id = 'media'
+      and public.is_business_member(((storage.foldername(name))[1])::uuid)
+    );
+exception
+  when insufficient_privilege then
+    raise notice 'Could not create the storage policies from SQL (this project restricts it). Create them in the Dashboard: Storage -> Policies -> New policy on objects. See README "If photo uploads fail" for the four policies to add.';
+end;
+$$;

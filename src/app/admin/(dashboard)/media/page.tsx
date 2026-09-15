@@ -24,7 +24,7 @@ export default async function MediaPage() {
 
       <Card>
         <CardBody>
-          <MediaUploadForm />
+          <MediaUploadForm businessId={business.id} />
         </CardBody>
       </Card>
 

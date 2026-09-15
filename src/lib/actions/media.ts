@@ -7,7 +7,7 @@ import { uploadBusinessImage, deleteBusinessImage } from "@/lib/actions/upload";
 import { CATALOG_PATHS } from "@/lib/industry";
 import type { MediaKind } from "@/lib/database.types";
 
-const VALID_KINDS: MediaKind[] = ["product", "gallery", "logo", "hero", "other"];
+const VALID_KINDS: MediaKind[] = ["product", "gallery", "logo", "hero", "og", "other"];
 
 function revalidateAll() {
   revalidatePath("/admin/media");
@@ -16,6 +16,60 @@ function revalidateAll() {
   revalidatePath("/");
 }
 
+/**
+ * Records files the browser has already put in storage.
+ *
+ * Uploads go straight from the browser to Supabase Storage rather than through
+ * a Server Action: a handful of phone photos easily exceeds the Server Action
+ * body limit, and routing megabytes through the server only to forward them
+ * again is slower for the owner and pointless. Storage RLS still decides who
+ * may write where (the path's first segment is the business id), and this
+ * action re-checks every path before it records anything — a client cannot
+ * register a file that isn't inside its own business's folder.
+ */
+export async function registerUploadedMedia(
+  paths: string[],
+  kind: string,
+  fileNames: string[],
+  sizes: number[],
+  mimeTypes: string[],
+): Promise<{ error?: string; added?: number }> {
+  const { business, userId } = await requireBusinessContext();
+
+  const mediaKind = VALID_KINDS.includes(kind as MediaKind) ? (kind as MediaKind) : "gallery";
+  if (paths.length === 0) return { error: "Nothing was uploaded." };
+  if (paths.length > 20) return { error: "Too many files at once — upload up to 20." };
+
+  const prefix = `${business.id}/`;
+  if (paths.some((path) => !path.startsWith(prefix))) {
+    return { error: "Those files don't belong to this business." };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase.from("media").insert(
+    paths.map((path, index) => ({
+      business_id: business.id,
+      storage_path: path,
+      file_name: fileNames[index] ?? path.split("/").pop() ?? "image",
+      mime_type: mimeTypes[index] ?? "image/jpeg",
+      size_bytes: sizes[index] ?? 0,
+      kind: mediaKind,
+      uploaded_by: userId,
+    })),
+  );
+
+  if (error) {
+    // The files are in storage but unrecorded; clean them up so the library
+    // and the bucket can't drift apart.
+    await Promise.all(paths.map((path) => deleteBusinessImage(supabase, path)));
+    return { error: `Couldn't save the uploads: ${error.message}` };
+  }
+
+  revalidateAll();
+  return { added: paths.length };
+}
+
+/** Server-side upload, still used by the single-image fields on forms. */
 export async function uploadMedia(formData: FormData): Promise<{ error?: string }> {
   const { business, userId } = await requireBusinessContext();
 
@@ -32,7 +86,7 @@ export async function uploadMedia(formData: FormData): Promise<{ error?: string 
 
   for (const file of files) {
     const result = await uploadBusinessImage(supabase, business.id, userId, kind, file);
-    if ("error" in result) errors.push(`${file.name}: ${result.error}`);
+    if ("error" in result) errors.push(result.error);
   }
 
   revalidateAll();

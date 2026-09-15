@@ -9,6 +9,7 @@ import { Input, Textarea, Select, Label, FieldError } from "@/components/ui/inpu
 import { Thumb } from "@/components/admin/thumb";
 import { MediaPicker } from "@/components/admin/media-picker";
 import { compressImageFile } from "@/lib/image-compress";
+import { IMAGE_ACCEPT, validateImageFile } from "@/lib/storage";
 
 const initialState: FormState = {};
 
@@ -34,6 +35,7 @@ export function ProductForm({
   const [isCompressing, setIsCompressing] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [picked, setPicked] = useState<Media | null>(null);
+  const [photoProblem, setPhotoProblem] = useState<string | null>(null);
 
   return (
     <form action={formAction} className="space-y-5">
@@ -95,13 +97,14 @@ export function ProductForm({
               id="image"
               name="image"
               type="file"
-              accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml"
+              accept={IMAGE_ACCEPT}
               className="block w-full text-sm text-ink-300 file:mr-3 file:rounded-lg file:border-0 file:bg-ink-800 file:px-3 file:py-2 file:text-sm file:font-medium file:text-ink-200 hover:file:bg-ink-700"
               onChange={async (e) => {
                 const input = e.target;
                 const file = input.files?.[0];
                 setRemoveImage(false);
                 setPicked(null);
+                setPhotoProblem(null);
                 if (!file) {
                   setPreview(null);
                   return;
@@ -112,6 +115,15 @@ export function ProductForm({
                 setIsCompressing(true);
                 const compressed = await compressImageFile(file);
                 setIsCompressing(false);
+
+                const invalid = validateImageFile(compressed);
+                if (invalid) {
+                  setPhotoProblem(invalid);
+                  setPreview(null);
+                  input.value = "";
+                  return;
+                }
+
                 if (compressed !== file) {
                   const dataTransfer = new DataTransfer();
                   dataTransfer.items.add(compressed);
@@ -120,8 +132,9 @@ export function ProductForm({
               }}
             />
             <p className="mt-1 text-xs text-ink-500">
-              {isCompressing ? "Optimising photo…" : "JPG, PNG, WebP, GIF, or SVG. Max 5MB."}
+              {isCompressing ? "Optimising photo…" : "JPG, PNG, WebP or GIF. Max 5MB."}
             </p>
+            {photoProblem && <p className="mt-1 text-xs text-red-400">{photoProblem}</p>}
           </div>
         </div>
 
