@@ -89,12 +89,13 @@ export function ensureReadable(color: string, background: string, target: number
  */
 const SURFACES: Record<ColorMode, string[]> = {
   // 50 …………………………………………………………………………………………………………………… 950
-  // Steps 400-700 sit higher than a plain ramp would put them: the brand
-  // bleed below darkens the lower half, and small text (ink-500) and
-  // placeholders (ink-600) have to clear AA *after* that, not before it.
+  // ink-500 sits higher than an even ramp would put it: it carries small text
+  // (form hints, captions, order-page labels) and at #6d6359 that text landed
+  // at 3.44:1 on this surface, short of AA. Everything else is the palette the
+  // design was built around.
   dark: [
-    "#f8f3ea", "#ece4d6", "#d6ccbd", "#b4a99a", "#a29689",
-    "#8f8478", "#786e65", "#4c433d", "#262120", "#151113", "#08060a",
+    "#f8f3ea", "#ece4d6", "#d6ccbd", "#b4a99a", "#8d8276",
+    "#82776b", "#514942", "#3a332f", "#262120", "#151113", "#08060a",
   ],
   // Tuned so every step used for text clears WCAG AA on this surface:
   // 300 and 400 carry body copy, 500 small captions, 600 placeholders.
@@ -105,34 +106,6 @@ const SURFACES: Record<ColorMode, string[]> = {
 };
 
 const STEPS = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950] as const;
-
-/**
- * How much of the brand colour is folded into each dark surface, foreground
- * (50) to background (950).
- *
- * A neutral near-black beside a red accent reads as two colours sitting next
- * to each other. Bleeding the brand hue into the surfaces themselves — heavily
- * at the background end, not at all where text sits — makes the page one
- * colour that happens to be darkest at the edges: black with red in it, rather
- * than black and red. Text steps stay neutral so the contrast guarantees the
- * rest of this file makes are unaffected.
- */
-const DARK_BRAND_BLEED = [0, 0, 0, 0, 0, 0.05, 0.1, 0.18, 0.28, 0.4, 0.5] as const;
-
-/**
- * The brand colour taken down to something that can serve as a near-black.
- * Mixing surfaces towards the raw brand colour would lift the whole page off
- * black; mixing towards this keeps it dark while carrying the hue.
- */
-function brandShadow(primary: string): string {
-  return mix(primary, "#000000", 0.62);
-}
-
-/** Dark surfaces, re-tinted around the business's own colour. */
-function bleedBrand(scale: string[], primary: string): string[] {
-  const shadow = brandShadow(primary);
-  return scale.map((step, index) => mix(step, shadow, DARK_BRAND_BLEED[index] ?? 0));
-}
 
 export interface BrandTheme {
   mode: ColorMode;
@@ -160,11 +133,7 @@ export function buildBrandTheme(
   const primary = normalizeHex(settings?.primary_color, DEFAULT_PRIMARY);
   const secondary = normalizeHex(settings?.secondary_color, DEFAULT_SECONDARY);
 
-  const base = SURFACES[mode];
-  // Light-mode businesses keep the neutral ivory scale: bleeding a saturated
-  // hue through pale surfaces muddies product photography rather than
-  // enriching it.
-  const scale = mode === "dark" ? bleedBrand(base, primary) : base;
+  const scale = SURFACES[mode];
   const surface = scale[scale.length - 1];
   const foreground = scale[0];
 
@@ -205,13 +174,10 @@ export function buildBrandTheme(
       "--brand-on-secondary": onSecondary,
       "--foreground": foreground,
       "--background": surface,
-      // How strongly the brand colour tints the hero stage. Kept low on dark:
-      // the surfaces already carry the hue (see bleedBrand), so a heavy wash
-      // on top of them stops reading as a dark page with colour in it and
-      // starts reading as a coloured page — two colours meeting, which is
-      // exactly what the bleed exists to avoid.
-      "--stage-mix": mode === "light" ? "16%" : "30%",
-      "--stage-mix-soft": mode === "light" ? "8%" : "16%",
+      // How strongly the brand colour tints the hero stage: a deep wash on
+      // dark, a soft veil on light so pale product photography still reads.
+      "--stage-mix": mode === "light" ? "16%" : "78%",
+      "--stage-mix-soft": mode === "light" ? "8%" : "42%",
       // Bloom reads as light *emitted* on a dark page and as ink *bleeding* on
       // a pale one, so light-mode businesses get a much gentler version.
       "--glow-opacity": mode === "light" ? "0.4" : "1",
