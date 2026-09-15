@@ -136,3 +136,26 @@ begin
 
   end if;
 end $$;
+
+-- ---- delivery + checkout (demo) ---------------------------------------------
+-- The restaurant demo takes delivery orders too, so switching between the two
+-- businesses shows the same checkout with different wording and areas.
+do $$
+declare
+  biz_id uuid;
+begin
+  select id into biz_id from public.businesses where slug = 'maison-ember';
+
+  insert into public.delivery_zones (business_id, name, fee, sort_order) values
+    (biz_id, 'Mission District', 5, 1),
+    (biz_id, 'Downtown', 7, 2),
+    (biz_id, 'Outer neighbourhoods', 9, 3)
+  on conflict (business_id, name) do update set fee = excluded.fee;
+
+  update public.website_settings
+     set checkout_enabled = true,
+         free_delivery_over = 60,          -- PLACEHOLDER (demo)
+         order_notice = 'Delivery within 45 minutes. Pay the driver on arrival.'
+   where business_id = biz_id;
+end;
+$$;

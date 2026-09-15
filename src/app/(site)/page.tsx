@@ -31,6 +31,7 @@ export default async function HomePage() {
 
   const currency = settings?.currency || "USD";
   const showPrices = settings?.show_prices ?? true;
+  const canOrder = settings?.checkout_enabled ?? true;
   const featured = products.slice(0, preset.layout === "grid" ? 4 : 6);
   const featuredGallery = gallery.slice(0, 5);
   const categoryById = new Map(categories.map((category) => [category.id, category.name]));
@@ -78,6 +79,7 @@ export default async function HomePage() {
                     product={product}
                     currency={currency}
                     showPrice={showPrices}
+                    canOrder={canOrder}
                     categoryName={
                       product.category_id ? categoryById.get(product.category_id) : undefined
                     }
@@ -99,6 +101,7 @@ export default async function HomePage() {
                     product={product}
                     currency={currency}
                     showPrice={showPrices}
+                    canOrder={canOrder}
                     orderHref={whatsapp}
                   />
                 </Reveal>

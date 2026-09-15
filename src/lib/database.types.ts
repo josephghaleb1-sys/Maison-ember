@@ -136,7 +136,87 @@ export type WebsiteSettings = {
   currency: string;
   whatsapp: string;
   show_prices: boolean;
+  checkout_enabled: boolean;
+  free_delivery_over: number | null;
+  min_order_total: number;
+  order_notice: string;
   updated_at: string;
+};
+
+export type OrderStatus =
+  | "new"
+  | "confirmed"
+  | "preparing"
+  | "shipped"
+  | "delivered"
+  | "cancelled";
+
+export type DeliveryZone = {
+  id: string;
+  business_id: string;
+  name: string;
+  fee: number;
+  sort_order: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+export type Order = {
+  id: string;
+  business_id: string;
+  order_number: number;
+  public_token: string;
+  customer_name: string;
+  customer_phone: string;
+  customer_phone_alt: string;
+  customer_email: string;
+  delivery_zone_id: string | null;
+  delivery_zone_name: string;
+  city: string;
+  address_line: string;
+  address_details: string;
+  notes: string;
+  payment_method: "cod";
+  status: OrderStatus;
+  admin_note: string;
+  subtotal: number;
+  delivery_fee: number;
+  total: number;
+  currency: string;
+  created_at: string;
+  updated_at: string;
+};
+
+export type OrderItem = {
+  id: string;
+  order_id: string;
+  business_id: string;
+  product_id: string | null;
+  name: string;
+  unit_price: number;
+  quantity: number;
+  line_total: number;
+  created_at: string;
+};
+
+/** Shape returned by the public.get_order_by_token() RPC. */
+export type OrderConfirmation = {
+  order_number: number;
+  status: OrderStatus;
+  customer_name: string;
+  customer_phone: string;
+  delivery_zone_name: string;
+  city: string;
+  address_line: string;
+  address_details: string;
+  notes: string;
+  subtotal: number;
+  delivery_fee: number;
+  total: number;
+  currency: string;
+  created_at: string;
+  items: { name: string; unit_price: number; quantity: number; line_total: number }[];
 };
 
 export type Testimonial = {
@@ -201,6 +281,56 @@ export type Database = {
             columns: ["business_id"];
             isOneToOne: false;
             referencedRelation: "businesses";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      delivery_zones: {
+        Row: DeliveryZone;
+        Insert: {
+          id?: string;
+          business_id: string;
+          name: string;
+          fee?: number;
+          sort_order?: number;
+          is_active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          business_id?: string;
+          name?: string;
+          fee?: number;
+          sort_order?: number;
+          is_active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      orders: {
+        Row: Order;
+        // Orders are only ever created through the place_order() RPC, which
+        // prices them server-side — there is no INSERT policy for visitors.
+        Insert: never;
+        Update: {
+          status?: OrderStatus;
+          admin_note?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      order_items: {
+        Row: OrderItem;
+        Insert: never;
+        Update: never;
+        Relationships: [
+          {
+            foreignKeyName: "order_items_order_id_fkey";
+            columns: ["order_id"];
+            isOneToOne: false;
+            referencedRelation: "orders";
             referencedColumns: ["id"];
           },
         ];
@@ -353,6 +483,10 @@ export type Database = {
           currency?: string;
           whatsapp?: string;
           show_prices?: boolean;
+          checkout_enabled?: boolean;
+          free_delivery_over?: number | null;
+          min_order_total?: number;
+          order_notice?: string;
           updated_at?: string;
         };
         Update: {
@@ -379,6 +513,10 @@ export type Database = {
           currency?: string;
           whatsapp?: string;
           show_prices?: boolean;
+          checkout_enabled?: boolean;
+          free_delivery_over?: number | null;
+          min_order_total?: number;
+          order_notice?: string;
           updated_at?: string;
         };
         Relationships: [];
@@ -415,7 +553,35 @@ export type Database = {
       };
     };
     Views: Record<string, never>;
-    Functions: Record<string, never>;
+    Functions: {
+      place_order: {
+        Args: {
+          p_business_slug: string;
+          p_customer_name: string;
+          p_customer_phone: string;
+          p_address_line: string;
+          p_items: { product_id: string; quantity: number }[];
+          p_delivery_zone_id?: string | null;
+          p_city?: string;
+          p_address_details?: string;
+          p_notes?: string;
+          p_customer_phone_alt?: string;
+          p_customer_email?: string;
+        };
+        Returns: {
+          order_number: number;
+          public_token: string;
+          subtotal: number;
+          delivery_fee: number;
+          total: number;
+          currency: string;
+        };
+      };
+      get_order_by_token: {
+        Args: { p_token: string };
+        Returns: OrderConfirmation | null;
+      };
+    };
     Enums: Record<string, never>;
     CompositeTypes: Record<string, never>;
   };

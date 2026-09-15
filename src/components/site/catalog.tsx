@@ -42,6 +42,7 @@ export async function CatalogPage({ path }: { path: CatalogPath }) {
 
   const currency = settings?.currency || "USD";
   const showPrices = settings?.show_prices ?? true;
+  const canOrder = settings?.checkout_enabled ?? true;
   const whatsapp = whatsappHref(settings?.whatsapp || settings?.phone);
 
   const grouped = categories
@@ -121,6 +122,7 @@ export async function CatalogPage({ path }: { path: CatalogPath }) {
                         product={product}
                         currency={currency}
                         showPrice={showPrices}
+                        canOrder={canOrder}
                         orderHref={
                           whatsapp
                             ? `${whatsapp}?text=${encodeURIComponent(
@@ -140,6 +142,7 @@ export async function CatalogPage({ path }: { path: CatalogPath }) {
                         product={product}
                         currency={currency}
                         showPrice={showPrices}
+                        canOrder={canOrder}
                         orderHref={whatsapp}
                       />
                     </Reveal>

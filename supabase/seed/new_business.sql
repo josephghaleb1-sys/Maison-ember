@@ -27,6 +27,10 @@ declare
   v_email       text := '';
   v_address     text := '';
   v_currency    text := 'USD';
+  -- Delivery areas for cash-on-delivery checkout: name => fee. Set to
+  -- '{}'::jsonb if this business doesn't deliver (checkout then still works
+  -- with no area choice, or turn checkout off in the dashboard).
+  v_zones       jsonb := '{"Beirut": 3, "Mount Lebanon": 4, "North Lebanon": 5, "South Lebanon": 5, "Bekaa": 5}'::jsonb;
   -- -------------------------------------------------------------------------
   biz_id uuid;
 begin
@@ -58,6 +62,12 @@ begin
     email = excluded.email,
     address = excluded.address,
     currency = excluded.currency;
+
+  -- Delivery areas
+  insert into public.delivery_zones (business_id, name, fee, sort_order)
+  select biz_id, zone.key, (zone.value)::numeric, ordinality
+    from jsonb_each(v_zones) with ordinality as zone(key, value, ordinality)
+  on conflict (business_id, name) do update set fee = excluded.fee;
 
   if v_hostname <> '' then
     insert into public.business_domains (business_id, hostname, is_primary)

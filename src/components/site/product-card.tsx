@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { Sparkles } from "lucide-react";
 import { WhatsAppIcon } from "@/components/site/social-icons";
+import { AddToCartButton } from "@/components/site/cart/add-to-cart-button";
 import type { Product } from "@/lib/database.types";
 import { getPublicMediaUrl } from "@/lib/storage";
 import { formatPrice } from "@/lib/utils";
@@ -32,11 +33,12 @@ interface ProductCardProps {
   categoryName?: string;
   priority?: boolean;
   /**
-   * Pre-filled WhatsApp enquiry link. Only rendered when the business has a
-   * WhatsApp number saved — plenty of businesses take orders by message
-   * rather than running a checkout.
+   * Pre-filled WhatsApp enquiry link. Used when the business takes orders by
+   * message instead of running a checkout.
    */
   orderHref?: string | null;
+  /** Show an add-to-cart control (checkout is switched on for this business). */
+  canOrder?: boolean;
 }
 
 /**
@@ -51,6 +53,7 @@ export function ProductCard({
   categoryName,
   priority = false,
   orderHref,
+  canOrder = false,
 }: ProductCardProps) {
   return (
     <Tilt className="h-full">
@@ -95,16 +98,20 @@ export function ProductCard({
             ) : (
               <span />
             )}
-            {orderHref && (
-              <a
-                href={orderHref}
-                target="_blank"
-                rel="noreferrer noopener"
-                className="inline-flex items-center gap-1.5 rounded-full border border-ink-700 px-3 py-1.5 text-[0.6875rem] font-medium uppercase tracking-[0.14em] text-ink-200 transition-colors hover:border-accent/60 hover:text-accent"
-              >
-                <WhatsAppIcon className="size-3.5" />
-                Order
-              </a>
+            {canOrder ? (
+              <AddToCartButton productId={product.id} productName={product.name} />
+            ) : (
+              orderHref && (
+                <a
+                  href={orderHref}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-ink-700 px-3 py-1.5 text-[0.6875rem] font-medium uppercase tracking-[0.14em] text-ink-200 transition-colors hover:border-accent/60 hover:text-accent"
+                >
+                  <WhatsAppIcon className="size-3.5" />
+                  Order
+                </a>
+              )
             )}
           </div>
         </div>
@@ -117,7 +124,13 @@ export function ProductCard({
  * Compact row — the right shape for menus and service lists, where people
  * scan names and prices rather than photographs.
  */
-export function ProductRowCard({ product, currency, showPrice, orderHref }: ProductCardProps) {
+export function ProductRowCard({
+  product,
+  currency,
+  showPrice,
+  orderHref,
+  canOrder = false,
+}: ProductCardProps) {
   return (
     <article className="group flex gap-4 rounded-xl border border-ink-800 bg-ink-900/60 p-4 transition-colors duration-300 hover:border-accent/40">
       <div className="relative size-20 shrink-0 overflow-hidden rounded-lg bg-ink-900 sm:size-24">
@@ -147,16 +160,24 @@ export function ProductRowCard({ product, currency, showPrice, orderHref }: Prod
         {product.description && (
           <p className="mt-1.5 text-sm leading-relaxed text-ink-300">{product.description}</p>
         )}
-        {orderHref && (
-          <a
-            href={orderHref}
-            target="_blank"
-            rel="noreferrer noopener"
-            className="mt-3 inline-flex items-center gap-1.5 text-[0.6875rem] font-medium uppercase tracking-[0.14em] text-ink-400 transition-colors hover:text-accent"
-          >
-            <WhatsAppIcon className="size-3.5" />
-            Enquire
-          </a>
+        {canOrder ? (
+          <AddToCartButton
+            productId={product.id}
+            productName={product.name}
+            className="mt-3"
+          />
+        ) : (
+          orderHref && (
+            <a
+              href={orderHref}
+              target="_blank"
+              rel="noreferrer noopener"
+              className="mt-3 inline-flex items-center gap-1.5 text-[0.6875rem] font-medium uppercase tracking-[0.14em] text-ink-400 transition-colors hover:text-accent"
+            >
+              <WhatsAppIcon className="size-3.5" />
+              Enquire
+            </a>
+          )
         )}
       </div>
     </article>

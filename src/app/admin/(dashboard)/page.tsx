@@ -1,16 +1,21 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import {
+  ClipboardList,
   Eye,
   Images,
   Palette,
   Plus,
   ShoppingBag,
   Star,
-  Tags,
 } from "lucide-react";
 import { requireBusinessContext } from "@/lib/dal";
-import { getDashboardStats, getRecentProducts, getWebsiteSettings } from "@/lib/queries/admin";
+import {
+  getDashboardStats,
+  getDeliveryZones,
+  getRecentProducts,
+  getWebsiteSettings,
+} from "@/lib/queries/admin";
 import { StatCard } from "@/components/admin/stat-card";
 import { Card, CardBody, CardHeader, CardTitle } from "@/components/ui/card";
 import { ButtonLink } from "@/components/ui/button";
@@ -28,12 +33,18 @@ function buildChecklist(input: {
   hasMedia: boolean;
   hasLogo: boolean;
   hasAbout: boolean;
+  hasDeliveryZones: boolean;
   itemNounPlural: string;
 }) {
   return [
     { done: input.hasProducts, label: `Add your ${input.itemNounPlural}`, href: "/admin/products" },
     { done: input.hasCategories, label: "Group them into categories", href: "/admin/categories" },
     { done: input.hasMedia, label: "Upload photos", href: "/admin/media" },
+    {
+      done: input.hasDeliveryZones,
+      label: "Set your delivery areas and fees",
+      href: "/admin/delivery",
+    },
     { done: input.hasLogo, label: "Add your logo and colours", href: "/admin/website" },
     { done: input.hasAbout, label: "Write your About text", href: "/admin/settings" },
   ];
@@ -41,10 +52,11 @@ function buildChecklist(input: {
 
 export default async function DashboardOverviewPage() {
   const { business, preset } = await requireBusinessContext();
-  const [stats, recentProducts, settings] = await Promise.all([
+  const [stats, recentProducts, settings, zones] = await Promise.all([
     getDashboardStats(business.id),
     getRecentProducts(business.id),
     getWebsiteSettings(business.id),
+    getDeliveryZones(business.id),
   ]);
 
   const currency = settings?.currency || "USD";
@@ -54,6 +66,7 @@ export default async function DashboardOverviewPage() {
     hasMedia: stats.totalMedia > 0,
     hasLogo: Boolean(settings?.logo_path),
     hasAbout: Boolean(settings?.about_text),
+    hasDeliveryZones: zones.length > 0,
     itemNounPlural: preset.itemNounPlural,
   });
   const remaining = checklist.filter((item) => !item.done);
@@ -69,6 +82,12 @@ export default async function DashboardOverviewPage() {
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <StatCard
+          label="New orders"
+          value={stats.newOrders}
+          icon={ClipboardList}
+          hint={stats.newOrders > 0 ? "Waiting to be confirmed" : "All caught up"}
+        />
+        <StatCard
           label={`Total ${preset.itemNounPlural}`}
           value={stats.totalProducts}
           icon={ShoppingBag}
@@ -79,14 +98,30 @@ export default async function DashboardOverviewPage() {
           icon={Eye}
           hint={`${stats.totalProducts - stats.visibleProducts} hidden`}
         />
-        <StatCard label="Categories" value={stats.totalCategories} icon={Tags} />
         <StatCard
           label="Photos"
           value={stats.totalMedia}
           icon={Images}
-          hint={`${stats.totalTestimonials} reviews`}
+          hint={`${stats.totalCategories} categories · ${stats.totalTestimonials} reviews`}
         />
       </div>
+
+      {stats.newOrders > 0 && (
+        <Link
+          href="/admin/orders"
+          className="flex items-center justify-between gap-4 rounded-xl border border-accent/40 bg-accent/10 px-5 py-4 transition-colors hover:bg-accent/15"
+        >
+          <span className="text-sm text-ink-100">
+            <span className="font-semibold text-accent">
+              {stats.newOrders} new {stats.newOrders === 1 ? "order" : "orders"}
+            </span>{" "}
+            waiting to be confirmed.
+          </span>
+          <span className="shrink-0 text-xs font-medium uppercase tracking-[0.14em] text-accent">
+            Open orders →
+          </span>
+        </Link>
+      )}
 
       {remaining.length > 0 && (
         <Card>
@@ -132,6 +167,9 @@ export default async function DashboardOverviewPage() {
           <ButtonLink href="/admin/products/new" size="sm">
             <Plus className="size-4" aria-hidden />
             <span className="capitalize">New {preset.itemNoun}</span>
+          </ButtonLink>
+          <ButtonLink href="/admin/orders" size="sm" variant="outline">
+            <ClipboardList className="size-4" aria-hidden /> View orders
           </ButtonLink>
           <ButtonLink href="/admin/website" size="sm" variant="outline">
             <Palette className="size-4" aria-hidden /> Edit website

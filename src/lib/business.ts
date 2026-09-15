@@ -8,6 +8,7 @@ import { buildBrandTheme, type BrandTheme } from "@/lib/theme";
 import type {
   Business,
   Category,
+  DeliveryZone,
   Product,
   Testimonial,
   WebsiteSettings,
@@ -171,6 +172,18 @@ export const getPublicGalleryMedia = cache(async () => {
     .eq("kind", "gallery")
     .eq("is_visible", true)
     .order("created_at", { ascending: false });
+  return data ?? [];
+});
+
+export const getPublicDeliveryZones = cache(async (): Promise<DeliveryZone[]> => {
+  const business = await getPublicBusiness();
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("delivery_zones")
+    .select("*")
+    .eq("business_id", business.id)
+    .eq("is_active", true)
+    .order("sort_order", { ascending: true });
   return data ?? [];
 });
 

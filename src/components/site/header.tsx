@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { BrandMark } from "@/components/site/brand-mark";
+import { CartButton } from "@/components/site/cart/cart-button";
 import { cn } from "@/lib/utils";
 
 export interface NavLink {
@@ -24,12 +25,14 @@ export function SiteHeader({
   links,
   ctaHref,
   ctaLabel,
+  showCart,
 }: {
   businessName: string;
   logoPath: string | null;
   links: NavLink[];
   ctaHref: string;
   ctaLabel: string;
+  showCart: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -100,10 +103,11 @@ export function SiteHeader({
           <div className="flex items-center gap-2">
             <Link
               href={ctaHref}
-              className="hidden rounded-full border border-accent/50 px-5 py-2 text-[0.75rem] font-medium uppercase tracking-[0.18em] text-accent transition-colors hover:bg-accent hover:text-on-accent sm:inline-flex"
+              className="hidden rounded-full border border-accent/50 px-5 py-2 text-[0.75rem] font-medium uppercase tracking-[0.18em] text-accent transition-colors hover:bg-accent hover:text-on-accent lg:inline-flex"
             >
               {ctaLabel}
             </Link>
+            {showCart && <CartButton />}
             <button
               type="button"
               onClick={() => setOpen((value) => !value)}

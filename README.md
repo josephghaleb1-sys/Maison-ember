@@ -31,28 +31,37 @@ different palette, fully isolated data.
 14. [Deploy to Vercel](#14-deploy-to-vercel)
 15. [Connect a custom domain](#15-connect-a-custom-domain)
 16. [Managing media](#16-managing-media)
-17. [Security notes](#17-security-notes)
-18. [Adding future businesses without duplicating the app](#18-adding-future-businesses-without-duplicating-the-app)
-19. [Project structure](#19-project-structure)
-20. [Verification performed](#20-verification-performed)
+16b. [Checkout and orders](#16b-checkout-and-orders)
+17. [Checkout and orders](#17-checkout-and-orders)
+18. [Security notes](#18-security-notes)
+19. [Adding future businesses without duplicating the app](#19-adding-future-businesses-without-duplicating-the-app)
+20. [Project structure](#20-project-structure)
+21. [Verification performed](#21-verification-performed)
 
 ---
 
 ## 1. What it does
 
 **Public website** (`/`, `/shop` · `/menu` · `/services`, `/about`, `/gallery`,
-`/contact`) — every word, price, photo, colour and meta tag comes from the
-database. Nothing about any specific business is hard-coded.
+`/contact`, `/checkout`) — every word, price, photo, colour and meta tag comes
+from the database. Nothing about any specific business is hard-coded.
+
+**Cash-on-delivery checkout** — cart, an order form built the way Lebanese
+shops sell (name, phone, area with its delivery fee, city, street, notes, pay
+on delivery), an order number, a shareable receipt and a WhatsApp confirm
+button. Orders land in the dashboard with the customer's phone and address.
 
 **Admin dashboard** (`/admin`) — sign in, then manage:
 
 | Section | What the owner can do |
 | --- | --- |
-| Overview | Counts, a setup checklist, quick actions, recent items |
+| Overview | Counts, new-order alert, a setup checklist, quick actions |
+| Orders | Every order with phone, address and items; filter by stage; call/WhatsApp the customer; move an order from New to Delivered; internal notes |
 | Catalogue | Create/edit/delete items, price, description, photo, category, visibility, order |
 | Categories | Create, rename, reorder, hide, delete (never orphans items) |
 | Media | Upload, preview, hide, delete images; reuse them as item photos |
 | Reviews | Add/hide/delete testimonials shown on the homepage |
+| Delivery | Delivery areas and fees, free-delivery threshold, minimum order, the note shown at checkout, and a switch to stop taking orders |
 | Website | Brand colours (live preview), hero copy, logo/hero/social images, currency, SEO, custom domains |
 | Business info | Name, industry, tagline, about, phone, WhatsApp, email, address, hours, social links |
 
@@ -136,12 +145,13 @@ CLI). All of them are safe to re-run.
 | `supabase/migrations/0001_init.sql` | Core tables, triggers, RLS policies, storage bucket + policies |
 | `supabase/migrations/0002_perf_indexes.sql` | Composite index for membership lookups |
 | `supabase/migrations/0003_platform_extensions.sql` | Industry, custom domains, branding/SEO columns, testimonials |
+| `supabase/migrations/0004_checkout.sql` | Orders, order items, delivery zones, checkout settings, `place_order()` and `get_order_by_token()` |
 
 Then load demo data (optional but recommended for a first run):
 
 | File | Contents |
 | --- | --- |
-| `supabase/seed/veloura_lab.sql` | Veloura Lab: settings, 5 categories, 7 products, 3 reviews |
+| `supabase/seed/veloura_lab.sql` | Veloura Lab: settings, 5 categories, 7 products, 3 reviews, 8 Lebanese delivery areas |
 | `supabase/seed/maison_ember.sql` | Second demo business (restaurant) — delete if you don't want it |
 | `supabase/seed/new_business.sql` | Template for adding a real customer |
 | `supabase/seed/link_owner.sql` | Give a user ownership of a business |
@@ -191,11 +201,13 @@ Real Supabase Auth — no mock login.
 ```
 businesses ──┬── business_members ── auth.users ── profiles
              ├── business_domains        (hostname -> business)
-             ├── website_settings        (1:1 — branding, contact, SEO)
+             ├── website_settings        (1:1 — branding, contact, SEO, checkout)
              ├── categories ──┐
              ├── products ────┘          (category_id ON DELETE SET NULL)
              ├── media                   (mirrors the "media" storage bucket)
-             └── testimonials
+             ├── testimonials
+             ├── delivery_zones          (area -> fee)
+             └── orders ── order_items   (price snapshot per line)
 ```
 
 | Table | Notes |
@@ -209,6 +221,9 @@ businesses ──┬── business_members ── auth.users ── profiles
 | `media` | `storage_path`, `kind` (`product`/`gallery`/`logo`/`hero`/`og`/`other`), `alt_text`, `is_visible` |
 | `website_settings` | Colours, hero copy, SEO, contact, hours, socials, currency |
 | `testimonials` | `author_name`, `quote`, `rating`, `is_visible`, `sort_order` |
+| `delivery_zones` | `name`, `fee`, `is_active` — the areas offered at checkout |
+| `orders` | Per-business `order_number`, unguessable `public_token`, customer + address, `status`, `subtotal`/`delivery_fee`/`total`, `admin_note` |
+| `order_items` | Snapshot of each line: name, `unit_price`, `quantity`, `line_total` (survives product edits and deletions) |
 
 UUID primary keys, foreign keys with sensible `ON DELETE` behaviour, `created_at`
 /`updated_at` timestamps (maintained by trigger), CHECK constraints on prices,
@@ -258,10 +273,26 @@ public.is_business_member(target_business_id uuid) -- is auth.uid() a member?
   `is_business_member`, so uploads and deletes can't cross businesses. Reads
   are public, which is what a website's images need.
 
+**Orders are a special case.** There is deliberately *no* INSERT policy on
+`orders` for visitors: an order can only be created through
+`public.place_order()`, a `SECURITY DEFINER` function that re-reads every
+product price and the delivery fee from the database. The browser sends product
+ids and quantities — nothing else — so a tampered request cannot change what
+anything costs. A visitor can never SELECT an order either; the customer's
+receipt page reads exactly one order through `public.get_order_by_token()`,
+matched on the unguessable token in its URL. The function also enforces the
+free-delivery threshold, the minimum order, the "ordering is closed" switch,
+per-item quantity limits and a simple per-phone rate limit.
+
 **Test them:** run `supabase/tests/rls_checks.sql` in the SQL Editor. It needs
 two rows in `auth.users`, creates its own fixtures, asserts ten isolation
 properties, and ends in `ROLLBACK` so it leaves nothing behind. A failure
 aborts with the name of the check that failed.
+
+Run `supabase/tests/checkout_checks.sql` the same way for the ordering rules:
+ten assertions covering server-side pricing, clamped quantities, cross-business
+and hidden items, the delivery fee and free-delivery threshold, anonymous read
+and write attempts, the token lookup, and per-business order numbering.
 
 ---
 
@@ -347,13 +378,70 @@ project pointing at the same database (`NEXT_PUBLIC_BUSINESS_SLUG` decides).
 
 ---
 
-## 17. Security notes
+## 17. Checkout and orders
+
+Cash on delivery, the way small shops in Lebanon actually sell — no card
+processor, no online payment, no account to create.
+
+**What the customer does**
+
+1. Adds items to the cart (it survives reloads and tabs, stored per business).
+2. Opens `/checkout` and fills one form: name, phone, second number, email
+   (optional), **area** — each with its delivery fee shown — city, street and
+   building, and any notes.
+3. Picks *Cash on delivery* and confirms. The total updates live as they
+   change area.
+4. Lands on a receipt with an order number, everything they ordered, the
+   address, and a **Confirm on WhatsApp** button pre-filled with the order
+   number. The link is theirs to keep — it shows the live status as the order
+   moves along.
+
+**What the owner does**
+
+- **Orders** lists every order newest first, filterable by stage, showing the
+  customer, phone, area and total at a glance.
+- Opening one shows the items, the full address, the customer's note, and
+  one-tap **Call** and **WhatsApp** buttons — the two things you actually do
+  when confirming a delivery.
+- Stage buttons move it: New → Confirmed → Preparing → Out for delivery →
+  Delivered (or Cancelled). The customer's receipt page updates too.
+- An internal note field keeps track of things like "called, delivering
+  Thursday". The customer never sees it.
+
+**What the owner configures** (Dashboard → Delivery)
+
+- Delivery areas and their fees — add, rename, reprice, deactivate, remove.
+  Past orders keep the area and fee they were charged.
+- Free delivery over an amount, a minimum order, the note shown at checkout,
+  and a switch that stops the website taking orders entirely (the cart
+  disappears and the site points customers to WhatsApp instead).
+
+**Why the prices can't be tampered with**
+
+The browser only ever sends product ids and quantities. Every price, the
+delivery fee, the free-delivery threshold and the minimum order are read from
+the database inside `place_order()`, and the order rows are written there —
+visitors have no INSERT permission on `orders` at all. See
+[RLS](#11-how-rls-works-and-how-to-test-it) and
+`supabase/tests/checkout_checks.sql`.
+
+**Deliberately not included**: online card payment. Adding a processor later
+means one more `payment_method` value and a payment step before
+`place_order()` — the schema already has the column.
+
+---
+
+## 18. Security notes
 
 - The service-role key is **never** used; there is no code path that could leak
   it to the browser.
 - The browser only ever sees the anon key, which is powerless without RLS
   permission.
 - `business_id` always comes from the session, never from client input.
+- Order totals are computed in Postgres, never accepted from the browser; the
+  checkout form is rate-limited per phone number and carries a honeypot field.
+- Customers' orders are unreadable to anonymous visitors; a receipt is reachable
+  only with its unguessable token.
 - All form input is validated with Zod on the server (lengths, emails, URLs,
   hex colours, currency codes, hostnames, price ranges).
 - Uploads are restricted by MIME type and size at three layers.
@@ -365,7 +453,7 @@ project pointing at the same database (`NEXT_PUBLIC_BUSINESS_SLUG` decides).
 
 ---
 
-## 18. Adding future businesses without duplicating the app
+## 19. Adding future businesses without duplicating the app
 
 The codebase separates five things on purpose:
 
@@ -382,7 +470,7 @@ plus a domain — not a fork.
 
 ---
 
-## 19. Project structure
+## 20. Project structure
 
 ```
 src/
@@ -390,16 +478,19 @@ src/
     (site)/                 public website — layout injects brand theme + SEO
       page.tsx              home
       shop|menu|services/   catalogue (industry picks the canonical path)
+      checkout/             cash-on-delivery order form
+      order/[token]/        the customer's receipt
       about, gallery, contact
     admin/
       (auth)/               login, reset-password, update-password
-      (dashboard)/          overview, products, categories, media,
-                            testimonials, website, settings
+      (dashboard)/          overview, orders, products, categories, media,
+                            testimonials, delivery, website, settings
     auth/callback/          Supabase auth redirect handler
     sitemap.ts, robots.ts   per-business, resolved from the request
   components/
     site/                   hero, brand-orb (3D), dust-field, tilt, reveal,
-                            catalog, product-card, header, footer, …
+                            catalog, product-card, checkout-form, header,
+                            footer, cart/ (store, drawer, buttons), …
     admin/                  forms, lists, rows, media picker, domain manager
     ui/                     button, card, input, dialog, badge, skeleton…
   lib/
@@ -408,7 +499,7 @@ src/
     industry.ts             per-industry vocabulary
     theme.ts                brand colours -> CSS variables
     actions/                Server Actions (auth, products, categories, media,
-                            settings, domains, testimonials)
+                            settings, domains, testimonials, orders, delivery)
     queries/admin.ts        dashboard reads
     validation/             Zod schemas
     supabase/               server, browser and proxy clients
@@ -416,6 +507,7 @@ supabase/
   migrations/               schema + RLS
   seed/                     demo data and templates
   tests/rls_checks.sql      isolation test suite
+  tests/checkout_checks.sql ordering + pricing test suite
 ```
 
 ### Performance
@@ -440,7 +532,7 @@ Images are resized before upload and served straight from Supabase's CDN.
 
 ---
 
-## 20. Verification performed
+## 21. Verification performed
 
 Automated against a local Postgres + a stand-in Supabase API, using the real
 application build:
@@ -449,10 +541,19 @@ application build:
   create/edit/hide/delete an item and see each change on the public site,
   categories, business info, brand colour, reviews, sign out, persistence
   across sessions, and cross-business isolation between two tenants.
+- 24 end-to-end checkout checks — add to cart, quantity stepper, badge count,
+  cart surviving a reload, the delivery fee following the chosen area,
+  submitting the order, the receipt (number, address, totals, WhatsApp
+  confirm), the cart emptying afterwards, a wrong token 404ing, the order
+  appearing in the dashboard, the status change reaching the customer's
+  receipt, and another business not seeing any of it.
+- 4 "ordering switched off" checks — cart hidden, cards falling back to
+  WhatsApp, `/checkout` 404, and `place_order()` refusing a direct call.
 - 5 media checks — upload, gallery visibility, picking a library image for an
   item, public rendering, hiding.
-- 10 RLS assertions (`supabase/tests/rls_checks.sql`), including a mutation
-  test proving the suite fails when a policy is loosened.
+- 10 RLS assertions (`supabase/tests/rls_checks.sql`) and 10 checkout
+  assertions (`supabase/tests/checkout_checks.sql`), each with a mutation test
+  proving the suite fails when a policy is loosened.
 - Hostname routing — the same deployment serving two businesses on two
   hostnames with different vocabulary, palette and sitemap.
 - `npm run typecheck`, `npm run lint`, `npm run build` all clean; no horizontal
@@ -464,7 +565,10 @@ application build:
   replace the `PLACEHOLDER` demo values.
 - Roles beyond `owner` exist in the schema (`admin`, `editor`) but every role
   currently has the same permissions; narrowing them is a policy change.
-- There is no checkout — the catalogue links to WhatsApp, matching how the
-  business takes orders today.
+- Checkout is cash on delivery only; there is no card payment and no stock
+  tracking (an out-of-stock item is hidden rather than counted down).
+- Order confirmation is not emailed or SMS'd: the customer keeps the receipt
+  link and the owner calls or WhatsApps them, which is how these shops work.
+  Wiring an email or SMS provider would be an addition to `place_order()`.
 - Email delivery for password resets uses Supabase's built-in SMTP; configure
   a custom SMTP provider before relying on it in production.
