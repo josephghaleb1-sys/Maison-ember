@@ -1,3 +1,4 @@
+import { requireSupabaseConfig } from "@/lib/supabase/config";
 const MEDIA_BUCKET = "media";
 
 export const MAX_UPLOAD_BYTES = 5 * 1024 * 1024; // 5MB, matches the bucket's file_size_limit
@@ -64,8 +65,8 @@ export function validateImageFile(file: File): string | null {
 
 /** Build the public URL for a file stored in the "media" bucket. */
 export function getPublicMediaUrl(storagePath: string): string {
-  const base = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-  return `${base}/storage/v1/object/public/${MEDIA_BUCKET}/${storagePath}`;
+  const { url } = requireSupabaseConfig();
+  return `${url}/storage/v1/object/public/${MEDIA_BUCKET}/${storagePath}`;
 }
 
 /** Storage paths are namespaced "{businessId}/{kind}/{filename}" so the

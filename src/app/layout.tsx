@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Inter } from "next/font/google";
 import "./globals.css";
+import { SetupRequired } from "@/components/setup-required";
+import { readSupabaseConfig } from "@/lib/supabase/config";
 
 /**
  * Two faces only: a high-contrast serif for display type and a neutral sans
@@ -31,11 +33,17 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
+  // Checked here rather than per-page: every route needs Supabase, and this is
+  // the outermost place that can still render HTML when it is absent.
+  const supabase = readSupabaseConfig();
+
   return (
     <html lang="en" className={`${display.variable} ${sans.variable} h-full antialiased`}>
       {/* The toast host lives in the admin layout, not here: the public site
           never raises toasts, and this keeps its JS payload smaller. */}
-      <body className="flex min-h-full flex-col font-sans">{children}</body>
+      <body className="flex min-h-full flex-col font-sans">
+        {supabase.ok ? children : <SetupRequired missing={supabase.missing} />}
+      </body>
     </html>
   );
 }

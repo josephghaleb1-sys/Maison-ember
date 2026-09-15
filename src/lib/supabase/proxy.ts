@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { readSupabaseConfig } from "./config";
 
 const PUBLIC_ADMIN_ROUTES = ["/admin/login", "/admin/reset-password"];
 
@@ -14,9 +15,16 @@ const PUBLIC_ADMIN_ROUTES = ["/admin/login", "/admin/reset-password"];
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
 
+  // Runs before every page. Without Supabase configured there is no session
+  // to refresh and no /admin worth gating — but throwing here would take down
+  // every route, including the page that explains what is missing. Step aside
+  // and let the root layout render that explanation instead.
+  const configured = readSupabaseConfig();
+  if (!configured.ok) return supabaseResponse;
+
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    configured.config.url,
+    configured.config.anonKey,
     {
       cookies: {
         getAll() {
