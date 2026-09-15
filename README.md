@@ -58,6 +58,7 @@ button. Orders land in the dashboard with the customer's phone and address.
 | Overview | Counts, new-order alert, a setup checklist, quick actions |
 | Orders | Every order with phone, address and items; filter by stage; call/WhatsApp the customer; move an order from New to Delivered; internal notes |
 | Catalogue | Create/edit/delete items, price, description, photo, category, visibility, order |
+| Sales | Put items on sale individually or take a percentage off a whole selection at once, with an optional end date; end one sale or all of them |
 | Categories | Create, rename, reorder, hide, delete (never orphans items) |
 | Media | Upload, preview, hide, delete images; reuse them as item photos |
 | Reviews | Add/hide/delete testimonials shown on the homepage |
@@ -150,6 +151,7 @@ CLI). All of them are safe to re-run.
 | `supabase/migrations/0003_platform_extensions.sql` | Industry, custom domains, branding/SEO columns, testimonials |
 | `supabase/migrations/0004_checkout.sql` | Orders, order items, delivery zones, checkout settings, `place_order()` and `get_order_by_token()` |
 | `supabase/migrations/0005_theme_payments_email.sql` | Light/dark site palette, order-notification address, Whish payment |
+| `supabase/migrations/0006_sales.sql` | Sale prices, `effective_price()`, and checkout charging the sale price |
 
 Then load demo data (optional but recommended for a first run):
 
@@ -221,7 +223,7 @@ businesses ──┬── business_members ── auth.users ── profiles
 | `business_members` | `(business_id, user_id, role)` — roles: `owner`, `admin`, `editor` |
 | `business_domains` | Lowercase hostname, unique; one `is_primary` per business |
 | `categories` | `name`, `sort_order`, `is_visible` |
-| `products` | `name`, `description`, `price`, `image_path`, `is_visible`, `sort_order` |
+| `products` | `name`, `description`, `price`, `sale_price`, `sale_ends_at`, `image_path`, `is_visible`, `sort_order` |
 | `media` | `storage_path`, `kind` (`product`/`gallery`/`logo`/`hero`/`og`/`other`), `alt_text`, `is_visible` |
 | `website_settings` | Colours, hero copy, SEO, contact, hours, socials, currency |
 | `testimonials` | `author_name`, `quote`, `rating`, `is_visible`, `sort_order` |
@@ -493,6 +495,28 @@ visitors have no INSERT permission on `orders` at all. See
 [RLS](#11-how-rls-works-and-how-to-test-it) and
 `supabase/tests/checkout_checks.sql`.
 
+### Sales
+
+**Dashboard → Sales** is where a shop runs a promotion:
+
+- Set a sale price on one item, with an optional end date.
+- Or tick several items, choose a percentage, and each sale price is worked
+  out from that item's own price ("25% off these six").
+- End one sale, or end them all at once.
+
+On the website, a discounted item shows its old price struck through, a
+−N% badge on the photo, and appears in an **On sale** group at the top of the
+catalogue plus a strip on the homepage — all of which disappear on their own
+when nothing is discounted.
+
+**The price a customer is charged is decided in the database.**
+`public.effective_price(price, sale_price, sale_ends_at)` is the single
+definition of "what does this cost right now", and `place_order()` uses it for
+every line. So a cart loaded during a sale that is checked out after it ends
+pays the normal price, and a sale price that isn't actually lower is rejected
+by a CHECK constraint rather than by the form. `src/lib/pricing.ts` mirrors the
+same rule for display only.
+
 **Deliberately not included**: online card payment. Adding a processor later
 means one more `payment_method` value and a payment step before
 `place_order()` — the schema already has the column.
@@ -626,6 +650,11 @@ application build:
   receipt, and another business not seeing any of it.
 - 4 "ordering switched off" checks — cart hidden, cards falling back to
   WhatsApp, `/checkout` 404, and `place_order()` refusing a direct call.
+- 16 sale checks — the dashboard page, saving a sale, refusing one that isn't a
+  discount, the badge and struck-through price on the catalogue and homepage,
+  checkout totals and the stored order line both using the sale price, an
+  expired sale reverting, ending one sale, a bulk percentage applied per item,
+  and End all.
 - 6 Whish checks — the option appearing only when enabled, the shop's number
   shown, the reference stored on the order and surfaced in the dashboard, and
   the database refusing Whish when the shop hasn't turned it on.
@@ -642,9 +671,10 @@ application build:
   its own while the rest of the batch still uploads, public rendering with no
   broken images, a product photo through the form, and an oversized logo
   explained before the form is saved.
-- 10 RLS assertions (`supabase/tests/rls_checks.sql`) and 10 checkout
-  assertions (`supabase/tests/checkout_checks.sql`), each with a mutation test
-  proving the suite fails when a policy is loosened.
+- 10 RLS assertions (`supabase/tests/rls_checks.sql`), 10 checkout assertions
+  (`supabase/tests/checkout_checks.sql`) and 6 sale-pricing assertions
+  (`supabase/tests/sale_checks.sql`), each with a mutation test proving the
+  suite fails when the rule it guards is broken.
 - Hostname routing — the same deployment serving two businesses on two
   hostnames with different vocabulary, palette and sitemap.
 - An accessibility sweep over every public page and the sign-in screen: images

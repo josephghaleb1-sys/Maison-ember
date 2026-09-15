@@ -1,3 +1,4 @@
+import { priceView } from "@/lib/pricing";
 import { toNumber } from "@/lib/utils";
 import type { Product } from "@/lib/database.types";
 
@@ -10,17 +11,24 @@ import type { Product } from "@/lib/database.types";
 export interface CatalogEntry {
   id: string;
   name: string;
+  /** What the customer pays today — the sale price while a sale is running. */
   price: number;
+  /** The normal price, present only while a sale is running. */
+  wasPrice: number | null;
   imagePath: string | null;
 }
 
 export function toCatalogEntries(products: Product[]): CatalogEntry[] {
-  return products.map((product) => ({
-    id: product.id,
-    name: product.name,
-    price: toNumber(product.price),
-    imagePath: product.image_path,
-  }));
+  return products.map((product) => {
+    const view = priceView(product);
+    return {
+      id: product.id,
+      name: product.name,
+      price: view.current,
+      wasPrice: view.was,
+      imagePath: product.image_path,
+    };
+  });
 }
 
 export interface CartLineView extends CatalogEntry {

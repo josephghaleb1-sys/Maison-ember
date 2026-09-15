@@ -10,6 +10,7 @@ import { VisibilityToggle } from "@/components/ui/visibility-toggle";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { formatPrice } from "@/lib/utils";
+import { priceView } from "@/lib/pricing";
 import { deleteProduct, setProductVisibility, moveProduct } from "@/lib/actions/products";
 
 export function ProductRow({
@@ -30,6 +31,7 @@ export function ProductRow({
 }) {
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
+  const view = priceView(product);
 
   function move(direction: "up" | "down") {
     startTransition(async () => {
@@ -46,7 +48,16 @@ export function ProductRow({
         <div className="min-w-0">
           <p className="truncate text-sm font-medium text-ink-50">{product.name}</p>
           <p className="text-sm text-ink-400">
-            {formatPrice(product.price, currency)}
+            {view.onSale ? (
+              <>
+                <span className="font-medium text-accent">
+                  {formatPrice(view.current, currency)}
+                </span>{" "}
+                <span className="line-through">{formatPrice(product.price, currency)}</span>
+              </>
+            ) : (
+              formatPrice(product.price, currency)
+            )}
             {categoryName && <span className="text-ink-500"> · {categoryName}</span>}
           </p>
         </div>

@@ -10,6 +10,7 @@ import {
 } from "@/lib/business";
 import { getPublicMediaUrl } from "@/lib/storage";
 import { whatsappHref } from "@/lib/contact";
+import { priceView } from "@/lib/pricing";
 import { Hero } from "@/components/site/hero";
 import { Marquee } from "@/components/site/marquee";
 import { ProductCard, ProductRowCard } from "@/components/site/product-card";
@@ -32,7 +33,13 @@ export default async function HomePage() {
   const currency = settings?.currency || "USD";
   const showPrices = settings?.show_prices ?? true;
   const canOrder = settings?.checkout_enabled ?? true;
-  const featured = products.slice(0, preset.layout === "grid" ? 4 : 6);
+  const onSale = products.filter((product) => priceView(product).onSale);
+  // Featured skips whatever the sale strip is already showing, so the page
+  // doesn't repeat itself when a sale is running.
+  const saleIds = new Set(onSale.slice(0, 4).map((product) => product.id));
+  const featured = products
+    .filter((product) => !saleIds.has(product.id))
+    .slice(0, preset.layout === "grid" ? 4 : 6);
   const featuredGallery = gallery.slice(0, 5);
   const categoryById = new Map(categories.map((category) => [category.id, category.name]));
   const whatsapp = whatsappHref(settings?.whatsapp || settings?.phone);
@@ -64,8 +71,39 @@ export default async function HomePage() {
 
       <Marquee items={[...preset.highlights, ...categories.slice(0, 4).map((c) => c.name)]} />
 
-      {featured.length > 0 && (
+      {onSale.length > 0 && (
         <Section>
+          <SectionHeading
+            eyebrow="Limited time"
+            title="On sale now"
+            link={{ href: preset.catalogPath, label: `All ${preset.itemNounPlural}` }}
+          />
+          <div className="mt-12 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {onSale.slice(0, 4).map((product, index) => (
+              <Reveal key={product.id} delay={index * 90} className="h-full">
+                <ProductCard
+                  product={product}
+                  currency={currency}
+                  showPrice={showPrices}
+                  canOrder={canOrder}
+                  categoryName={
+                    product.category_id ? categoryById.get(product.category_id) : undefined
+                  }
+                  priority={index < 2}
+                  orderHref={
+                    whatsapp && `${whatsapp}?text=${encodeURIComponent(
+                      `Hi ${businessName}! I'd like to order: ${product.name}`,
+                    )}`
+                  }
+                />
+              </Reveal>
+            ))}
+          </div>
+        </Section>
+      )}
+
+      {featured.length > 0 && (
+        <Section className={onSale.length > 0 ? "pt-0" : undefined}>
           <SectionHeading
             eyebrow="Curated"
             title={preset.featuredHeading}

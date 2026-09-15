@@ -340,7 +340,12 @@ export function CheckoutForm({
                     {item.quantity}
                   </span>
                 </div>
-                <span className="min-w-0 flex-1 truncate text-sm text-ink-100">{item.name}</span>
+                <span className="min-w-0 flex-1 truncate text-sm text-ink-100">
+                  {item.name}
+                  {item.wasPrice !== null && (
+                    <span className="ml-1.5 text-xs text-accent">on sale</span>
+                  )}
+                </span>
                 <span className="text-sm text-ink-300">
                   {formatPrice(item.lineTotal, currency)}
                 </span>

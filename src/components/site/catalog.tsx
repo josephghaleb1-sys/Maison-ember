@@ -7,6 +7,7 @@ import {
   getSiteContext,
 } from "@/lib/business";
 import { whatsappHref } from "@/lib/contact";
+import { priceView } from "@/lib/pricing";
 import type { CatalogPath } from "@/lib/industry";
 import { ProductCard, ProductRowCard } from "@/components/site/product-card";
 import { Reveal } from "@/components/site/reveal";
@@ -45,6 +46,8 @@ export async function CatalogPage({ path }: { path: CatalogPath }) {
   const canOrder = settings?.checkout_enabled ?? true;
   const whatsapp = whatsappHref(settings?.whatsapp || settings?.phone);
 
+  const onSale = products.filter((product) => priceView(product).onSale);
+
   const grouped = categories
     .map((category) => ({
       id: category.id,
@@ -54,10 +57,17 @@ export async function CatalogPage({ path }: { path: CatalogPath }) {
     .filter((group) => group.items.length > 0);
 
   const uncategorized = products.filter((product) => !product.category_id);
-  const sections =
+  const categorised =
     uncategorized.length > 0
       ? [...grouped, { id: "more", name: grouped.length > 0 ? "More" : preset.catalogHeading, items: uncategorized }]
       : grouped;
+
+  // Discounted items also appear in their own category below; showing them
+  // together first is what people come to a sale for.
+  const sections =
+    onSale.length > 0
+      ? [{ id: "on-sale", name: "On sale", items: onSale }, ...categorised]
+      : categorised;
 
   return (
     <>

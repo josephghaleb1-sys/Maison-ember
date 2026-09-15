@@ -4,8 +4,8 @@ import { WhatsAppIcon } from "@/components/site/social-icons";
 import { AddToCartButton } from "@/components/site/cart/add-to-cart-button";
 import type { Product } from "@/lib/database.types";
 import { getPublicMediaUrl } from "@/lib/storage";
-import { formatPrice } from "@/lib/utils";
 import { Tilt } from "@/components/site/tilt";
+import { Price, SaleBadge } from "@/components/site/price";
 
 /**
  * Deterministic 0-1 value from an id — used to vary the placeholder gradient
@@ -82,6 +82,7 @@ export function ProductCard({
             className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink-950/80 via-transparent to-transparent"
             aria-hidden
           />
+          <SaleBadge product={product} className="absolute left-3 top-3" />
         </div>
 
         <div className="flex flex-1 flex-col gap-2 p-5">
@@ -94,9 +95,7 @@ export function ProductCard({
           )}
           <div className="mt-auto flex items-center justify-between gap-3 pt-4">
             {showPrice ? (
-              <p className="text-sm font-medium tracking-wide text-accent">
-                {formatPrice(product.price, currency)}
-              </p>
+              <Price product={product} currency={currency} className="text-sm" />
             ) : (
               <span />
             )}
@@ -136,6 +135,7 @@ export function ProductRowCard({
   return (
     <article className="group flex gap-4 rounded-xl border border-ink-800 bg-ink-900/60 p-4 transition-colors duration-300 hover:border-accent/40">
       <div className="relative size-20 shrink-0 overflow-hidden rounded-lg bg-ink-900 sm:size-24">
+        <SaleBadge product={product} className="absolute left-1 top-1 px-1.5 py-0.5 text-[0.5625rem]" />
         {product.image_path ? (
           <Image
             src={getPublicMediaUrl(product.image_path)}
@@ -154,9 +154,7 @@ export function ProductRowCard({
         <div className="flex items-baseline justify-between gap-3">
           <h3 className="font-display text-lg font-semibold text-ink-50">{product.name}</h3>
           {showPrice && (
-            <span className="shrink-0 text-sm font-medium text-accent">
-              {formatPrice(product.price, currency)}
-            </span>
+            <Price product={product} currency={currency} size="sm" className="shrink-0 text-sm" />
           )}
         </div>
         {product.description && (

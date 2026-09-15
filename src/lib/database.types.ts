@@ -73,6 +73,10 @@ export type Product = {
   name: string;
   description: string;
   price: number;
+  /** While a sale is running this is what the customer pays. */
+  sale_price: number | null;
+  /** When the sale stops. Null means it runs until the owner ends it. */
+  sale_ends_at: string | null;
   image_path: string | null;
   is_visible: boolean;
   sort_order: number;
@@ -472,6 +476,8 @@ export type Database = {
           name: string;
           description?: string;
           price?: number;
+          sale_price?: number | null;
+          sale_ends_at?: string | null;
           image_path?: string | null;
           is_visible?: boolean;
           sort_order?: number;
@@ -485,6 +491,8 @@ export type Database = {
           name?: string;
           description?: string;
           price?: number;
+          sale_price?: number | null;
+          sale_ends_at?: string | null;
           image_path?: string | null;
           is_visible?: boolean;
           sort_order?: number;

@@ -110,6 +110,11 @@ export function CartDrawer({
                     <p className="truncate text-sm font-medium text-ink-50">{item.name}</p>
                     <p className="mt-0.5 text-xs text-ink-400">
                       {formatPrice(item.price, currency)} each
+                      {item.wasPrice !== null && (
+                        <span className="ml-1.5 text-ink-500 line-through">
+                          {formatPrice(item.wasPrice, currency)}
+                        </span>
+                      )}
                     </p>
 
                     <div className="mt-2.5 flex items-center gap-3">

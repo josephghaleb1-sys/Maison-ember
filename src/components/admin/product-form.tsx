@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { ImagePlus, Images, X } from "lucide-react";
+import { ImagePlus, Images, Tag, X } from "lucide-react";
 import type { Category, Media, Product } from "@/lib/database.types";
 import type { FormState } from "@/lib/actions/auth";
 import { Button, ButtonLink } from "@/components/ui/button";
@@ -189,6 +189,24 @@ export function ProductForm({
           </p>
         )}
       </div>
+
+      {product && (
+        <div className="rounded-xl border border-ink-800 p-4">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-sm font-medium text-ink-50">Sale</p>
+              <p className="mt-0.5 text-xs text-ink-500">
+                {product.sale_price !== null
+                  ? `On sale at ${currency} ${product.sale_price}.`
+                  : "Not on sale."}
+              </p>
+            </div>
+            <ButtonLink href="/admin/sales" variant="outline" size="sm">
+              <Tag className="size-4" aria-hidden /> Manage sales
+            </ButtonLink>
+          </div>
+        </div>
+      )}
 
       <label className="flex items-center gap-2 text-sm font-medium text-ink-200">
         <input
