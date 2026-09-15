@@ -64,9 +64,9 @@ begin
     'The Touch of Luxury',
     'Premium beauty tools and skincare, curated for everyday ritual — delivered across Lebanon with cash on delivery.',
     'Shop the collection',
-    '#7d1230',                             -- wine, from the logo's velvet
+    '#a5122b',                             -- deep red; the surfaces are mixed from it
     '#b8893b',                             -- gold, from the wordmark
-    'light',                               -- ivory surface: the product photography is pale
+    'dark',                                -- near-black ground, bled through with the red above
     'Veloura Lab | Premium Beauty & Skincare',
     'Discover beauty, skincare, makeup, and self-care essentials at Veloura Lab. Shop quality beauty products in Lebanon and find your new favorites.',
     '+961 70 349 245',
