@@ -331,7 +331,7 @@ begin
         allowed_mime_types = excluded.allowed_mime_types;
 exception
   when insufficient_privilege then
-    raise notice 'Could not create the "media" bucket from SQL. Create it in the Dashboard: Storage -> New bucket -> name "media", Public ON, file size limit 5MB.';
+    raise warning 'Could not create the "media" bucket from SQL. Create it in the Dashboard: Storage -> New bucket -> name "media", Public ON, file size limit 5MB.';
 end;
 $$;
 
@@ -379,6 +379,6 @@ begin
     );
 exception
   when insufficient_privilege then
-    raise notice 'Could not create the storage policies from SQL (this project restricts it). Create them in the Dashboard: Storage -> Policies -> New policy on objects. See README "If photo uploads fail" for the four policies to add.';
+    raise warning 'Could not create the storage policies from SQL (this project restricts it). Create them in the Dashboard: Storage -> Policies -> New policy on objects. See README "If photo uploads fail" for the four policies to add.';
 end;
 $$;
