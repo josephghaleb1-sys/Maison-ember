@@ -4,7 +4,6 @@ import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { CheckCircle2, UploadCloud, XCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Select, Label } from "@/components/ui/input";
 import { registerUploadedMedia } from "@/lib/actions/media";
 import { compressImageFile } from "@/lib/image-compress";
@@ -144,10 +143,12 @@ export function MediaUploadForm({ businessId }: { businessId: string }) {
             they upload.
           </p>
         </div>
-        <Button type="button" loading={busy} onClick={() => inputRef.current?.click()}>
-          <UploadCloud className="size-4" aria-hidden />
-          {busy ? "Uploading…" : "Choose photos"}
-        </Button>
+        {/* The file input is the control; a second button beside it would be
+            redundant, so this is just a status line. */}
+        <p className="flex items-center gap-2 pb-2.5 text-sm text-ink-400 sm:w-36">
+          <UploadCloud className={busy ? "size-4 animate-pulse text-accent" : "size-4"} aria-hidden />
+          {busy ? "Uploading…" : "Ready"}
+        </p>
       </div>
 
       {progress.length > 0 && (
