@@ -151,6 +151,13 @@ about **storage**, which is the one failure that breaks photo uploads later
 `scripts/build-setup-sql.sh`; regenerate it after changing any migration or
 the seed rather than editing it by hand.
 
+After running it, confirm the result with `supabase/tests/verify_install.sql`
+— paste it into the SQL Editor and every row should read `OK` (`Your login`
+reads `PENDING` until [section 7](#7-create-the-first-user)). It is read-only,
+and it is the reliable way to check the storage bucket and its policies, whose
+setup failures are raised as warnings the SQL Editor does not always display
+— on a phone it shows none at all.
+
 **Or run the files individually** in order in **Supabase → SQL Editor** (or
 via the Supabase CLI). All of them are safe to re-run.
 
