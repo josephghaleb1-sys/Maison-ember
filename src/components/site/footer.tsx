@@ -77,7 +77,7 @@ export function SiteFooter({
         </div>
 
         <div>
-          <h3 className="eyebrow text-accent">Explore</h3>
+          <h2 className="eyebrow text-accent">Explore</h2>
           <ul className="mt-4 space-y-2.5 text-sm">
             {links.map((link) => (
               <li key={link.href}>
@@ -90,7 +90,7 @@ export function SiteFooter({
         </div>
 
         <div>
-          <h3 className="eyebrow text-accent">Contact</h3>
+          <h2 className="eyebrow text-accent">Contact</h2>
           <ul className="mt-4 space-y-3 text-sm text-ink-300">
             {settings?.address && (
               <li className="flex items-start gap-2.5">
@@ -121,7 +121,7 @@ export function SiteFooter({
 
           {hourEntries.length > 0 && (
             <>
-              <h3 className="eyebrow mt-8 text-accent">Hours</h3>
+              <h2 className="eyebrow mt-8 text-accent">Hours</h2>
               <ul className="mt-4 space-y-1.5 text-sm">
                 {hourEntries.map(([key, label]) => (
                   <li key={key} className="flex justify-between gap-4">

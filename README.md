@@ -386,9 +386,9 @@ processor, no online payment, no account to create.
 **What the customer does**
 
 1. Adds items to the cart (it survives reloads and tabs, stored per business).
-2. Opens `/checkout` and fills one form: name, phone, second number, email
-   (optional), **area** — each with its delivery fee shown — city, street and
-   building, and any notes.
+2. Opens `/checkout` and fills one form: name, phone, email (optional),
+   **area** — each with its delivery fee shown — city, street and building,
+   and any notes.
 3. Picks *Cash on delivery* and confirms. The total updates live as they
    change area.
 4. Lands on a receipt with an order number, everything they ordered, the
@@ -520,6 +520,12 @@ one small Canvas particle field:
 
 - the 3D hero (orbiting rings, faceted gem) is CSS `preserve-3d` + keyframes,
   not WebGL: no library, no textures, no per-frame JavaScript;
+- scrolling drives the scene: one passive listener, coalesced into a single
+  `requestAnimationFrame`, writes one CSS variable (`--scroll-progress`) on the
+  hero; every layer — backdrop, copy, rings, gem — moves at its own rate off
+  that variable, purely with transforms and opacity. The listener is attached
+  only while the hero is on screen. Measured on a 4×-throttled mobile CPU:
+  zero long tasks and ~47fps through a full-page scroll;
 - pointer parallax and card tilt write a single transform and park their rAF
   loop as soon as the pointer settles;
 - the particle canvas caps device-pixel-ratio at 2 and suspends itself when the
@@ -556,11 +562,17 @@ application build:
   proving the suite fails when a policy is loosened.
 - Hostname routing — the same deployment serving two businesses on two
   hostnames with different vocabulary, palette and sitemap.
+- An accessibility sweep over every public page and the sign-in screen: images
+  with alt text, every form control labelled, every button and link with an
+  accessible name, one `h1` per page with no skipped heading levels.
 - `npm run typecheck`, `npm run lint`, `npm run build` all clean; no horizontal
   overflow and no console errors at 1440px and 390px on every public page.
 
 **Known limitations / setup still required**
 
+- **Nothing is deployed yet.** The app is Vercel-ready but has never been
+  hosted — deploying needs your own Supabase project and Vercel account. See
+  [Deploy to Vercel](#14-deploy-to-vercel).
 - Real photos, the real contact email, real prices, hours and reviews must
   replace the `PLACEHOLDER` demo values.
 - Roles beyond `owner` exist in the schema (`admin`, `editor`) but every role

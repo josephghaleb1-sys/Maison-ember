@@ -3,6 +3,7 @@ import { getPublicMediaUrl } from "@/lib/storage";
 import { BrandOrb } from "@/components/site/brand-orb";
 import { DustField } from "@/components/site/dust-field";
 import { getInitials } from "@/components/site/brand-mark";
+import { ScrollScene } from "@/components/site/scroll-scene";
 import type { BrandTheme } from "@/lib/theme";
 
 /**
@@ -13,6 +14,13 @@ import type { BrandTheme } from "@/lib/theme";
  * stage + orbiting rings + drifting motes) carries the page, so a brand-new
  * business still looks finished. Either way the copy comes from
  * website_settings.
+ *
+ * Scrolling drives the scene: <ScrollScene> publishes the hero's own progress
+ * as --scroll-progress, and each layer moves at a different rate off it — the
+ * backdrop drifts down, the copy lifts and fades, the 3D mark recedes and
+ * tilts. Different rates are what read as depth. All of it is transform and
+ * opacity, so it runs on the compositor, and it stops entirely once the hero
+ * leaves the viewport or the visitor prefers reduced motion.
  */
 export function Hero({
   imagePath,
@@ -34,7 +42,8 @@ export function Hero({
   const hasPhoto = Boolean(imagePath);
 
   return (
-    <section className="relative isolate flex min-h-[92svh] items-center overflow-hidden">
+    <ScrollScene className="relative isolate block min-h-[92svh] overflow-hidden">
+    <section className="relative flex min-h-[92svh] items-center">
       {/* ---- Backdrop ---- */}
       {hasPhoto ? (
         <>
@@ -44,7 +53,10 @@ export function Hero({
             fill
             priority
             sizes="100vw"
-            className="-z-10 object-cover"
+            className="-z-10 scale-110 object-cover will-change-transform"
+            style={{
+              transform: "translate3d(0, calc(var(--scroll-progress, 0) * 9vh), 0)",
+            }}
           />
           <div
             className="absolute inset-0 -z-10"
@@ -56,7 +68,11 @@ export function Hero({
           />
         </>
       ) : (
-        <div className="absolute inset-0 -z-10" aria-hidden>
+        <div
+          className="absolute inset-0 -z-10 will-change-transform"
+          style={{ transform: "translate3d(0, calc(var(--scroll-progress, 0) * 7vh), 0)" }}
+          aria-hidden
+        >
           {/* Velvet stage: a deep brand-coloured wash with soft folds. Pure
               CSS gradients — no image weight, no layout cost. */}
           <div
@@ -85,7 +101,13 @@ export function Hero({
       />
 
       <div className="mx-auto grid w-full max-w-6xl grid-cols-1 items-center gap-10 px-4 pb-20 pt-28 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:gap-6 lg:pb-28 lg:pt-32">
-        <div className="max-w-xl">
+        <div
+          className="max-w-xl will-change-transform"
+          style={{
+            transform: "translate3d(0, calc(var(--scroll-progress, 0) * -6vh), 0)",
+            opacity: "calc(1 - var(--scroll-progress, 0) * 1.1)",
+          }}
+        >
           {eyebrow && (
             <p className="animate-fade-up eyebrow text-accent">{eyebrow}</p>
           )}
@@ -116,7 +138,14 @@ export function Hero({
         {/* The 3D mark only earns its place when there's no hero photo
             competing with it. */}
         {!hasPhoto && (
-          <div className="flex justify-center lg:justify-end">
+          <div
+            className="flex justify-center will-change-transform lg:justify-end"
+            style={{
+              transform:
+                "perspective(1200px) translate3d(0, calc(var(--scroll-progress, 0) * 12vh), 0) rotateX(calc(var(--scroll-progress, 0) * 18deg)) scale(calc(1 - var(--scroll-progress, 0) * 0.18))",
+              opacity: "calc(1 - var(--scroll-progress, 0) * 0.65)",
+            }}
+          >
             <BrandOrb monogram={getInitials(businessName)} />
           </div>
         )}
@@ -125,6 +154,7 @@ export function Hero({
       {/* Scroll cue — a slow travelling highlight inside a hairline. */}
       <div
         className="absolute inset-x-0 bottom-8 hidden justify-center sm:flex"
+        style={{ opacity: "calc(1 - var(--scroll-progress, 0) * 3)" }}
         aria-hidden
       >
         <span className="flex h-10 w-6 items-start justify-center rounded-full border border-accent/35 p-1.5">
@@ -134,5 +164,6 @@ export function Hero({
 
       <div className="hairline-accent absolute inset-x-0 bottom-0 h-px" aria-hidden />
     </section>
+    </ScrollScene>
   );
 }

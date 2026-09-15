@@ -48,7 +48,6 @@ export async function placeOrder(_prevState: FormState, formData: FormData): Pro
     p_city: parsed.data.city,
     p_address_details: parsed.data.address_details,
     p_notes: parsed.data.notes,
-    p_customer_phone_alt: parsed.data.customer_phone_alt,
     p_customer_email: parsed.data.customer_email,
   });
 

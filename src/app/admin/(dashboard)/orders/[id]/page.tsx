@@ -73,14 +73,6 @@ export default async function OrderDetailPage(props: PageProps<"/admin/orders/[i
                 {order.customer_phone}
               </a>
             </p>
-            {order.customer_phone_alt && (
-              <p className="flex items-center gap-2 text-ink-300">
-                <Phone className="size-4 shrink-0 text-ink-600" aria-hidden />
-                <a href={`tel:${order.customer_phone_alt}`} className="hover:text-accent">
-                  {order.customer_phone_alt}
-                </a>
-              </p>
-            )}
             {order.customer_email && (
               <p className="flex items-center gap-2 break-all text-ink-300">
                 <Mail className="size-4 shrink-0 text-accent/70" aria-hidden />

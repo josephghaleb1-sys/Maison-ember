@@ -52,6 +52,10 @@ create table if not exists public.orders (
 
   customer_name text not null check (length(btrim(customer_name)) between 2 and 120),
   customer_phone text not null check (length(btrim(customer_phone)) between 6 and 40),
+  -- Optional back-up number. The checkout form doesn't ask for one (one number
+  -- is enough when every order is confirmed by a phone call), but the column
+  -- and the place_order() parameter stay so it can be re-added without a
+  -- migration.
   customer_phone_alt text not null default '',
   customer_email text not null default '',
 

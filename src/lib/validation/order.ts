@@ -24,16 +24,6 @@ export const checkoutSchema = z.object({
     .min(2, "Enter your full name.")
     .max(120),
   customer_phone: phone,
-  customer_phone_alt: z
-    .string()
-    .trim()
-    .max(40)
-    .optional()
-    .default("")
-    .refine(
-      (value) => value === "" || value.replace(/\D/g, "").length >= 7,
-      "Enter a valid second number, or leave it empty.",
-    ),
   customer_email: z
     .string()
     .trim()

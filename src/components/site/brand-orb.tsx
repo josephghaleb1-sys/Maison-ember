@@ -131,7 +131,15 @@ function Ring({
   reverse?: boolean;
 }) {
   return (
-    <div className="absolute inset-0" style={{ transform: tilt, transformStyle: "preserve-3d" }}>
+    <div
+      className="absolute inset-0"
+      style={{
+        // The scroll-driven half turn rides on top of the constant spin, so
+        // the rings visibly wind on as the page moves.
+        transform: `${tilt} rotate(calc(var(--scroll-progress, 0) * ${reverse ? "-" : ""}140deg))`,
+        transformStyle: "preserve-3d",
+      }}
+    >
       <div
         className="absolute rounded-full border border-accent/70"
         style={{

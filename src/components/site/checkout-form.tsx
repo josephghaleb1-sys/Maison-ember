@@ -134,23 +134,13 @@ export function CheckoutForm({
               hint="We call to confirm before delivery."
             />
             <Field
-              label="Second number"
-              name="customer_phone_alt"
-              type="tel"
-              inputMode="tel"
+              label="Email"
+              name="customer_email"
+              type="email"
+              autoComplete="email"
               placeholder="Optional"
-              maxLength={40}
+              maxLength={160}
             />
-            <div className="sm:col-span-2">
-              <Field
-                label="Email"
-                name="customer_email"
-                type="email"
-                autoComplete="email"
-                placeholder="Optional"
-                maxLength={160}
-              />
-            </div>
           </div>
         </section>
 
