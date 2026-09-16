@@ -161,7 +161,7 @@ export default async function DashboardOverviewPage() {
             <CardTitle>Recently added</CardTitle>
             <Link
               href="/admin/products"
-              className="text-sm font-medium text-ember-400 hover:underline"
+              className="text-sm font-medium text-accent-400 hover:underline"
             >
               View all
             </Link>

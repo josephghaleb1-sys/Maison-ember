@@ -61,7 +61,7 @@ export function ConfirmDialog({
               <div
                 className={cn(
                   "flex size-10 shrink-0 items-center justify-center rounded-full",
-                  danger ? "bg-red-500/15 text-red-400" : "bg-ember-500/15 text-ember-300",
+                  danger ? "bg-red-500/15 text-red-400" : "bg-accent-500/15 text-accent-300",
                 )}
               >
                 <AlertTriangle className="size-5" aria-hidden />

@@ -37,7 +37,7 @@ export function VisibilityToggle({ checked, label, action }: VisibilityTogglePro
       onClick={toggle}
       className={cn(
         "relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors disabled:opacity-50",
-        checked ? "bg-ember-600" : "bg-charcoal-700",
+        checked ? "bg-accent-600" : "bg-charcoal-700",
       )}
     >
       <span

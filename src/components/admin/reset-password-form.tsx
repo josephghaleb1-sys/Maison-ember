@@ -15,7 +15,7 @@ export function ResetPasswordForm() {
     return (
       <div className="space-y-4">
         <p className="text-sm text-charcoal-200">{state.message}</p>
-        <Link href="/admin/login" className="text-sm font-medium text-ember-400 hover:underline">
+        <Link href="/admin/login" className="text-sm font-medium text-accent-400 hover:underline">
           Back to sign in
         </Link>
       </div>

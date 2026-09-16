@@ -45,7 +45,7 @@ export function MobileMoreMenu({ items }: { items: MoreItem[] }) {
         aria-haspopup="menu"
         className={cn(
           "flex flex-1 flex-col items-center gap-0.5 py-2 text-[11px] font-medium",
-          active ? "text-ember-400" : "text-charcoal-500",
+          active ? "text-accent-400" : "text-charcoal-500",
         )}
       >
         <MoreHorizontal className="size-5" aria-hidden />
@@ -86,7 +86,7 @@ export function MobileMoreMenu({ items }: { items: MoreItem[] }) {
                     className={cn(
                       "flex items-center gap-3 rounded-lg px-3 py-3.5 text-sm font-medium",
                       pathname.startsWith(item.href)
-                        ? "bg-ember-600 text-white"
+                        ? "bg-accent-600 text-white"
                         : "text-charcoal-200 hover:bg-charcoal-800",
                     )}
                   >

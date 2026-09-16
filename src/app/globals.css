@@ -10,7 +10,7 @@
       component may hard-code a color, or that business's branding stops
       working.
 
-   2. ADMIN CHROME (--color-charcoal-* / --color-ember-*)
+   2. ADMIN CHROME (--color-charcoal-* / --color-accent-*)
       The dashboard's own product UI. This is the platform's interface, not
       any customer's brand, so it stays fixed across tenants — the same way a
       commerce back office looks the same to every merchant using it.
@@ -73,17 +73,17 @@
   --color-line-strong: var(--line-strong);
 
   /* --- Admin chrome: fixed platform palette --- */
-  --color-ember-50: #fbf3e3;
-  --color-ember-100: #f3e2b8;
-  --color-ember-200: #e7c883;
-  --color-ember-300: #ddb158;
-  --color-ember-400: #d4a03a;
-  --color-ember-500: #c08a24;
-  --color-ember-600: #a6741c;
-  --color-ember-700: #8a5f17;
-  --color-ember-800: #6e4b13;
-  --color-ember-900: #543910;
-  --color-ember-950: #33220a;
+  --color-accent-50: #fbf3e3;
+  --color-accent-100: #f3e2b8;
+  --color-accent-200: #e7c883;
+  --color-accent-300: #ddb158;
+  --color-accent-400: #d4a03a;
+  --color-accent-500: #c08a24;
+  --color-accent-600: #a6741c;
+  --color-accent-700: #8a5f17;
+  --color-accent-800: #6e4b13;
+  --color-accent-900: #543910;
+  --color-accent-950: #33220a;
 
   --color-charcoal-50: #f7f5f3;
   --color-charcoal-100: #ece7e2;

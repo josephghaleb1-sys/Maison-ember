@@ -29,7 +29,7 @@ export default async function AuthLayout({ children }: { children: React.ReactNo
           ) : (
             <span
               aria-hidden
-              className="flex size-12 items-center justify-center rounded-full bg-ember-600 font-display text-xl font-semibold text-white"
+              className="flex size-12 items-center justify-center rounded-full bg-accent-600 font-display text-xl font-semibold text-white"
             >
               {name.trim().charAt(0).toUpperCase()}
             </span>

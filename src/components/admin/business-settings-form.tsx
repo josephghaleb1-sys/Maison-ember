@@ -34,7 +34,7 @@ export function BusinessSettingsForm({
               name="business_type"
               defaultValue={business.business_type}
               disabled={!canManage}
-              className="h-10 w-full rounded-lg border border-charcoal-700 bg-charcoal-900 px-3 text-sm text-cream-50 focus:border-ember-500 focus:outline-none disabled:opacity-50"
+              className="h-10 w-full rounded-lg border border-charcoal-700 bg-charcoal-900 px-3 text-sm text-cream-50 focus:border-accent-500 focus:outline-none disabled:opacity-50"
             >
               {BUSINESS_TYPE_OPTIONS.map((option) => (
                 <option key={option.value} value={option.value}>

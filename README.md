@@ -1,17 +1,27 @@
-# Multi-Business Website Platform
+# Bibliotheca Bookshop
 
-A reusable, production-grade website platform: **one Next.js application that
-serves many businesses**, each with its own content, branding, domain, admin
-users and data — isolated at the database level by PostgreSQL Row Level
-Security.
+A production-grade client website: a public marketing site plus a secure
+dashboard where the owner manages everything on it — products, categories,
+photos, branding, contact details and SEO — without touching code.
 
-Each business gets a public marketing website and a dashboard where the owner
-manages everything on it without touching code. Adding a customer means
-creating a row and pointing a domain at the deployment — not forking the app.
+## How this repository is meant to be used
 
-The repository ships configured for **Bibliotheca Bookshop**, with a second
-demo business (a restaurant) included to make the isolation and the
-per-industry theming demonstrable.
+**One repository, one deployment, one client.** This repo is Bibliotheca
+Bookshop. The next client gets its own copy of this codebase, its own Vercel
+project and its own Supabase project, so work on one site can never affect
+another. Nothing is shared at runtime between clients.
+
+What makes that cheap is that almost nothing here is specific to a bookshop.
+The industry is a single field (`businesses.business_type`) that drives the
+site's vocabulary, its catalog URL and its illustration; the branding is two
+hex values in the database. Standing up a barbershop means copying this repo,
+changing that field and filling in the dashboard — not rewriting components.
+
+The underlying schema is still multi-tenant (every row carries a `business_id`
+and RLS enforces it). That is deliberate: it costs nothing when a deployment
+serves one business, it keeps the security model honest, and it leaves the
+door open to hosting several small clients on one deployment later if you ever
+want to. It is not a reason to put two clients in one repo.
 
 ---
 
@@ -151,7 +161,6 @@ Then load demo data (optional but recommended for a first run):
 | File | Contents |
 | --- | --- |
 | `supabase/seed/bibliotheca.sql` | Bibliotheca Bookshop: settings, 5 categories, 19 items |
-| `supabase/seed/maison_ember.sql` | A second demo business (restaurant), to prove isolation |
 
 ---
 
@@ -279,11 +288,12 @@ Private data — `business_members`, other people's `profiles`, non-gallery medi
 — is never readable by `anon`.
 
 **Test it.** `supabase/tests/rls_isolation.sql` impersonates the `anon` and
-`authenticated` roles the way PostgREST does and asserts that a member of
-Business A cannot read, update or insert Business B's rows, that anonymous
-visitors see visible rows only, and that membership data stays private. It runs
-inside a transaction and rolls itself back, so it is safe against a real
-project:
+`authenticated` roles the way PostgREST does and asserts that a member of one
+business cannot read, update or insert another's rows, that a member *can*
+still work with their own, that anonymous visitors see visible rows only, and
+that membership data stays private. It creates its own fixtures, so it runs on
+a database with nothing but the migrations applied, and rolls itself back —
+safe against a real project:
 
 ```
 Supabase Dashboard → SQL Editor → paste supabase/tests/rls_isolation.sql → Run
@@ -295,7 +305,9 @@ Every check in it passes on the shipped schema.
 
 ## 12. Add a new business / customer
 
-No code changes, no new deployment.
+**For a new client, copy this repository** and give them their own Vercel and
+Supabase projects — that is what keeps clients separate. Then run the
+migrations and, instead of the Bibliotheca seed, insert their own rows:
 
 ```sql
 -- 1. The business
@@ -321,6 +333,11 @@ from public.businesses where slug = 'acme-barbers';
 ```
 
 The owner then signs in and fills in the rest from the dashboard.
+
+Adding a second business row to an *existing* deployment also works — the
+schema and RLS support it — but that puts two clients in one codebase and one
+database. Prefer a separate copy per client unless you have a specific reason
+not to.
 
 Supported `business_type` values: `restaurant`, `cafe`, `bakery`, `bookshop`,
 `retail`, `barbershop`, `salon`, `gym`, `general`. To add another industry, add
@@ -368,13 +385,14 @@ button at 2.4:1, where black would have given 8.9:1.
 
 Two deployment shapes are supported:
 
-- **One project, many businesses** (recommended) — attach every customer's
-  domain to the same project and let `business_domains` route them. Leave
-  `NEXT_PUBLIC_BUSINESS_SLUG` unset.
-- **One project per business** — set `NEXT_PUBLIC_BUSINESS_SLUG` per project.
-  Useful when a customer wants billing or analytics separated.
-
-Both read the same database and the same code.
+- **One project per client** (how this repo is set up) — set
+  `NEXT_PUBLIC_BUSINESS_SLUG` to that client's slug. Separate repo, separate
+  database, separate deployment: nothing you do for one client can reach
+  another.
+- **One project, several businesses** — attach each domain to the same project
+  and let `business_domains` route by hostname, leaving
+  `NEXT_PUBLIC_BUSINESS_SLUG` unset. Cheaper to host and to patch, at the cost
+  of clients sharing a codebase and a database.
 
 ---
 
@@ -456,19 +474,22 @@ inaccessible.
 
 ---
 
-## 18. Scaling to many businesses
+## 18. Reusing this for the next client
 
-The application is written so that a new business is **data**, not code:
+Copy the repository, then change data rather than code:
 
-- Shared, business-agnostic: every component, route, Server Action and query.
-- Per-business, in the database: identity, content, catalog, media, branding,
-  SEO, domains, users.
-- Per-industry, in one config file: vocabulary and catalog routing
-  (`src/lib/business-types.ts`).
+- **Business-agnostic:** every component, route, Server Action and query. No
+  component hard-codes a business name, color, price or image.
+- **In the database:** identity, content, catalog, media, branding, SEO,
+  domains, users.
+- **One config file:** `src/lib/business-types.ts` holds each industry's
+  vocabulary, catalog URL and illustration. Adding an industry is an entry
+  there plus a line in the CHECK constraint in migration `0003`.
 
-No component hard-codes a business name, color, price or image. Adding
-Business D means inserting rows and pointing a domain — the same deployment
-serves it.
+So a new client is: copy repo → new Supabase project → run migrations → insert
+their business row → set `NEXT_PUBLIC_BUSINESS_SLUG` → deploy. The design work
+that remains is theirs alone, in their own repo, where it cannot disturb
+anyone else's site.
 
 ---
 

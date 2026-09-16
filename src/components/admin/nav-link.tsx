@@ -29,7 +29,7 @@ export function DesktopNavLink({ href, label, exact, icon }: NavLinkProps) {
       className={cn(
         "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
         active
-          ? "bg-ember-600 text-white"
+          ? "bg-accent-600 text-white"
           : "text-charcoal-300 hover:bg-charcoal-800 hover:text-white",
       )}
     >
@@ -48,7 +48,7 @@ export function MobileNavLink({ href, label, exact, icon }: NavLinkProps) {
       href={href}
       className={cn(
         "flex flex-1 flex-col items-center gap-0.5 py-2 text-[11px] font-medium",
-        active ? "text-ember-400" : "text-charcoal-500",
+        active ? "text-accent-400" : "text-charcoal-500",
       )}
     >
       {icon}

@@ -3,7 +3,7 @@ import type { InputHTMLAttributes, TextareaHTMLAttributes, SelectHTMLAttributes 
 import { cn } from "@/lib/utils";
 
 const fieldClasses =
-  "block w-full rounded-lg border border-charcoal-700 bg-charcoal-900 px-3 py-2 text-sm text-cream-50 placeholder:text-charcoal-500 focus:border-ember-400 focus:outline focus:outline-2 focus:outline-ember-500 disabled:bg-charcoal-800 disabled:text-charcoal-500";
+  "block w-full rounded-lg border border-charcoal-700 bg-charcoal-900 px-3 py-2 text-sm text-cream-50 placeholder:text-charcoal-500 focus:border-accent-400 focus:outline focus:outline-2 focus:outline-accent-500 disabled:bg-charcoal-800 disabled:text-charcoal-500";
 
 export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputElement>>(
   ({ className, ...props }, ref) => (

@@ -52,7 +52,7 @@ export function MediaCard({ media }: { media: Media }) {
       </div>
       <div className="space-y-2 p-3">
         <div className="flex items-center justify-between gap-2">
-          <Badge className={cn(media.kind === "gallery" && "bg-ember-500/15 text-ember-300")}>
+          <Badge className={cn(media.kind === "gallery" && "bg-accent-500/15 text-accent-300")}>
             {kindLabels[media.kind] ?? media.kind}
           </Badge>
           <span className="text-xs text-charcoal-500">{formatBytes(media.size_bytes)}</span>
@@ -63,7 +63,7 @@ export function MediaCard({ media }: { media: Media }) {
           onBlur={saveAlt}
           disabled={isPending}
           placeholder="Alt text (for accessibility)"
-          className="w-full rounded-md border border-charcoal-700 px-2 py-1 text-xs text-charcoal-200 focus:border-ember-500 focus:outline-none disabled:opacity-60"
+          className="w-full rounded-md border border-charcoal-700 px-2 py-1 text-xs text-charcoal-200 focus:border-accent-500 focus:outline-none disabled:opacity-60"
         />
         <div className="flex items-center justify-between">
           <VisibilityToggle

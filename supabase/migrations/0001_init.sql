@@ -1,4 +1,4 @@
--- Maison Ember / multi-tenant website platform
+-- Website platform schema — one business per deployment
 -- Initial schema + Row Level Security (RLS)
 --
 -- Design: every business-owned table carries a business_id. RLS policies
