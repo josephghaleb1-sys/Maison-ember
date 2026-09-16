@@ -149,16 +149,33 @@ export function buildThemeCss(settings: ThemeInput | null): string {
   // The direction text and borders travel to separate from the surface.
   const away = dark ? "#FFFFFF" : "#000000";
 
+  // Surface steps carry a little of the brand as well as a lightness shift.
+  // Mixing only toward black/white desaturates: an ivory page turned grey as
+  // it stepped down, losing the warmth that makes a beige-gold palette read
+  // as beige-gold. The lightness push is what guarantees the steps stay
+  // distinguishable even when the brand is close to the surface in tone.
+  const warmth = [0.05, 0.11, 0.18];
+  const push = dark ? [0.05, 0.1, 0.17] : [0.02, 0.05, 0.09];
+  const step = (i: number) => blend(blend(surface, primary, warmth[i]), away, push[i]);
+  const surface1 = step(0);
+  const surface2 = step(1);
+  const surface3 = step(2);
+
+  // Text is solved against the FURTHEST surface step, not the base one.
+  // Cards and banded sections sit on surface-2/3, so solving against the base
+  // would leave copy short of target exactly where most of it is rendered.
+  const textAgainst = surface3;
+
   // Body text keeps a hint of the brand so the page reads as one palette
   // rather than black-on-a-colored-background, then is pushed until readable.
   const inkBase = blend(surface, primary, 0.14);
-  const ink = solveContrast(inkBase, away, surface, BODY_TARGET);
-  const inkMuted = solveContrast(inkBase, away, surface, AA_TEXT);
-  const inkFaint = solveContrast(inkBase, away, surface, FAINT_TARGET);
+  const ink = solveContrast(inkBase, away, textAgainst, BODY_TARGET);
+  const inkMuted = solveContrast(inkBase, away, textAgainst, AA_TEXT);
+  const inkFaint = solveContrast(inkBase, away, textAgainst, FAINT_TARGET);
 
   // Brand-colored text has to clear AA against the surface too. On a light
   // theme this darkens the gold; on a dark theme it lightens it.
-  const brandInk = solveContrast(primary, away, surface, AA_TEXT);
+  const brandInk = solveContrast(primary, away, textAgainst, AA_TEXT);
 
   const declarations: Record<string, string> = {
     "--brand": primary,
@@ -171,20 +188,21 @@ export function buildThemeCss(settings: ThemeInput | null): string {
     "--on-brand": readableOn(primary),
 
     "--surface": surface,
-    "--surface-1": `color-mix(in oklab, ${surface} ${dark ? 94 : 97}%, ${away})`,
-    "--surface-2": `color-mix(in oklab, ${surface} ${dark ? 88 : 94}%, ${away})`,
-    "--surface-3": `color-mix(in oklab, ${surface} ${dark ? 80 : 89}%, ${away})`,
+    "--surface-1": surface1,
+    "--surface-2": surface2,
+    "--surface-3": surface3,
 
     "--ink": ink,
     "--ink-muted": inkMuted,
     "--ink-faint": inkFaint,
 
-    "--line": `color-mix(in oklab, ${surface} ${dark ? 86 : 91}%, ${away})`,
-    "--line-strong": `color-mix(in oklab, ${surface} ${dark ? 72 : 80}%, ${away})`,
+    // Borders take brand warmth too, so a hairline on beige reads as a warm
+    // rule rather than a grey one.
+    "--line": blend(blend(surface, primary, 0.2), away, dark ? 0.12 : 0.08),
+    "--line-strong": blend(blend(surface, primary, 0.3), away, dark ? 0.24 : 0.16),
 
-    // Hero scrim: the headline over a hero photo is white in both modes, so
-    // this has to be genuinely dark even when the surface is ivory — it keeps
-    // a trace of the brand's warmth rather than being flat black.
+    // Hero scrim: only used when a business has uploaded a hero photograph,
+    // where white headline text sits over the image. Dark for every palette.
     "--hero-scrim": blend(surface, "#000000", dark ? 0.45 : 0.86),
   };
 

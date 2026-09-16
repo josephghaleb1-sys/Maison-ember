@@ -79,6 +79,7 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
           logoPath={settings?.logo_path ?? null}
           catalogSegment={type.catalogSegment}
           catalogLabel={type.catalogLabel}
+          heroIsDark={Boolean(settings?.hero_image_path)}
         />
         <main className="flex-1">{children}</main>
         <SiteFooter businessName={businessName} settings={settings} />

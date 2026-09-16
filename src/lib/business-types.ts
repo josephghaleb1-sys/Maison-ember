@@ -1,5 +1,14 @@
 import type { BusinessType } from "@/lib/database.types";
 
+export type OrnamentMotif =
+  | "books"
+  | "dining"
+  | "cup"
+  | "shears"
+  | "bloom"
+  | "barbell"
+  | "bag";
+
 /**
  * Per-industry vocabulary and routing for the public site.
  *
@@ -28,6 +37,10 @@ export interface BusinessTypeConfig {
   adminCatalogLabel: string;
   /** lucide-react icon name, resolved to a component inside client code. */
   icon: "utensils" | "coffee" | "book" | "shopping-bag" | "scissors" | "dumbbell" | "sparkles";
+  /** Line-art illustration used as the homepage centrepiece. Keeping this
+   * per-industry is what lets the same layout feel made-for-them: a bookshop
+   * gets a stack of books where a salon gets a bloom. */
+  motif: OrnamentMotif;
   /** Default hero call-to-action when the owner hasn't written their own. */
   ctaLabel: string;
   /** Fallback copy used only until the owner fills the field in. */
@@ -46,6 +59,7 @@ export const BUSINESS_TYPES: Record<BusinessType, BusinessTypeConfig> = {
     itemSingular: "dish",
     adminCatalogLabel: "Menu items",
     icon: "utensils",
+    motif: "dining",
     ctaLabel: "View menu",
     defaultTagline: "A menu worth crossing town for.",
     defaultCatalogIntro: "Made fresh, served daily.",
@@ -59,6 +73,7 @@ export const BUSINESS_TYPES: Record<BusinessType, BusinessTypeConfig> = {
     itemSingular: "item",
     adminCatalogLabel: "Menu items",
     icon: "coffee",
+    motif: "cup",
     ctaLabel: "See the menu",
     defaultTagline: "Good coffee, slow mornings.",
     defaultCatalogIntro: "Roasted, poured and baked in house.",
@@ -72,6 +87,7 @@ export const BUSINESS_TYPES: Record<BusinessType, BusinessTypeConfig> = {
     itemSingular: "bake",
     adminCatalogLabel: "Bakery items",
     icon: "coffee",
+    motif: "cup",
     ctaLabel: "See what's baking",
     defaultTagline: "Baked before sunrise, every day.",
     defaultCatalogIntro: "Out of the oven this morning.",
@@ -85,6 +101,7 @@ export const BUSINESS_TYPES: Record<BusinessType, BusinessTypeConfig> = {
     itemSingular: "title",
     adminCatalogLabel: "Books & products",
     icon: "book",
+    motif: "books",
     ctaLabel: "Browse the shelves",
     defaultTagline: "Books worth keeping.",
     defaultCatalogIntro: "A considered selection, shelf by shelf.",
@@ -98,6 +115,7 @@ export const BUSINESS_TYPES: Record<BusinessType, BusinessTypeConfig> = {
     itemSingular: "product",
     adminCatalogLabel: "Products",
     icon: "shopping-bag",
+    motif: "bag",
     ctaLabel: "Shop the collection",
     defaultTagline: "Chosen with care.",
     defaultCatalogIntro: "Our current collection.",
@@ -111,6 +129,7 @@ export const BUSINESS_TYPES: Record<BusinessType, BusinessTypeConfig> = {
     itemSingular: "service",
     adminCatalogLabel: "Services",
     icon: "scissors",
+    motif: "shears",
     ctaLabel: "See services",
     defaultTagline: "A proper cut, every time.",
     defaultCatalogIntro: "What we do, and what it costs.",
@@ -124,6 +143,7 @@ export const BUSINESS_TYPES: Record<BusinessType, BusinessTypeConfig> = {
     itemSingular: "treatment",
     adminCatalogLabel: "Treatments",
     icon: "sparkles",
+    motif: "bloom",
     ctaLabel: "See treatments",
     defaultTagline: "Looked after, head to toe.",
     defaultCatalogIntro: "Our treatments and pricing.",
@@ -137,6 +157,7 @@ export const BUSINESS_TYPES: Record<BusinessType, BusinessTypeConfig> = {
     itemSingular: "class",
     adminCatalogLabel: "Classes & plans",
     icon: "dumbbell",
+    motif: "barbell",
     ctaLabel: "See classes",
     defaultTagline: "Train properly.",
     defaultCatalogIntro: "Classes, memberships and what they include.",
@@ -150,6 +171,7 @@ export const BUSINESS_TYPES: Record<BusinessType, BusinessTypeConfig> = {
     itemSingular: "offering",
     adminCatalogLabel: "Offerings",
     icon: "shopping-bag",
+    motif: "bag",
     ctaLabel: "See what we offer",
     defaultTagline: "",
     defaultCatalogIntro: "",

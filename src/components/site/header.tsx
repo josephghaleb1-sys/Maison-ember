@@ -13,12 +13,17 @@ export function SiteHeader({
   logoPath,
   catalogSegment,
   catalogLabel,
+  heroIsDark,
 }: {
   businessName: string;
   logoPath: string | null;
   /** Industry-driven, e.g. "shop" for a bookshop, "menu" for a restaurant. */
   catalogSegment: string;
   catalogLabel: string;
+  /** True when the homepage hero is a photograph under a dark scrim. Without
+   * one the hero is a light wash in the business's own palette, and the
+   * floating header has to switch to ink text to stay readable. */
+  heroIsDark: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -37,11 +42,10 @@ export function SiteHeader({
   // bare page background.
   const overlaysHero = pathname === "/";
 
-  // While floating over the hero, the header sits on the hero scrim, which is
-  // dark for EVERY palette (see --hero-scrim). Brand/ink tokens are solved
-  // against the page surface, so on a light theme they'd be dark-on-dark
-  // here — over the hero the header uses plain white instead.
   const onHero = overlaysHero && !scrolled && !open;
+  // Over a photographic hero the scrim is dark, so the header goes white.
+  // Over the light illustrated hero it keeps the page's own ink tokens.
+  const onDarkHero = onHero && heroIsDark;
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -83,7 +87,7 @@ export function SiteHeader({
               aria-hidden
               className={cn(
                 "flex size-10 shrink-0 items-center justify-center rounded-full border font-display text-lg font-semibold",
-                onHero
+                onDarkHero
                   ? "border-white/40 text-white"
                   : "border-brand-line text-brand-ink",
               )}
@@ -94,7 +98,7 @@ export function SiteHeader({
           <span
             className={cn(
               "truncate font-display text-lg font-semibold tracking-tight",
-              onHero ? "text-white" : "text-ink",
+              onDarkHero ? "text-white" : "text-ink",
             )}
           >
             {businessName}
@@ -113,11 +117,9 @@ export function SiteHeader({
                 className={cn(
                   "relative py-1 text-sm font-medium tracking-wide transition-colors",
                   "after:absolute after:inset-x-0 after:-bottom-0.5 after:h-px after:origin-left after:scale-x-0 after:transition-transform after:duration-300 hover:after:scale-x-100",
-                  onHero
-                    ? "after:bg-white"
-                    : "after:bg-brand",
+                  onDarkHero ? "after:bg-white" : "after:bg-brand",
                   active && "after:scale-x-100",
-                  onHero
+                  onDarkHero
                     ? active
                       ? "text-white"
                       : "text-white/75 hover:text-white"
@@ -140,7 +142,7 @@ export function SiteHeader({
           aria-controls="site-mobile-nav"
           className={cn(
             "flex size-10 items-center justify-center rounded-lg transition-colors md:hidden",
-            onHero ? "text-white hover:bg-white/15" : "text-ink hover:bg-surface-2",
+            onDarkHero ? "text-white hover:bg-white/15" : "text-ink hover:bg-surface-2",
           )}
         >
           {open ? <X className="size-5" aria-hidden /> : <Menu className="size-5" aria-hidden />}

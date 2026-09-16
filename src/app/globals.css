@@ -138,6 +138,21 @@ body {
     animation: fade-up 0.8s ease-out both;
   }
 
+  /* The track holds the item list twice, so sliding it exactly half its
+     width returns to an identical frame — a seamless loop. */
+  @keyframes marquee {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  .animate-marquee {
+    animation: marquee 44s linear infinite;
+  }
+
   @keyframes ambient-glow-pulse {
     0%,
     100% {
@@ -154,7 +169,8 @@ body {
 
   @media (prefers-reduced-motion: reduce) {
     .animate-fade-up,
-    .animate-ambient-glow {
+    .animate-ambient-glow,
+    .animate-marquee {
       animation: none;
     }
   }
