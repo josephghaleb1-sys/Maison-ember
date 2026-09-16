@@ -4,11 +4,18 @@ export function cn(...inputs: ClassValue[]) {
   return clsx(inputs);
 }
 
-export function formatPrice(value: number): string {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-  }).format(value);
+/** Formats a price in the business's own currency (businesses.currency).
+ * Falls back to plain formatting if a business somehow carries a currency
+ * code Intl doesn't recognise, so a bad value can never crash a page. */
+export function formatPrice(value: number, currency = "USD"): string {
+  try {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency,
+    }).format(value);
+  } catch {
+    return `${currency} ${value.toFixed(2)}`;
+  }
 }
 
 export function formatBytes(bytes: number): string {

@@ -115,7 +115,7 @@ export function CategoryRow({
           <div>
             <p className="text-sm font-medium text-cream-50">{category.name}</p>
             <p className="text-xs text-charcoal-500">
-              {productCount} {productCount === 1 ? "product" : "products"}
+              {productCount} {productCount === 1 ? "item" : "items"}
             </p>
           </div>
         )}
@@ -140,7 +140,7 @@ export function CategoryRow({
             title="Delete this category?"
             description={
               productCount > 0
-                ? `"${category.name}" will be removed. ${productCount} ${productCount === 1 ? "product" : "products"} will become uncategorized — none will be deleted.`
+                ? `"${category.name}" will be removed. ${productCount} ${productCount === 1 ? "item" : "items"} will become uncategorized — nothing will be deleted.`
                 : `"${category.name}" will be permanently removed.`
             }
             confirmLabel="Delete"

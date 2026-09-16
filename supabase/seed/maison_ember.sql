@@ -1,4 +1,11 @@
 -- Demo data for the fictional restaurant "Maison Ember".
+--
+-- Kept alongside bookshop.sql as a SECOND business, which is what makes the
+-- platform's multi-tenancy demonstrable: seed both, sign in as each owner,
+-- and confirm neither can see the other's catalogue. It also shows the same
+-- code rendering a different industry — this business's catalogue lives at
+-- /menu and is described in restaurant vocabulary, driven entirely by
+-- businesses.business_type.
 -- Safe to re-run: upserts by slug/business_id, so running it twice does not
 -- duplicate rows.
 --
@@ -17,15 +24,20 @@ declare
   cat_drinks uuid;
 begin
   -- ---- business -----------------------------------------------------------
-  insert into public.businesses (slug, name)
-  values ('maison-ember', 'Maison Ember')
-  on conflict (slug) do update set name = excluded.name
+  insert into public.businesses (slug, name, business_type, currency)
+  values ('maison-ember', 'Maison Ember', 'restaurant', 'USD')
+  on conflict (slug) do update set
+    name = excluded.name,
+    business_type = excluded.business_type,
+    currency = excluded.currency
   returning id into biz_id;
 
   -- ---- website settings -----------------------------------------------------
   insert into public.website_settings (
     business_id, business_name, tagline, about_text,
-    phone, email, address, hours, social_links
+    phone, email, address, hours, social_links,
+    primary_color, secondary_color, hero_title, hero_subtitle,
+    seo_title, seo_description
   )
   values (
     biz_id,
@@ -36,7 +48,15 @@ begin
     'hello@maisonember.com',
     '214 Kindling Lane, San Francisco, CA 94110',
     '{"mon": "Closed", "tue": "5:00 PM - 10:00 PM", "wed": "5:00 PM - 10:00 PM", "thu": "5:00 PM - 10:00 PM", "fri": "5:00 PM - 11:00 PM", "sat": "5:00 PM - 11:00 PM", "sun": "11:00 AM - 9:00 PM"}'::jsonb,
-    '{"instagram": "https://instagram.com/maisonember", "facebook": "https://facebook.com/maisonember"}'::jsonb
+    '{"instagram": "https://instagram.com/maisonember", "facebook": "https://facebook.com/maisonember"}'::jsonb,
+    -- A deliberately different palette from the bookshop's, so running both
+    -- seeds shows the same components rendering two distinct brands.
+    '#D4A03A',
+    '#140F0D',
+    'Cooked over live fire.',
+    'Wood-fired cooking with a modern French soul, served in a room built around the hearth.',
+    'Maison Ember | Wood-Fired Restaurant',
+    'Live-fire cooking and modern French technique. Small plates, wood-fired mains and a wine list built for lingering.'
   )
   on conflict (business_id) do update set
     business_name = excluded.business_name,
@@ -46,7 +66,13 @@ begin
     email = excluded.email,
     address = excluded.address,
     hours = excluded.hours,
-    social_links = excluded.social_links;
+    social_links = excluded.social_links,
+    primary_color = excluded.primary_color,
+    secondary_color = excluded.secondary_color,
+    hero_title = excluded.hero_title,
+    hero_subtitle = excluded.hero_subtitle,
+    seo_title = excluded.seo_title,
+    seo_description = excluded.seo_description;
 
   -- ---- categories -----------------------------------------------------------
   insert into public.categories (business_id, name, sort_order)

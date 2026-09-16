@@ -2,6 +2,7 @@ import "server-only";
 import { cache } from "react";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { getBusinessTypeConfig, type BusinessTypeConfig } from "@/lib/business-types";
 import type { Business, BusinessRole } from "@/lib/database.types";
 
 export interface AuthedContext {
@@ -9,6 +10,9 @@ export interface AuthedContext {
   email: string | null;
   business: Business;
   role: BusinessRole;
+  /** Industry vocabulary for this business, so dashboard labels read
+   * "Menu items" for a restaurant and "Books & products" for a bookshop. */
+  type: BusinessTypeConfig;
 }
 
 /**
@@ -34,7 +38,7 @@ export const requireBusinessContext = cache(async (): Promise<AuthedContext> => 
 
   const { data: membership, error: membershipError } = await supabase
     .from("business_members")
-    .select("role, business:businesses(id, slug, name, created_at)")
+    .select("role, business:businesses(*)")
     .eq("user_id", user.id)
     .limit(1)
     .maybeSingle();
@@ -52,5 +56,18 @@ export const requireBusinessContext = cache(async (): Promise<AuthedContext> => 
     email: user.email ?? null,
     business,
     role: membership.role,
+    type: getBusinessTypeConfig(business.business_type),
   };
 });
+
+/** Roles that may change business-wide configuration (branding, domains,
+ * business type). Everyone with a membership can manage day-to-day catalog
+ * content; only these roles can reshape the business itself.
+ *
+ * The initial release ships Owner; the table and this helper are the seam
+ * where Manager/Staff restrictions get added without touching call sites. */
+const CONFIG_ROLES: BusinessRole[] = ["owner", "admin"];
+
+export function canManageBusinessConfig(role: BusinessRole): boolean {
+  return CONFIG_ROLES.includes(role);
+}

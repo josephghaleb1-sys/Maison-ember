@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { revalidateCatalog } from "@/lib/revalidate";
 import { redirect } from "next/navigation";
 import { after } from "next/server";
 import { createClient } from "@/lib/supabase/server";
@@ -81,8 +82,7 @@ export async function createProduct(_prevState: FormState, formData: FormData): 
   }
 
   revalidatePath("/admin/products");
-  revalidatePath("/menu");
-  revalidatePath("/");
+  revalidateCatalog();
   redirect("/admin/products");
 }
 
@@ -162,8 +162,7 @@ export async function updateProduct(
   }
 
   revalidatePath("/admin/products");
-  revalidatePath("/menu");
-  revalidatePath("/");
+  revalidateCatalog();
   redirect("/admin/products");
 }
 
@@ -195,8 +194,7 @@ export async function deleteProduct(productId: string): Promise<{ error?: string
   }
 
   revalidatePath("/admin/products");
-  revalidatePath("/menu");
-  revalidatePath("/");
+  revalidateCatalog();
   return {};
 }
 
@@ -216,8 +214,7 @@ export async function setProductVisibility(
   if (error) return { error: error.message };
 
   revalidatePath("/admin/products");
-  revalidatePath("/menu");
-  revalidatePath("/");
+  revalidateCatalog();
   return {};
 }
 
@@ -259,6 +256,6 @@ export async function moveProduct(
   if (error1 || error2) return { error: "Couldn't reorder products." };
 
   revalidatePath("/admin/products");
-  revalidatePath("/menu");
+  revalidateCatalog();
   return {};
 }

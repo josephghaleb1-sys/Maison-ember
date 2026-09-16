@@ -1,6 +1,9 @@
 import Link from "next/link";
-import { Phone, Mail, MapPin, Flame } from "lucide-react";
+import Image from "next/image";
+import { Phone, Mail, MapPin, MessageCircle } from "lucide-react";
 import type { WebsiteSettings } from "@/lib/database.types";
+import { getPublicMediaUrl } from "@/lib/storage";
+import { telHref, whatsappUrl } from "@/lib/contact";
 
 const DAY_LABELS: [keyof NonNullable<WebsiteSettings["hours"]>, string][] = [
   ["mon", "Mon"],
@@ -30,27 +33,49 @@ export function SiteFooter({
   const hours = settings?.hours ?? {};
   const social = settings?.social_links ?? {};
   const socialEntries = SOCIAL_LABELS.filter(([key]) => social[key]);
+  // Owners often leave days blank; an all-blank table is noise, so the whole
+  // column is dropped rather than rendering seven em-dashes.
+  const hasHours = DAY_LABELS.some(([key]) => hours[key]);
+  const wa = whatsappUrl(settings?.whatsapp);
+  // A raw phone string ("+1 (555) 014-2200") is not a valid tel: URL — the
+  // spaces and parens have to be stripped, same as on the contact page.
+  const tel = telHref(settings?.phone);
 
   return (
-    <footer className="border-t border-charcoal-900/10 bg-charcoal-950 text-charcoal-300">
-      <div className="mx-auto grid max-w-6xl grid-cols-1 gap-8 px-4 py-12 sm:px-6 md:grid-cols-3">
+    <footer className="border-t border-line bg-surface-1 text-ink-muted">
+      <div className="mx-auto grid max-w-6xl grid-cols-1 gap-10 px-4 py-14 sm:px-6 md:grid-cols-3">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="flex size-8 items-center justify-center rounded-full bg-ember-600 text-white">
-              <Flame className="size-4" aria-hidden />
-            </span>
-            <span className="font-display text-base font-semibold text-white">{businessName}</span>
+          <div className="flex items-center gap-3">
+            {settings?.logo_path ? (
+              <span className="relative size-9 shrink-0 overflow-hidden rounded-full ring-1 ring-brand-line">
+                <Image
+                  src={getPublicMediaUrl(settings.logo_path)}
+                  alt=""
+                  fill
+                  sizes="36px"
+                  className="object-cover"
+                />
+              </span>
+            ) : (
+              <span
+                aria-hidden
+                className="flex size-9 shrink-0 items-center justify-center rounded-full border border-brand-line font-display text-base font-semibold text-brand"
+              >
+                {businessName.trim().charAt(0).toUpperCase() || "·"}
+              </span>
+            )}
+            <span className="font-display text-base font-semibold text-ink">{businessName}</span>
           </div>
-          {settings?.tagline && <p className="mt-3 text-sm">{settings.tagline}</p>}
+          {settings?.tagline && <p className="mt-4 max-w-xs text-sm leading-relaxed">{settings.tagline}</p>}
           {socialEntries.length > 0 && (
-            <ul className="mt-4 flex flex-wrap gap-3">
+            <ul className="mt-5 flex flex-wrap gap-x-4 gap-y-2">
               {socialEntries.map(([key, label]) => (
                 <li key={key}>
                   <Link
                     href={social[key]!}
                     target="_blank"
                     rel="noreferrer"
-                    className="text-sm text-charcoal-300 hover:text-ember-400"
+                    className="text-sm transition-colors hover:text-brand"
                   >
                     {label}
                   </Link>
@@ -60,45 +85,60 @@ export function SiteFooter({
           )}
         </div>
 
-        <div className="space-y-2 text-sm">
-          <h3 className="font-medium text-white">Contact</h3>
+        <div className="space-y-3 text-sm">
+          <h2 className="font-display text-base font-semibold text-ink">Contact</h2>
           {settings?.address && (
-            <p className="flex items-start gap-2">
-              <MapPin className="mt-0.5 size-4 shrink-0" aria-hidden />
+            <p className="flex items-start gap-2.5">
+              <MapPin className="mt-0.5 size-4 shrink-0 text-brand" aria-hidden />
               {settings.address}
             </p>
           )}
-          {settings?.phone && (
-            <p className="flex items-center gap-2">
-              <Phone className="size-4 shrink-0" aria-hidden />
-              <a href={`tel:${settings.phone}`} className="hover:text-ember-400">
+          {tel && settings?.phone && (
+            <p className="flex items-center gap-2.5">
+              <Phone className="size-4 shrink-0 text-brand" aria-hidden />
+              <a href={tel} className="transition-colors hover:text-brand">
                 {settings.phone}
               </a>
             </p>
           )}
+          {wa && (
+            <p className="flex items-center gap-2.5">
+              <MessageCircle className="size-4 shrink-0 text-brand" aria-hidden />
+              <a
+                href={wa}
+                target="_blank"
+                rel="noreferrer"
+                className="transition-colors hover:text-brand"
+              >
+                WhatsApp
+              </a>
+            </p>
+          )}
           {settings?.email && (
-            <p className="flex items-center gap-2">
-              <Mail className="size-4 shrink-0" aria-hidden />
-              <a href={`mailto:${settings.email}`} className="hover:text-ember-400">
+            <p className="flex items-center gap-2.5">
+              <Mail className="size-4 shrink-0 text-brand" aria-hidden />
+              <a href={`mailto:${settings.email}`} className="transition-colors hover:text-brand">
                 {settings.email}
               </a>
             </p>
           )}
         </div>
 
-        <div className="text-sm">
-          <h3 className="font-medium text-white">Hours</h3>
-          <ul className="mt-2 space-y-1">
-            {DAY_LABELS.map(([key, label]) => (
-              <li key={key} className="flex justify-between gap-4">
-                <span>{label}</span>
-                <span className="text-charcoal-400">{hours[key] || "—"}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
+        {hasHours && (
+          <div className="text-sm">
+            <h2 className="font-display text-base font-semibold text-ink">Hours</h2>
+            <ul className="mt-3 space-y-1.5">
+              {DAY_LABELS.map(([key, label]) => (
+                <li key={key} className="flex justify-between gap-4">
+                  <span>{label}</span>
+                  <span className="text-ink-faint">{hours[key] || "—"}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
-      <div className="border-t border-white/10 px-4 py-4 text-center text-xs text-charcoal-500 sm:px-6">
+      <div className="border-t border-line px-4 py-5 text-center text-xs text-ink-faint sm:px-6">
         © {new Date().getFullYear()} {businessName}. All rights reserved.
       </div>
     </footer>

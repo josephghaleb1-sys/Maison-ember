@@ -1,44 +1,74 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import { getPublicBusiness, getPublicSettings } from "@/lib/business";
+import { ArrowRight } from "lucide-react";
+import { getSiteContext } from "@/lib/business";
 import { getPublicMediaUrl } from "@/lib/storage";
+import { SectionHeading } from "@/components/site/section-heading";
+import { SiteButton } from "@/components/site/site-button";
 import { Reveal } from "@/components/site/reveal";
 
-export const metadata: Metadata = { title: "About" };
+export async function generateMetadata(): Promise<Metadata> {
+  const { businessName, settings } = await getSiteContext();
+  return {
+    title: "About",
+    description: settings?.tagline || `About ${businessName}.`,
+    alternates: { canonical: "/about" },
+  };
+}
 
 export default async function AboutPage() {
-  const [business, settings] = await Promise.all([getPublicBusiness(), getPublicSettings()]);
-  const businessName = settings?.business_name || business.name;
+  const { settings, businessName, type } = await getSiteContext();
   const paragraphs = (settings?.about_text || "").split(/\n+/).filter(Boolean);
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6">
+    <div className="mx-auto max-w-3xl px-4 py-20 sm:px-6 sm:py-24">
       <Reveal className="flex flex-col items-center">
         {settings?.logo_path && (
-          <div className="relative mx-auto mb-6 size-20 overflow-hidden rounded-full bg-charcoal-900 shadow">
+          <div className="relative mb-8 size-24 overflow-hidden rounded-full ring-1 ring-brand-line">
             <Image
               src={getPublicMediaUrl(settings.logo_path)}
               alt={`${businessName} logo`}
               fill
-              sizes="80px"
+              sizes="96px"
               className="object-cover"
             />
           </div>
         )}
-        <h1 className="text-center font-display text-4xl font-semibold text-cream-50">
-          About {businessName}
-        </h1>
-        {settings?.tagline && (
-          <p className="mt-3 text-center text-lg text-ember-300">{settings.tagline}</p>
+        <SectionHeading
+          eyebrow={settings?.tagline || undefined}
+          title={`About ${businessName}`}
+          align="center"
+        />
+      </Reveal>
+
+      <Reveal delay={120} className="mt-12">
+        {paragraphs.length > 0 ? (
+          <div className="space-y-6">
+            {paragraphs.map((paragraph, i) => (
+              <p
+                key={i}
+                className={
+                  i === 0
+                    ? "text-xl leading-relaxed text-ink"
+                    : "text-lg leading-relaxed text-ink-muted"
+                }
+              >
+                {paragraph}
+              </p>
+            ))}
+          </div>
+        ) : (
+          <p className="text-center text-ink-faint">More about us is coming soon.</p>
         )}
       </Reveal>
 
-      <Reveal delay={100} className="mt-10 space-y-5 text-lg leading-relaxed text-charcoal-200">
-        {paragraphs.length > 0 ? (
-          paragraphs.map((paragraph, i) => <p key={i}>{paragraph}</p>)
-        ) : (
-          <p className="text-charcoal-500">More about us is coming soon.</p>
-        )}
+      <Reveal delay={200} className="mt-14 flex flex-wrap justify-center gap-3">
+        <SiteButton href={`/${type.catalogSegment}`} size="lg">
+          {type.ctaLabel} <ArrowRight className="size-4" aria-hidden />
+        </SiteButton>
+        <SiteButton href="/contact" size="lg" variant="outline">
+          {type.visitLabel}
+        </SiteButton>
       </Reveal>
     </div>
   );

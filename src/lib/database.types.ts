@@ -11,12 +11,38 @@
 // `type`, same as the real `supabase gen types` CLI output.
 
 export type BusinessRole = "owner" | "admin" | "editor";
+
+/** Industries the platform knows how to render a site for. Must stay in sync
+ * with the businesses_business_type_check constraint in migration 0003 and
+ * with BUSINESS_TYPES in src/lib/business-types.ts. */
+export type BusinessType =
+  | "restaurant"
+  | "cafe"
+  | "bakery"
+  | "bookshop"
+  | "retail"
+  | "barbershop"
+  | "salon"
+  | "gym"
+  | "general";
 export type MediaKind = "product" | "gallery" | "logo" | "hero" | "other";
 
 export type Business = {
   id: string;
   slug: string;
   name: string;
+  business_type: BusinessType;
+  currency: string;
+  created_at: string;
+};
+
+/** Maps a hostname to the business whose site should be served for it, so a
+ * single deployment can host many businesses on their own custom domains. */
+export type BusinessDomain = {
+  id: string;
+  business_id: string;
+  hostname: string;
+  is_primary: boolean;
   created_at: string;
 };
 
@@ -101,9 +127,17 @@ export type WebsiteSettings = {
   hero_image_path: string | null;
   phone: string;
   email: string;
+  whatsapp: string;
   address: string;
   hours: WebsiteHours;
   social_links: WebsiteSocialLinks;
+  /** Hex, e.g. "#C8A44D". Drives the public site's generated theme. */
+  primary_color: string;
+  secondary_color: string;
+  hero_title: string;
+  hero_subtitle: string;
+  seo_title: string;
+  seo_description: string;
   updated_at: string;
 };
 
@@ -120,15 +154,45 @@ export type Database = {
           id?: string;
           slug: string;
           name: string;
+          business_type?: BusinessType;
+          currency?: string;
           created_at?: string;
         };
         Update: {
           id?: string;
           slug?: string;
           name?: string;
+          business_type?: BusinessType;
+          currency?: string;
           created_at?: string;
         };
         Relationships: [];
+      };
+      business_domains: {
+        Row: BusinessDomain;
+        Insert: {
+          id?: string;
+          business_id: string;
+          hostname: string;
+          is_primary?: boolean;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          business_id?: string;
+          hostname?: string;
+          is_primary?: boolean;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "business_domains_business_id_fkey";
+            columns: ["business_id"];
+            isOneToOne: false;
+            referencedRelation: "businesses";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       profiles: {
         Row: Profile;
@@ -236,9 +300,16 @@ export type Database = {
           hero_image_path?: string | null;
           phone?: string;
           email?: string;
+          whatsapp?: string;
           address?: string;
           hours?: WebsiteHours;
           social_links?: WebsiteSocialLinks;
+          primary_color?: string;
+          secondary_color?: string;
+          hero_title?: string;
+          hero_subtitle?: string;
+          seo_title?: string;
+          seo_description?: string;
           updated_at?: string;
         };
         Update: {
@@ -251,9 +322,16 @@ export type Database = {
           hero_image_path?: string | null;
           phone?: string;
           email?: string;
+          whatsapp?: string;
           address?: string;
           hours?: WebsiteHours;
           social_links?: WebsiteSocialLinks;
+          primary_color?: string;
+          secondary_color?: string;
+          hero_title?: string;
+          hero_subtitle?: string;
+          seo_title?: string;
+          seo_description?: string;
           updated_at?: string;
         };
         Relationships: [];

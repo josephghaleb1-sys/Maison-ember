@@ -1,82 +1,100 @@
-import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, Clock, MapPin } from "lucide-react";
+import Link from "next/link";
+import { ArrowRight, MapPin, Clock } from "lucide-react";
 import {
-  getPublicBusiness,
   getPublicCategories,
   getPublicGalleryMedia,
   getPublicProducts,
-  getPublicSettings,
+  getSiteContext,
 } from "@/lib/business";
 import { getPublicMediaUrl } from "@/lib/storage";
+import { mapsUrl } from "@/lib/contact";
 import { Hero } from "@/components/site/hero";
 import { ProductCard } from "@/components/site/product-card";
-import { Button } from "@/components/ui/button";
+import { SectionHeading } from "@/components/site/section-heading";
+import { SiteButton } from "@/components/site/site-button";
 import { Reveal } from "@/components/site/reveal";
 
-export default async function HomePage() {
-  const [business, settings, categories, products, gallery] = await Promise.all([
-    getPublicBusiness(),
-    getPublicSettings(),
-    getPublicCategories(),
-    getPublicProducts(),
-    getPublicGalleryMedia(),
-  ]);
+/** First day of the week that actually has hours set, so the homepage never
+ * advertises "Today: —" for a business that left Monday blank. */
+function firstListedHours(hours: Record<string, string | undefined> | undefined) {
+  const order = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] as const;
+  const labels: Record<string, string> = {
+    mon: "Mon", tue: "Tue", wed: "Wed", thu: "Thu", fri: "Fri", sat: "Sat", sun: "Sun",
+  };
+  for (const day of order) {
+    if (hours?.[day]) return `${labels[day]} · ${hours[day]}`;
+  }
+  return null;
+}
 
-  const businessName = settings?.business_name || business.name;
-  const featuredProducts = products.slice(0, 4);
-  const featuredGallery = gallery.slice(0, 4);
-  const todayHours = settings?.hours?.mon;
+export default async function HomePage() {
+  const [{ business, settings, type, businessName }, categories, products, gallery] =
+    await Promise.all([
+      getSiteContext(),
+      getPublicCategories(),
+      getPublicProducts(),
+      getPublicGalleryMedia(),
+    ]);
+
+  const catalogHref = `/${type.catalogSegment}`;
+  const featured = products.slice(0, 4);
+  const featuredGallery = gallery.slice(0, 6);
+  const hoursLine = firstListedHours(settings?.hours);
+  const aboutExcerpt = (settings?.about_text ?? "").split(/\n+/).filter(Boolean)[0] ?? "";
 
   return (
     <>
       <Hero
         imagePath={settings?.hero_image_path ?? null}
-        title={businessName}
-        tagline={settings?.tagline || "A menu worth crossing town for."}
+        eyebrow={settings?.tagline || type.defaultTagline || undefined}
+        title={settings?.hero_title?.trim() || businessName}
+        subtitle={settings?.hero_subtitle?.trim() || ""}
       >
-        <Link href="/menu">
-          <Button size="lg">
-            View menu <ArrowRight className="size-4" aria-hidden />
-          </Button>
-        </Link>
-        <Link href="/contact">
-          <Button size="lg" variant="outline" className="border-white/30 bg-white/10 text-white hover:bg-white/20">
-            Visit us
-          </Button>
-        </Link>
+        <SiteButton href={catalogHref} size="lg">
+          {type.ctaLabel} <ArrowRight className="size-4" aria-hidden />
+        </SiteButton>
+        <SiteButton href="/contact" size="lg" variant="quiet">
+          {type.visitLabel}
+        </SiteButton>
       </Hero>
 
-      {settings?.about_text && (
-        <Reveal as="section" className="mx-auto max-w-3xl px-4 py-20 text-center sm:px-6">
-          <h2 className="font-display text-3xl font-semibold text-cream-50">Our story</h2>
-          <p className="mt-4 text-lg leading-relaxed text-charcoal-300">
-            {settings.about_text.length > 340
-              ? `${settings.about_text.slice(0, 340).trim()}…`
-              : settings.about_text}
-          </p>
-          <Link
-            href="/about"
-            className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-ember-400 hover:underline"
-          >
-            Read more <ArrowRight className="size-4" aria-hidden />
-          </Link>
-        </Reveal>
-      )}
-
-      {featuredProducts.length > 0 && (
-        <section className="bg-charcoal-900 py-20">
-          <div className="mx-auto max-w-5xl px-4 sm:px-6">
-            <Reveal className="flex items-end justify-between gap-4">
-              <h2 className="font-display text-3xl font-semibold text-cream-50">From the menu</h2>
-              <Link href="/menu" className="text-sm font-medium text-ember-400 hover:underline">
-                Full menu
+      {aboutExcerpt && (
+        <section className="border-b border-line bg-surface">
+          <div className="mx-auto max-w-3xl px-4 py-24 text-center sm:px-6">
+            <Reveal>
+              <SectionHeading eyebrow="Our story" title={`About ${businessName}`} align="center" />
+              <p className="mt-6 text-lg leading-relaxed text-ink-muted">
+                {aboutExcerpt.length > 360 ? `${aboutExcerpt.slice(0, 360).trim()}…` : aboutExcerpt}
+              </p>
+              <Link
+                href="/about"
+                className="mt-7 inline-flex items-center gap-1.5 text-sm font-medium text-brand transition-opacity hover:opacity-75"
+              >
+                Read our story <ArrowRight className="size-4" aria-hidden />
               </Link>
             </Reveal>
-            <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
-              {featuredProducts.map((product, i) => (
-                <Reveal key={product.id} delay={i * 80}>
-                  <ProductCard product={product} />
+          </div>
+        </section>
+      )}
+
+      {featured.length > 0 && (
+        <section className="bg-surface-1">
+          <div className="mx-auto max-w-6xl px-4 py-24 sm:px-6">
+            <Reveal className="flex flex-wrap items-end justify-between gap-6">
+              <SectionHeading eyebrow="Featured" title={`From the ${type.catalogLabel.toLowerCase()}`} />
+              <Link
+                href={catalogHref}
+                className="inline-flex items-center gap-1.5 pb-2 text-sm font-medium text-brand transition-opacity hover:opacity-75"
+              >
+                See all {type.itemPlural} <ArrowRight className="size-4" aria-hidden />
+              </Link>
+            </Reveal>
+
+            <div className="mt-12 grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4">
+              {featured.map((product, i) => (
+                <Reveal key={product.id} delay={i * 90} className="h-full">
+                  <ProductCard product={product} currency={business.currency} priority={i < 2} />
                 </Reveal>
               ))}
             </div>
@@ -85,38 +103,60 @@ export default async function HomePage() {
       )}
 
       {categories.length > 0 && (
-        <section className="mx-auto max-w-5xl px-4 py-12 sm:px-6">
-          <div className="flex flex-wrap justify-center gap-3">
-            {categories.map((category, i) => (
-              <Reveal key={category.id} delay={i * 60}>
-                <span className="rounded-full border border-ember-700 bg-ember-500/10 px-4 py-1.5 text-sm font-medium text-ember-300 transition-colors hover:bg-ember-500/20">
-                  {category.name}
-                </span>
-              </Reveal>
-            ))}
+        <section className="border-y border-line bg-surface">
+          <div className="mx-auto max-w-5xl px-4 py-20 sm:px-6">
+            <Reveal>
+              <SectionHeading eyebrow="Browse" title="Find what you're looking for" align="center" />
+            </Reveal>
+            <div className="mt-10 flex flex-wrap justify-center gap-3">
+              {categories.map((category, i) => (
+                <Reveal key={category.id} delay={i * 60}>
+                  <Link
+                    href={`${catalogHref}#${category.id}`}
+                    className="inline-flex rounded-full border border-line-strong px-5 py-2.5 text-sm font-medium text-ink-muted transition-colors duration-300 hover:border-brand-line hover:text-brand"
+                  >
+                    {category.name}
+                  </Link>
+                </Reveal>
+              ))}
+            </div>
           </div>
         </section>
       )}
 
       {featuredGallery.length > 0 && (
-        <section className="py-20">
-          <div className="mx-auto max-w-5xl px-4 sm:px-6">
-            <Reveal className="flex items-end justify-between gap-4">
-              <h2 className="font-display text-3xl font-semibold text-cream-50">Inside Maison Ember</h2>
-              <Link href="/gallery" className="text-sm font-medium text-ember-400 hover:underline">
-                View gallery
+        <section className="bg-surface">
+          <div className="mx-auto max-w-6xl px-4 py-24 sm:px-6">
+            <Reveal className="flex flex-wrap items-end justify-between gap-6">
+              <SectionHeading eyebrow="Gallery" title={`Inside ${businessName}`} />
+              <Link
+                href="/gallery"
+                className="inline-flex items-center gap-1.5 pb-2 text-sm font-medium text-brand transition-opacity hover:opacity-75"
+              >
+                View gallery <ArrowRight className="size-4" aria-hidden />
               </Link>
             </Reveal>
-            <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
+
+            {/* First image spans two columns on desktop for an editorial,
+                non-grid-like rhythm. */}
+            <div className="mt-12 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
               {featuredGallery.map((item, i) => (
-                <Reveal key={item.id} delay={i * 80}>
-                  <div className="group relative aspect-square overflow-hidden rounded-xl bg-charcoal-800">
+                <Reveal
+                  key={item.id}
+                  delay={i * 70}
+                  className={i === 0 ? "col-span-2 row-span-2" : undefined}
+                >
+                  <div
+                    className={`group relative overflow-hidden rounded-2xl bg-surface-2 ${
+                      i === 0 ? "aspect-square" : "aspect-square"
+                    }`}
+                  >
                     <Image
                       src={getPublicMediaUrl(item.storage_path)}
-                      alt={item.alt_text || businessName}
+                      alt={item.alt_text || ""}
                       fill
-                      sizes="(min-width: 640px) 25vw, 50vw"
-                      className="object-cover transition-transform duration-500 ease-out group-hover:scale-110"
+                      sizes={i === 0 ? "(min-width: 1024px) 50vw, 100vw" : "(min-width: 1024px) 25vw, 50vw"}
+                      className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                     />
                   </div>
                 </Reveal>
@@ -126,25 +166,42 @@ export default async function HomePage() {
         </section>
       )}
 
-      <Reveal as="section" className="bg-charcoal-950 py-16 text-white">
-        <div className="mx-auto flex max-w-5xl flex-col items-center gap-4 px-4 text-center sm:px-6">
-          {settings?.address && (
-            <p className="flex items-center gap-2 text-charcoal-200">
-              <MapPin className="size-4" aria-hidden /> {settings.address}
-            </p>
-          )}
-          {todayHours && (
-            <p className="flex items-center gap-2 text-charcoal-200">
-              <Clock className="size-4" aria-hidden /> Today: {todayHours}
-            </p>
-          )}
-          <Link href="/contact">
-            <Button size="lg" className="mt-2">
-              Get directions & hours
-            </Button>
-          </Link>
+      <section className="border-t border-line bg-surface-1">
+        <div className="mx-auto max-w-4xl px-4 py-24 text-center sm:px-6">
+          <Reveal>
+            <SectionHeading eyebrow={type.visitLabel} title="Come see us" align="center" />
+            <div className="mt-8 flex flex-col items-center gap-3 text-ink-muted">
+              {settings?.address && (
+                <p className="flex items-center gap-2.5">
+                  <MapPin className="size-4 shrink-0 text-brand" aria-hidden />
+                  {settings.address}
+                </p>
+              )}
+              {hoursLine && (
+                <p className="flex items-center gap-2.5">
+                  <Clock className="size-4 shrink-0 text-brand" aria-hidden />
+                  {hoursLine}
+                </p>
+              )}
+            </div>
+            <div className="mt-9 flex flex-wrap justify-center gap-3">
+              <SiteButton href="/contact" size="lg">
+                Contact &amp; hours
+              </SiteButton>
+              {settings?.address && (
+                <a
+                  href={mapsUrl(settings.address)!}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex h-13 items-center justify-center gap-2.5 rounded-full border border-brand-line px-7 text-base font-medium tracking-wide text-brand transition-colors duration-300 hover:bg-brand-tint"
+                >
+                  Get directions
+                </a>
+              )}
+            </div>
+          </Reveal>
         </div>
-      </Reveal>
+      </section>
     </>
   );
 }

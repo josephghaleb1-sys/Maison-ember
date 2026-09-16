@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { revalidateCatalog } from "@/lib/revalidate";
 import { createClient } from "@/lib/supabase/server";
 import { requireBusinessContext } from "@/lib/dal";
 import { categorySchema } from "@/lib/validation/category";
@@ -8,8 +9,7 @@ import { categorySchema } from "@/lib/validation/category";
 function revalidateAll() {
   revalidatePath("/admin/categories");
   revalidatePath("/admin/products");
-  revalidatePath("/menu");
-  revalidatePath("/");
+  revalidateCatalog();
 }
 
 export async function createCategory(formData: FormData): Promise<{ error?: string }> {

@@ -1,84 +1,94 @@
 import Image from "next/image";
-import { Flame } from "lucide-react";
 import { getPublicMediaUrl } from "@/lib/storage";
-import { EmberParticles } from "@/components/site/ember-particles";
 import { HeroParallax } from "@/components/site/hero-parallax";
 
+/**
+ * Full-bleed hero. Every word and color comes from the business's settings,
+ * and the no-image fallback is drawn entirely from brand tokens so it looks
+ * intentional for any tenant rather than like a missing asset.
+ */
 export function Hero({
   imagePath,
+  eyebrow,
   title,
-  tagline,
+  subtitle,
   children,
 }: {
   imagePath: string | null;
+  eyebrow?: string;
   title: string;
-  tagline: string;
+  subtitle: string;
   children?: React.ReactNode;
 }) {
   return (
-    <section className="relative flex min-h-[70vh] items-end overflow-hidden bg-charcoal-950 sm:min-h-[80vh]">
+    <section className="relative flex min-h-[78vh] items-end overflow-hidden bg-surface sm:min-h-[88vh]">
       <HeroParallax>
         {imagePath ? (
           <Image
             src={getPublicMediaUrl(imagePath)}
-            alt={title}
+            alt=""
             fill
             priority
             sizes="100vw"
-            className="object-cover opacity-70"
+            className="object-cover"
           />
         ) : (
-          <div
-            className="absolute inset-0 overflow-hidden bg-gradient-to-b from-charcoal-950 via-charcoal-900 to-charcoal-950"
-            aria-hidden
-          >
-            {/* Ambient hearth glow cast onto the dark wall */}
-            <div className="animate-ambient-glow motion-reduce:animate-none absolute bottom-[-20%] left-[62%] h-[70vh] w-[70vh] -translate-x-1/2 rounded-full bg-ember-600/35 blur-[100px]" />
-            <div className="animate-ambient-glow motion-reduce:animate-none absolute bottom-[-5%] left-[62%] h-[38vh] w-[38vh] -translate-x-1/2 rounded-full bg-ember-300/30 blur-[60px]" style={{ animationDelay: "1.2s" }} />
-
-            {/* Layered flame silhouette, back (soft glow) to front (bright core) */}
-            <Flame
-              fill="currentColor"
-              className="animate-flame-flicker motion-reduce:animate-none absolute bottom-[26%] left-[62%] size-56 -translate-x-1/2 text-ember-700/70 blur-md sm:bottom-[4%] sm:size-96"
+          <div className="absolute inset-0 overflow-hidden bg-surface" aria-hidden>
+            {/* Soft brand-colored light, so the empty state still carries the
+                business's identity instead of a grey box. */}
+            <div className="animate-ambient-glow absolute -right-[10%] top-[-20%] size-[80vh] rounded-full bg-brand-tint blur-[120px]" />
+            <div
+              className="animate-ambient-glow absolute bottom-[-30%] left-[-10%] size-[60vh] rounded-full bg-brand-tint blur-[100px]"
+              style={{ animationDelay: "1.5s" }}
             />
-            <Flame
-              fill="currentColor"
-              className="animate-flame-flicker motion-reduce:animate-none absolute bottom-[26%] left-[62%] size-40 -translate-x-1/2 text-ember-500/90 sm:bottom-[4%] sm:size-72"
-              style={{ animationDelay: "180ms" }}
-            />
-            <Flame
-              fill="currentColor"
-              className="animate-flame-flicker motion-reduce:animate-none absolute bottom-[26%] left-[62%] size-24 -translate-x-1/2 text-ember-200 sm:bottom-[4%] sm:size-40"
-              style={{ animationDelay: "90ms" }}
+            {/* Fine diagonal texture — reads as embossed paper/linen at a
+                distance and keeps large empty areas from looking flat. */}
+            <div
+              className="absolute inset-0 opacity-[0.07]"
+              style={{
+                backgroundImage:
+                  "repeating-linear-gradient(135deg, var(--brand) 0 1px, transparent 1px 14px)",
+              }}
             />
           </div>
         )}
       </HeroParallax>
-      {/* Whole-scene ambient firelight, breathing gently across everything */}
+
+      {/* Scrim: guarantees readable headline text over any uploaded photo. */}
       <div
-        className="animate-ambient-glow motion-reduce:animate-none pointer-events-none absolute inset-0"
+        className="absolute inset-0"
         style={{
-          background: "radial-gradient(ellipse at 62% 70%, rgba(166, 116, 28, 0.18), transparent 60%)",
-          animationDelay: "0.6s",
+          background:
+            "linear-gradient(to top, var(--hero-scrim) 8%, color-mix(in oklab, var(--hero-scrim) 72%, transparent) 46%, color-mix(in oklab, var(--hero-scrim) 24%, transparent) 100%)",
         }}
         aria-hidden
       />
-      <EmberParticles />
-      <div className="absolute inset-0 bg-gradient-to-t from-charcoal-950 via-charcoal-950/55 to-transparent" />
-      <div className="relative mx-auto w-full max-w-6xl px-4 pb-16 pt-32 sm:px-6">
-        <h1 className="animate-fade-up font-display text-4xl font-semibold text-white text-balance sm:text-6xl">
+
+      <div className="relative mx-auto w-full max-w-6xl px-4 pb-20 pt-36 sm:px-6 sm:pb-24">
+        {eyebrow && (
+          <p className="animate-fade-up mb-5 flex items-center gap-3 text-xs font-medium uppercase tracking-[0.28em] text-brand">
+            <span className="h-px w-8 bg-brand" aria-hidden />
+            {eyebrow}
+          </p>
+        )}
+        <h1
+          className="animate-fade-up max-w-3xl font-display text-4xl font-semibold leading-[1.08] tracking-tight text-white text-balance sm:text-6xl lg:text-7xl"
+          style={{ animationDelay: "80ms" }}
+        >
           {title}
         </h1>
-        <p
-          className="animate-fade-up mt-4 max-w-xl text-lg text-charcoal-200"
-          style={{ animationDelay: "150ms" }}
-        >
-          {tagline}
-        </p>
+        {subtitle && (
+          <p
+            className="animate-fade-up mt-6 max-w-xl text-lg leading-relaxed text-white/80"
+            style={{ animationDelay: "200ms" }}
+          >
+            {subtitle}
+          </p>
+        )}
         {children && (
           <div
-            className="animate-fade-up mt-8 flex flex-wrap gap-3"
-            style={{ animationDelay: "300ms" }}
+            className="animate-fade-up mt-10 flex flex-wrap gap-3"
+            style={{ animationDelay: "320ms" }}
           >
             {children}
           </div>

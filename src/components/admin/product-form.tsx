@@ -16,10 +16,15 @@ export function ProductForm({
   product,
   categories,
   action,
+  itemSingular = "item",
+  currency = "USD",
 }: {
   product?: Product;
   categories: Category[];
   action: (prevState: FormState, formData: FormData) => Promise<FormState>;
+  /** Industry noun ("dish", "title", "service") used in labels and hints. */
+  itemSingular?: string;
+  currency?: string;
 }) {
   const [state, formAction, isPending] = useActionState(action, initialState);
   const [preview, setPreview] = useState<string | null>(null);
@@ -40,7 +45,7 @@ export function ProductForm({
 
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
         <div>
-          <Label htmlFor="price">Price (USD)</Label>
+          <Label htmlFor="price">Price ({currency})</Label>
           <Input
             id="price"
             name="price"
@@ -73,7 +78,7 @@ export function ProductForm({
               <img src={preview} alt="Selected preview" className="size-full object-cover" />
             </div>
           ) : (
-            !removeImage && <Thumb path={product?.image_path ?? null} alt={product?.name ?? "Product"} size={64} />
+            !removeImage && <Thumb path={product?.image_path ?? null} alt={product?.name ?? "Item"} size={64} />
           )}
           <div className="flex-1">
             <input
@@ -141,7 +146,7 @@ export function ProductForm({
 
       <div className="flex gap-3">
         <Button type="submit" loading={isPending}>
-          {product ? "Save changes" : "Create product"}
+          {product ? "Save changes" : `Create ${itemSingular}`}
         </Button>
         <Link href="/admin/products">
           <Button type="button" variant="outline">

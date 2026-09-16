@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { revalidateGallery } from "@/lib/revalidate";
 import { createClient } from "@/lib/supabase/server";
 import { requireBusinessContext } from "@/lib/dal";
 import { uploadBusinessImage, deleteBusinessImage } from "@/lib/actions/upload";
@@ -10,8 +11,7 @@ const VALID_KINDS: MediaKind[] = ["product", "gallery", "logo", "hero", "other"]
 
 function revalidateAll() {
   revalidatePath("/admin/media");
-  revalidatePath("/gallery");
-  revalidatePath("/");
+  revalidateGallery();
 }
 
 export async function uploadMedia(formData: FormData): Promise<{ error?: string }> {

@@ -18,12 +18,14 @@ export function ProductRow({
   categoryName,
   isFirst,
   isLast,
+  currency,
   onOptimisticRemove,
 }: {
   product: Product;
   categoryName: string | null;
   isFirst: boolean;
   isLast: boolean;
+  currency: string;
   /** Called synchronously, before the server call, to hide the row immediately. */
   onOptimisticRemove: () => void;
 }) {
@@ -45,7 +47,7 @@ export function ProductRow({
         <div className="min-w-0">
           <p className="truncate text-sm font-medium text-cream-50">{product.name}</p>
           <p className="text-sm text-charcoal-400">
-            {formatPrice(product.price)}
+            {formatPrice(product.price, currency)}
             {categoryName && <span className="text-charcoal-500"> · {categoryName}</span>}
           </p>
         </div>
@@ -80,14 +82,14 @@ export function ProductRow({
         />
 
         <Link href={`/admin/products/${product.id}`}>
-          <Button variant="outline" size="sm" aria-label="Edit product">
+          <Button variant="outline" size="sm" aria-label={`Edit ${product.name}`}>
             <Pencil className="size-4" aria-hidden />
           </Button>
         </Link>
 
         <ConfirmDialog
           trigger={
-            <Button variant="outline" size="sm" aria-label="Delete product">
+            <Button variant="outline" size="sm" aria-label={`Delete ${product.name}`}>
               <Trash2 className="size-4 text-red-600" aria-hidden />
             </Button>
           }

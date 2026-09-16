@@ -9,11 +9,14 @@ const optionalUrl = z
     message: "Enter a full URL starting with https://",
   });
 
-export const settingsSchema = z.object({
+/** Business identity + how customers reach it. Everything here is rendered
+ * on the public site, so it's all optional except the name. */
+export const businessInfoSchema = z.object({
   business_name: z.string().trim().min(1, "Business name is required.").max(120),
   tagline: z.string().trim().max(160).optional().default(""),
   about_text: z.string().trim().max(4000).optional().default(""),
   phone: z.string().trim().max(40).optional().default(""),
+  whatsapp: z.string().trim().max(40).optional().default(""),
   email: z
     .string()
     .trim()
@@ -37,4 +40,4 @@ export const settingsSchema = z.object({
   social_yelp: optionalUrl,
 });
 
-export type SettingsInput = z.infer<typeof settingsSchema>;
+export type BusinessInfoInput = z.infer<typeof businessInfoSchema>;

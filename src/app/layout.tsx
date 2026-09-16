@@ -14,12 +14,12 @@ const inter = Inter({
   subsets: ["latin"],
 });
 
+// Neutral platform-level default only. The public site overrides this per
+// business in src/app/(site)/layout.tsx using that business's own SEO
+// settings — nothing here may name a specific customer.
 export const metadata: Metadata = {
-  title: {
-    default: "Maison Ember",
-    template: "%s | Maison Ember",
-  },
-  description: "Wood-fired cooking, modern French soul.",
+  title: "Website",
+  description: "",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

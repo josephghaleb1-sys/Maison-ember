@@ -1,6 +1,44 @@
 @import "tailwindcss";
 
+/* ---------------------------------------------------------------------------
+   Two palettes live in this file, and the split is deliberate.
+
+   1. BRAND TOKENS (--brand / --surface / --ink / --line)
+      The public website's colors. These are only DEFAULTS — every public
+      request overwrites them with the served business's own colors, generated
+      from `website_settings` by src/lib/theme.ts. Nothing in a public
+      component may hard-code a color, or that business's branding stops
+      working.
+
+   2. ADMIN CHROME (--color-charcoal-* / --color-ember-*)
+      The dashboard's own product UI. This is the platform's interface, not
+      any customer's brand, so it stays fixed across tenants — the same way a
+      commerce back office looks the same to every merchant using it.
+--------------------------------------------------------------------------- */
+
 :root {
+  /* Overwritten per-business on the public site; see src/lib/theme.ts. */
+  --brand: #c8a44d;
+  --brand-strong: color-mix(in oklab, #c8a44d 78%, black);
+  --brand-soft: color-mix(in oklab, #c8a44d 62%, white);
+  --brand-tint: color-mix(in oklab, #c8a44d 14%, transparent);
+  --brand-line: color-mix(in oklab, #c8a44d 42%, transparent);
+  --on-brand: #10100e;
+
+  --surface: #0e1420;
+  --surface-1: color-mix(in oklab, #0e1420 94%, white);
+  --surface-2: color-mix(in oklab, #0e1420 88%, white);
+  --surface-3: color-mix(in oklab, #0e1420 80%, white);
+
+  --ink: color-mix(in oklab, #c8a44d 8%, white);
+  --ink-muted: color-mix(in oklab, #0e1420 42%, white);
+  --ink-faint: color-mix(in oklab, #0e1420 62%, white);
+
+  --line: color-mix(in oklab, #0e1420 84%, white);
+  --line-strong: color-mix(in oklab, #0e1420 70%, white);
+  --hero-scrim: color-mix(in oklab, #0e1420 92%, black);
+
+  /* Admin chrome background, independent of any business's branding. */
   --background: #0c0a08;
   --foreground: #f7f1e6;
 }
@@ -11,8 +49,27 @@
   --font-display: var(--font-fraunces);
   --font-sans: var(--font-inter);
 
-  /* "ember" accent scale — luxury gold. 50-400 read well as gold text/icons
-     on dark surfaces; 600-700 are dark enough for white button text. */
+  /* --- Public site: business-driven brand tokens --- */
+  --color-brand: var(--brand);
+  --color-brand-strong: var(--brand-strong);
+  --color-brand-soft: var(--brand-soft);
+  --color-brand-tint: var(--brand-tint);
+  --color-brand-line: var(--brand-line);
+  --color-on-brand: var(--on-brand);
+
+  --color-surface: var(--surface);
+  --color-surface-1: var(--surface-1);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-ink-faint: var(--ink-faint);
+
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+
+  /* --- Admin chrome: fixed platform palette --- */
   --color-ember-50: #fbf3e3;
   --color-ember-100: #f3e2b8;
   --color-ember-200: #e7c883;
@@ -25,9 +82,6 @@
   --color-ember-900: #543910;
   --color-ember-950: #33220a;
 
-  /* Warm neutral "charcoal" scale — near-black with a hint of brown. The
-     dark end (800-950) is now the page/card surface everywhere; the light
-     end (50-400) is used for text and borders on those dark surfaces. */
   --color-charcoal-50: #f7f5f3;
   --color-charcoal-100: #ece7e2;
   --color-charcoal-200: #d8cec4;
@@ -40,8 +94,6 @@
   --color-charcoal-900: #201a17;
   --color-charcoal-950: #140f0d;
 
-  /* "cream" — warm off-white, used for headings/high-emphasis text on the
-     dark surfaces (not a background anymore). */
   --color-cream-50: #f7f1e6;
   --color-cream-100: #ece2cf;
   --color-cream-200: #ddcdad;
@@ -55,6 +107,17 @@ body {
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+
+  /* A hairline rule that fades out at both ends — used under section
+     headings on the public site. */
+  .rule-fade {
+    background: linear-gradient(
+      to right,
+      transparent,
+      var(--brand-line),
+      transparent
+    );
   }
 
   @keyframes fade-up {
@@ -72,39 +135,22 @@ body {
     animation: fade-up 0.8s ease-out both;
   }
 
-  @keyframes flame-flicker {
+  @keyframes ambient-glow-pulse {
     0%,
     100% {
-      transform: scale(1) translateY(0);
-      opacity: 1;
+      opacity: 0.55;
     }
     50% {
-      transform: scale(1.05) translateY(-4px);
       opacity: 0.9;
     }
   }
 
-  .animate-flame-flicker {
-    animation: flame-flicker 3.4s ease-in-out infinite;
-  }
-
-  @keyframes ambient-glow-pulse {
-    0%,
-    100% {
-      opacity: 0.6;
-    }
-    50% {
-      opacity: 1;
-    }
-  }
-
   .animate-ambient-glow {
-    animation: ambient-glow-pulse 6s ease-in-out infinite;
+    animation: ambient-glow-pulse 7s ease-in-out infinite;
   }
 
   @media (prefers-reduced-motion: reduce) {
     .animate-fade-up,
-    .animate-flame-flicker,
     .animate-ambient-glow {
       animation: none;
     }

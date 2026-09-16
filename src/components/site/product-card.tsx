@@ -1,35 +1,64 @@
 import Image from "next/image";
-import { Flame } from "lucide-react";
 import type { Product } from "@/lib/database.types";
 import { getPublicMediaUrl } from "@/lib/storage";
 import { formatPrice } from "@/lib/utils";
 
-export function ProductCard({ product }: { product: Product }) {
+/**
+ * One catalog item. Used for books, dishes, services — whatever the tenant
+ * sells — so it carries no industry-specific wording or iconography.
+ */
+export function ProductCard({
+  product,
+  currency,
+  priority = false,
+}: {
+  product: Product;
+  currency: string;
+  /** Set on above-the-fold cards so their images aren't lazy-loaded. */
+  priority?: boolean;
+}) {
   return (
-    <article className="group flex gap-4 rounded-xl border border-cream-50/10 bg-charcoal-900/60 p-4 transition-colors duration-300 hover:border-ember-700/60">
-      <div className="relative size-20 shrink-0 overflow-hidden rounded-lg bg-charcoal-800 sm:size-24">
+    <article className="group flex h-full flex-col overflow-hidden rounded-2xl border border-line bg-surface-1 transition-colors duration-300 hover:border-brand-line">
+      <div className="relative aspect-[4/5] overflow-hidden bg-surface-2">
         {product.image_path ? (
           <Image
             src={getPublicMediaUrl(product.image_path)}
             alt={product.name}
             fill
-            sizes="96px"
-            className="object-cover transition-transform duration-500 ease-out group-hover:scale-110"
+            priority={priority}
+            sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
+            className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
           />
         ) : (
-          <div className="flex size-full items-center justify-center text-ember-300">
-            <Flame className="size-8" aria-hidden />
+          // Monogram placeholder — deliberate-looking while an owner is still
+          // uploading photos, and themed so it never looks like a broken image.
+          <div
+            className="flex size-full items-center justify-center"
+            style={{
+              backgroundImage:
+                "repeating-linear-gradient(135deg, var(--brand-tint) 0 1px, transparent 1px 12px)",
+            }}
+            aria-hidden
+          >
+            <span className="font-display text-4xl font-semibold text-brand/40">
+              {product.name.trim().charAt(0).toUpperCase()}
+            </span>
           </div>
         )}
       </div>
-      <div className="min-w-0 flex-1">
-        <div className="flex items-baseline justify-between gap-3">
-          <h3 className="font-display text-lg font-semibold text-cream-50">{product.name}</h3>
-          <span className="shrink-0 font-medium text-ember-300">{formatPrice(product.price)}</span>
-        </div>
+
+      <div className="flex flex-1 flex-col p-5">
+        <h3 className="font-display text-lg font-semibold leading-snug text-ink">
+          {product.name}
+        </h3>
         {product.description && (
-          <p className="mt-1 text-sm text-charcoal-300">{product.description}</p>
+          <p className="mt-2 line-clamp-3 flex-1 text-sm leading-relaxed text-ink-muted">
+            {product.description}
+          </p>
         )}
+        <p className="mt-4 font-medium tracking-wide text-brand">
+          {formatPrice(product.price, currency)}
+        </p>
       </div>
     </article>
   );
