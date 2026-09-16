@@ -18,25 +18,25 @@ begin;
 
 do $$
 declare
-  biz_a uuid;   -- bookshop
+  biz_a uuid;   -- bibliotheca
   biz_b uuid;   -- maison-ember
   user_a uuid;
   visible_count int;
   hidden_probe int;
   update_count int;
 begin
-  select id into biz_a from public.businesses where slug = 'bookshop';
+  select id into biz_a from public.businesses where slug = 'bibliotheca';
   select id into biz_b from public.businesses where slug = 'maison-ember';
 
   if biz_a is null or biz_b is null then
-    raise exception 'Seed both businesses first (bookshop.sql and maison_ember.sql).';
+    raise exception 'Seed both businesses first (bibliotheca.sql and maison_ember.sql).';
   end if;
 
   select user_id into user_a
   from public.business_members where business_id = biz_a limit 1;
 
   if user_a is null then
-    raise exception 'No member on the bookshop yet — run link_owner.sql first.';
+    raise exception 'No member on Bibliotheca yet — run link_owner.sql first.';
   end if;
 
   -- Give Business B a hidden product to probe for.

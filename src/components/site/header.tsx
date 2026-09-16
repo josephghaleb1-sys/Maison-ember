@@ -37,6 +37,12 @@ export function SiteHeader({
   // bare page background.
   const overlaysHero = pathname === "/";
 
+  // While floating over the hero, the header sits on the hero scrim, which is
+  // dark for EVERY palette (see --hero-scrim). Brand/ink tokens are solved
+  // against the page surface, so on a light theme they'd be dark-on-dark
+  // here — over the hero the header uses plain white instead.
+  const onHero = overlaysHero && !scrolled && !open;
+
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
     onScroll();
@@ -47,7 +53,10 @@ export function SiteHeader({
   return (
     <header
       className={cn(
-        "sticky top-0 z-40 transition-colors duration-300",
+        // Fixed, not sticky: a sticky header stays in normal flow, so it
+        // would sit *above* the hero as a solid strip instead of floating
+        // over it. Inner pages carry top padding to clear it.
+        "fixed inset-x-0 top-0 z-40 transition-colors duration-300",
         scrolled || open || !overlaysHero
           ? "border-b border-line bg-surface/95 backdrop-blur"
           : "border-b border-transparent bg-transparent",
@@ -72,12 +81,22 @@ export function SiteHeader({
           ) : (
             <span
               aria-hidden
-              className="flex size-10 shrink-0 items-center justify-center rounded-full border border-brand-line font-display text-lg font-semibold text-brand"
+              className={cn(
+                "flex size-10 shrink-0 items-center justify-center rounded-full border font-display text-lg font-semibold",
+                onHero
+                  ? "border-white/40 text-white"
+                  : "border-brand-line text-brand-ink",
+              )}
             >
               {businessName.trim().charAt(0).toUpperCase() || "·"}
             </span>
           )}
-          <span className="truncate font-display text-lg font-semibold tracking-tight text-ink">
+          <span
+            className={cn(
+              "truncate font-display text-lg font-semibold tracking-tight",
+              onHero ? "text-white" : "text-ink",
+            )}
+          >
             {businessName}
           </span>
         </Link>
@@ -93,8 +112,18 @@ export function SiteHeader({
                 aria-current={active ? "page" : undefined}
                 className={cn(
                   "relative py-1 text-sm font-medium tracking-wide transition-colors",
-                  "after:absolute after:inset-x-0 after:-bottom-0.5 after:h-px after:origin-left after:scale-x-0 after:bg-brand after:transition-transform after:duration-300 hover:after:scale-x-100",
-                  active ? "text-brand after:scale-x-100" : "text-ink-muted hover:text-ink",
+                  "after:absolute after:inset-x-0 after:-bottom-0.5 after:h-px after:origin-left after:scale-x-0 after:transition-transform after:duration-300 hover:after:scale-x-100",
+                  onHero
+                    ? "after:bg-white"
+                    : "after:bg-brand",
+                  active && "after:scale-x-100",
+                  onHero
+                    ? active
+                      ? "text-white"
+                      : "text-white/75 hover:text-white"
+                    : active
+                      ? "text-brand-ink"
+                      : "text-ink-muted hover:text-ink",
                 )}
               >
                 {link.label}
@@ -109,7 +138,10 @@ export function SiteHeader({
           aria-label={open ? "Close menu" : "Open menu"}
           aria-expanded={open}
           aria-controls="site-mobile-nav"
-          className="flex size-10 items-center justify-center rounded-lg text-ink transition-colors hover:bg-surface-2 md:hidden"
+          className={cn(
+            "flex size-10 items-center justify-center rounded-lg transition-colors md:hidden",
+            onHero ? "text-white hover:bg-white/15" : "text-ink hover:bg-surface-2",
+          )}
         >
           {open ? <X className="size-5" aria-hidden /> : <Menu className="size-5" aria-hidden />}
         </button>
@@ -129,7 +161,7 @@ export function SiteHeader({
                     aria-current={active ? "page" : undefined}
                     className={cn(
                       "block border-b border-line/60 py-4 text-base font-medium last:border-b-0",
-                      active ? "text-brand" : "text-ink",
+                      active ? "text-brand-ink" : "text-ink",
                     )}
                   >
                     {link.label}

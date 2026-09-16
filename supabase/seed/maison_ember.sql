@@ -77,27 +77,27 @@ begin
   -- ---- categories -----------------------------------------------------------
   insert into public.categories (business_id, name, sort_order)
   values (biz_id, 'Starters', 1)
-  on conflict do nothing;
+  on conflict (business_id, name) do nothing;
   select id into cat_starters from public.categories where business_id = biz_id and name = 'Starters';
 
   insert into public.categories (business_id, name, sort_order)
   values (biz_id, 'Wood-Fired Mains', 2)
-  on conflict do nothing;
+  on conflict (business_id, name) do nothing;
   select id into cat_mains from public.categories where business_id = biz_id and name = 'Wood-Fired Mains';
 
   insert into public.categories (business_id, name, sort_order)
   values (biz_id, 'Sides', 3)
-  on conflict do nothing;
+  on conflict (business_id, name) do nothing;
   select id into cat_sides from public.categories where business_id = biz_id and name = 'Sides';
 
   insert into public.categories (business_id, name, sort_order)
   values (biz_id, 'Desserts', 4)
-  on conflict do nothing;
+  on conflict (business_id, name) do nothing;
   select id into cat_desserts from public.categories where business_id = biz_id and name = 'Desserts';
 
   insert into public.categories (business_id, name, sort_order)
   values (biz_id, 'Drinks', 5)
-  on conflict do nothing;
+  on conflict (business_id, name) do nothing;
   select id into cat_drinks from public.categories where business_id = biz_id and name = 'Drinks';
 
   -- ---- products: only insert if this business has none yet (idempotent) ----

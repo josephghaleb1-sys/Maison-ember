@@ -17,26 +17,29 @@
 --------------------------------------------------------------------------- */
 
 :root {
-  /* Overwritten per-business on the public site; see src/lib/theme.ts. */
-  --brand: #c8a44d;
-  --brand-strong: color-mix(in oklab, #c8a44d 78%, black);
-  --brand-soft: color-mix(in oklab, #c8a44d 62%, white);
-  --brand-tint: color-mix(in oklab, #c8a44d 14%, transparent);
-  --brand-line: color-mix(in oklab, #c8a44d 42%, transparent);
+  /* Overwritten per-business on every public request; see src/lib/theme.ts.
+     These defaults are that module's own output for the shipped palette, so
+     the two can't drift. Text tokens are concrete hex because their contrast
+     against the surface is solved, not eyeballed. */
+  --brand: #b08d57;
+  --brand-strong: #907447;
+  --brand-ink: #846941;
+  --brand-tint: color-mix(in oklab, #b08d57 12%, transparent);
+  --brand-line: color-mix(in oklab, #b08d57 46%, transparent);
   --on-brand: #10100e;
 
-  --surface: #0e1420;
-  --surface-1: color-mix(in oklab, #0e1420 94%, white);
-  --surface-2: color-mix(in oklab, #0e1420 88%, white);
-  --surface-3: color-mix(in oklab, #0e1420 80%, white);
+  --surface: #f4f0e8;
+  --surface-1: color-mix(in oklab, #f4f0e8 97%, #000000);
+  --surface-2: color-mix(in oklab, #f4f0e8 94%, #000000);
+  --surface-3: color-mix(in oklab, #f4f0e8 89%, #000000);
 
-  --ink: color-mix(in oklab, #c8a44d 8%, white);
-  --ink-muted: color-mix(in oklab, #0e1420 42%, white);
-  --ink-faint: color-mix(in oklab, #0e1420 62%, white);
+  --ink: #353330;
+  --ink-muted: #716d67;
+  --ink-faint: #8f8a82;
 
-  --line: color-mix(in oklab, #0e1420 84%, white);
-  --line-strong: color-mix(in oklab, #0e1420 70%, white);
-  --hero-scrim: color-mix(in oklab, #0e1420 92%, black);
+  --line: color-mix(in oklab, #f4f0e8 91%, #000000);
+  --line-strong: color-mix(in oklab, #f4f0e8 80%, #000000);
+  --hero-scrim: #222220;
 
   /* Admin chrome background, independent of any business's branding. */
   --background: #0c0a08;
@@ -52,7 +55,7 @@
   /* --- Public site: business-driven brand tokens --- */
   --color-brand: var(--brand);
   --color-brand-strong: var(--brand-strong);
-  --color-brand-soft: var(--brand-soft);
+  --color-brand-ink: var(--brand-ink);
   --color-brand-tint: var(--brand-tint);
   --color-brand-line: var(--brand-line);
   --color-on-brand: var(--on-brand);

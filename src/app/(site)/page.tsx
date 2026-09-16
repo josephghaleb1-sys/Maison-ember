@@ -69,7 +69,7 @@ export default async function HomePage() {
               </p>
               <Link
                 href="/about"
-                className="mt-7 inline-flex items-center gap-1.5 text-sm font-medium text-brand transition-opacity hover:opacity-75"
+                className="mt-7 inline-flex items-center gap-1.5 text-sm font-medium text-brand-ink transition-opacity hover:opacity-75"
               >
                 Read our story <ArrowRight className="size-4" aria-hidden />
               </Link>
@@ -85,7 +85,7 @@ export default async function HomePage() {
               <SectionHeading eyebrow="Featured" title={`From the ${type.catalogLabel.toLowerCase()}`} />
               <Link
                 href={catalogHref}
-                className="inline-flex items-center gap-1.5 pb-2 text-sm font-medium text-brand transition-opacity hover:opacity-75"
+                className="inline-flex items-center gap-1.5 pb-2 text-sm font-medium text-brand-ink transition-opacity hover:opacity-75"
               >
                 See all {type.itemPlural} <ArrowRight className="size-4" aria-hidden />
               </Link>
@@ -113,7 +113,7 @@ export default async function HomePage() {
                 <Reveal key={category.id} delay={i * 60}>
                   <Link
                     href={`${catalogHref}#${category.id}`}
-                    className="inline-flex rounded-full border border-line-strong px-5 py-2.5 text-sm font-medium text-ink-muted transition-colors duration-300 hover:border-brand-line hover:text-brand"
+                    className="inline-flex rounded-full border border-line-strong px-5 py-2.5 text-sm font-medium text-ink-muted transition-colors duration-300 hover:border-brand-line hover:text-brand-ink"
                   >
                     {category.name}
                   </Link>
@@ -131,7 +131,7 @@ export default async function HomePage() {
               <SectionHeading eyebrow="Gallery" title={`Inside ${businessName}`} />
               <Link
                 href="/gallery"
-                className="inline-flex items-center gap-1.5 pb-2 text-sm font-medium text-brand transition-opacity hover:opacity-75"
+                className="inline-flex items-center gap-1.5 pb-2 text-sm font-medium text-brand-ink transition-opacity hover:opacity-75"
               >
                 View gallery <ArrowRight className="size-4" aria-hidden />
               </Link>
@@ -173,13 +173,13 @@ export default async function HomePage() {
             <div className="mt-8 flex flex-col items-center gap-3 text-ink-muted">
               {settings?.address && (
                 <p className="flex items-center gap-2.5">
-                  <MapPin className="size-4 shrink-0 text-brand" aria-hidden />
+                  <MapPin className="size-4 shrink-0 text-brand-ink" aria-hidden />
                   {settings.address}
                 </p>
               )}
               {hoursLine && (
                 <p className="flex items-center gap-2.5">
-                  <Clock className="size-4 shrink-0 text-brand" aria-hidden />
+                  <Clock className="size-4 shrink-0 text-brand-ink" aria-hidden />
                   {hoursLine}
                 </p>
               )}
@@ -193,7 +193,7 @@ export default async function HomePage() {
                   href={mapsUrl(settings.address)!}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex h-13 items-center justify-center gap-2.5 rounded-full border border-brand-line px-7 text-base font-medium tracking-wide text-brand transition-colors duration-300 hover:bg-brand-tint"
+                  className="inline-flex h-13 items-center justify-center gap-2.5 rounded-full border border-brand-line px-7 text-base font-medium tracking-wide text-brand-ink transition-colors duration-300 hover:bg-brand-tint"
                 >
                   Get directions
                 </a>

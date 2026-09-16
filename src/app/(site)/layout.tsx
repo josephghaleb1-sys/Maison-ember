@@ -63,6 +63,16 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
         the database), which is what makes this interpolation safe.
       */}
       <style dangerouslySetInnerHTML={{ __html: `:root{${buildThemeCss(settings)}}` }} />
+      {/* Scroll-reveal sections start transparent and are faded in by an
+          IntersectionObserver. Without JavaScript that observer never runs,
+          which would leave the page blank — this makes them visible instead. */}
+      <noscript>
+        <style
+          dangerouslySetInnerHTML={{
+            __html: "[data-reveal]{opacity:1 !important;transform:none !important}",
+          }}
+        />
+      </noscript>
       <div className="flex min-h-screen flex-col bg-surface">
         <SiteHeader
           businessName={businessName}

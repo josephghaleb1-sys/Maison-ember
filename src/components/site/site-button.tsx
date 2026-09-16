@@ -15,7 +15,7 @@ const variantClasses: Record<Variant, string> = {
   primary:
     "bg-brand text-on-brand hover:bg-brand-strong focus-visible:outline-brand",
   outline:
-    "border border-brand-line text-brand hover:bg-brand-tint focus-visible:outline-brand",
+    "border border-brand-line text-brand-ink hover:bg-brand-tint focus-visible:outline-brand",
   quiet:
     "border border-white/25 bg-white/10 text-white backdrop-blur hover:bg-white/20 focus-visible:outline-white",
 };

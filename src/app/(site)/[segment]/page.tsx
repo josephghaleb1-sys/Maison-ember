@@ -64,7 +64,7 @@ export default async function CatalogPage({ params }: Params) {
       : grouped;
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-24">
+    <div className="mx-auto max-w-6xl px-4 pb-20 pt-32 sm:px-6 sm:pb-24 sm:pt-36">
       <Reveal>
         <SectionHeading
           eyebrow={business.name}

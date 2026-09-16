@@ -78,7 +78,7 @@ export default async function ContactPage() {
   ].filter((card): card is NonNullable<typeof card> => card !== null);
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-20 sm:px-6 sm:py-24">
+    <div className="mx-auto max-w-5xl px-4 pb-20 pt-32 sm:px-6 sm:pb-24 sm:pt-36">
       <Reveal>
         <SectionHeading
           eyebrow="Contact"
@@ -110,7 +110,7 @@ export default async function ContactPage() {
                     className="flex items-start gap-4 rounded-2xl border border-line bg-surface-1 p-5 transition-colors duration-300 hover:border-brand-line"
                   >
                     <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-brand-tint">
-                      <Icon className="size-5 text-brand" aria-hidden />
+                      <Icon className="size-5 text-brand-ink" aria-hidden />
                     </span>
                     <span className="min-w-0">
                       <span className="block text-xs font-medium uppercase tracking-[0.2em] text-ink-faint">
@@ -132,7 +132,7 @@ export default async function ContactPage() {
                       href={url as string}
                       target="_blank"
                       rel="noreferrer"
-                      className="rounded-full border border-line-strong px-5 py-2 text-sm font-medium text-ink-muted transition-colors duration-300 hover:border-brand-line hover:text-brand"
+                      className="rounded-full border border-line-strong px-5 py-2 text-sm font-medium text-ink-muted transition-colors duration-300 hover:border-brand-line hover:text-brand-ink"
                     >
                       {key.charAt(0).toUpperCase() + key.slice(1)}
                     </Link>
@@ -146,7 +146,7 @@ export default async function ContactPage() {
             <Reveal delay={120} className="lg:col-span-2">
               <div className="rounded-2xl border border-line bg-surface-1 p-6">
                 <h2 className="flex items-center gap-2.5 font-display text-lg font-semibold text-ink">
-                  <Clock className="size-5 text-brand" aria-hidden /> Opening hours
+                  <Clock className="size-5 text-brand-ink" aria-hidden /> Opening hours
                 </h2>
                 <ul className="mt-4 divide-y divide-line text-sm">
                   {DAY_LABELS.map(([key, label]) => (

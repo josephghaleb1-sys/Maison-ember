@@ -7,6 +7,11 @@ import { cn } from "@/lib/utils";
  * Fades + slides a section in the first time it scrolls into view. Pure
  * CSS transition driven by an IntersectionObserver — no animation library.
  * Respects prefers-reduced-motion (see motion-reduce: below).
+ *
+ * Sections start at opacity 0, so an entrance animation could in principle be
+ * the reason a page looks empty. Each root carries `data-reveal`, and the
+ * site layout ships a <noscript> rule that forces those elements visible —
+ * with JavaScript disabled the content is simply there, unanimated.
  */
 export function Reveal({
   children,
@@ -49,14 +54,14 @@ export function Reveal({
 
   if (as === "section") {
     return (
-      <section ref={ref} style={style} className={classes}>
+      <section ref={ref} data-reveal style={style} className={classes}>
         {children}
       </section>
     );
   }
 
   return (
-    <div ref={ref} style={style} className={classes}>
+    <div ref={ref} data-reveal style={style} className={classes}>
       {children}
     </div>
   );

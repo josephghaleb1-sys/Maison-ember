@@ -1,14 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
   Platform fallback favicon, used when a business hasn't uploaded a logo yet.
-  Once one is uploaded it becomes that business's icon automatically — see the
-  `icons` entry in generateMetadata in src/app/(site)/layout.tsx.
+  Once one is uploaded it becomes that business's tab icon automatically — see
+  the `icons` entry in generateMetadata in src/app/(site)/layout.tsx.
+
+  Simplified for 16-32px: the column stem and a single bowl, no flutes or
+  book, which turn to mud at favicon size.
 -->
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
-  <rect width="64" height="64" rx="14" fill="#0E1420"/>
-  <circle cx="32" cy="32" r="22" fill="none" stroke="#C8A44D" stroke-width="2.5"/>
-  <path d="M32 22 C 27 19, 21 18, 17 19 L17 40 C 21 39, 27 40, 32 43 Z"
-        fill="none" stroke="#C8A44D" stroke-width="3" stroke-linejoin="round"/>
-  <path d="M32 22 C 37 19, 43 18, 47 19 L47 40 C 43 39, 37 40, 32 43 Z"
-        fill="none" stroke="#C8A44D" stroke-width="3" stroke-linejoin="round"/>
+  <rect width="64" height="64" rx="14" fill="#F4F0E8"/>
+  <g fill="#9A7A48">
+    <rect x="15" y="13" width="17" height="4.5" rx="1"/>
+    <rect x="19" y="17.5" width="9" height="29" rx="0.5"/>
+    <rect x="15" y="46.5" width="17" height="4.5" rx="1"/>
+  </g>
+  <g fill="none" stroke="#9A7A48" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M30 15 H37 A8 8 0 0 1 37 31 H30"/>
+    <path d="M30 31 H39 A9.5 9.5 0 0 1 39 50 H30"/>
+  </g>
 </svg>

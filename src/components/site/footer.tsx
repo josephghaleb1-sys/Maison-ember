@@ -59,7 +59,7 @@ export function SiteFooter({
             ) : (
               <span
                 aria-hidden
-                className="flex size-9 shrink-0 items-center justify-center rounded-full border border-brand-line font-display text-base font-semibold text-brand"
+                className="flex size-9 shrink-0 items-center justify-center rounded-full border border-brand-line font-display text-base font-semibold text-brand-ink"
               >
                 {businessName.trim().charAt(0).toUpperCase() || "·"}
               </span>
@@ -75,7 +75,7 @@ export function SiteFooter({
                     href={social[key]!}
                     target="_blank"
                     rel="noreferrer"
-                    className="text-sm transition-colors hover:text-brand"
+                    className="text-sm transition-colors hover:text-brand-ink"
                   >
                     {label}
                   </Link>
@@ -89,21 +89,21 @@ export function SiteFooter({
           <h2 className="font-display text-base font-semibold text-ink">Contact</h2>
           {settings?.address && (
             <p className="flex items-start gap-2.5">
-              <MapPin className="mt-0.5 size-4 shrink-0 text-brand" aria-hidden />
+              <MapPin className="mt-0.5 size-4 shrink-0 text-brand-ink" aria-hidden />
               {settings.address}
             </p>
           )}
           {tel && settings?.phone && (
             <p className="flex items-center gap-2.5">
-              <Phone className="size-4 shrink-0 text-brand" aria-hidden />
-              <a href={tel} className="transition-colors hover:text-brand">
+              <Phone className="size-4 shrink-0 text-brand-ink" aria-hidden />
+              <a href={tel} className="transition-colors hover:text-brand-ink">
                 {settings.phone}
               </a>
             </p>
           )}
           {wa && (
             <p className="flex items-center gap-2.5">
-              <MessageCircle className="size-4 shrink-0 text-brand" aria-hidden />
+              <MessageCircle className="size-4 shrink-0 text-brand-ink" aria-hidden />
               <a
                 href={wa}
                 target="_blank"
@@ -116,8 +116,8 @@ export function SiteFooter({
           )}
           {settings?.email && (
             <p className="flex items-center gap-2.5">
-              <Mail className="size-4 shrink-0 text-brand" aria-hidden />
-              <a href={`mailto:${settings.email}`} className="transition-colors hover:text-brand">
+              <Mail className="size-4 shrink-0 text-brand-ink" aria-hidden />
+              <a href={`mailto:${settings.email}`} className="transition-colors hover:text-brand-ink">
                 {settings.email}
               </a>
             </p>

@@ -56,7 +56,7 @@ export function ProductCard({
             {product.description}
           </p>
         )}
-        <p className="mt-4 font-medium tracking-wide text-brand">
+        <p className="mt-4 font-medium tracking-wide text-brand-ink">
           {formatPrice(product.price, currency)}
         </p>
       </div>

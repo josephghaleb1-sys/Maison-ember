@@ -9,9 +9,9 @@ Each business gets a public marketing website and a dashboard where the owner
 manages everything on it without touching code. Adding a customer means
 creating a row and pointing a domain at the deployment — not forking the app.
 
-The repository ships configured for a demo bookshop, with a second demo
-business (a restaurant) included to make the isolation and the per-industry
-theming demonstrable.
+The repository ships configured for **Bibliotheca Bookshop**, with a second
+demo business (a restaurant) included to make the isolation and the
+per-industry theming demonstrable.
 
 ---
 
@@ -144,12 +144,13 @@ CLI). Every file is idempotent and safe to re-run.
 | 1 | `supabase/migrations/0001_init.sql` | Tables, triggers, RLS policies, storage bucket |
 | 2 | `supabase/migrations/0002_perf_indexes.sql` | Supporting indexes |
 | 3 | `supabase/migrations/0003_platform_generalization.sql` | Industry type, currency, brand colors, hero copy, SEO fields, `business_domains` |
+| 4 | `supabase/migrations/0004_unique_category_names.sql` | Merges duplicate categories and enforces one category name per business |
 
 Then load demo data (optional but recommended for a first run):
 
 | File | Contents |
 | --- | --- |
-| `supabase/seed/bookshop.sql` | The demo bookshop: settings, 5 categories, 19 items |
+| `supabase/seed/bibliotheca.sql` | Bibliotheca Bookshop: settings, 5 categories, 19 items |
 | `supabase/seed/maison_ember.sql` | A second demo business (restaurant), to prove isolation |
 
 ---
@@ -162,7 +163,7 @@ site (there is deliberately no public sign-up — owners are onboarded by you).
 1. **Supabase Dashboard → Authentication → Users → Add user.** Enter an email
    and password and tick *Auto Confirm User*.
 2. Open `supabase/seed/link_owner.sql`, set `target_email` to that address and
-   `target_slug` to the business (`bookshop`), and run it.
+   `target_slug` to the business (`bibliotheca`), and run it.
 3. Visit `/admin/login` and sign in.
 
 Step 2 is not optional. Membership is what every RLS policy checks — without a
@@ -224,6 +225,9 @@ never an owner.
 Constraints worth knowing (all enforced in the database, not just in forms):
 
 - `business_type` must be one of the supported industries
+- category names are unique per business (which is also what makes the seed
+  files genuinely re-runnable — without it their `on conflict do nothing`
+  never matched and every re-run duplicated the category list)
 - `currency` must match `^[A-Z]{3}$`
 - `primary_color` / `secondary_color` must match `^#[0-9A-Fa-f]{6}$`
 - `hostname` must be lowercase and contain no port
@@ -339,9 +343,17 @@ Everything below is editable in the dashboard by the owner:
 | **Media** | Upload, replace, delete, alt text, gallery visibility |
 
 Colors are stored as hex and expanded at request time into a full set of CSS
-custom properties (surfaces, borders, muted text, readable contrast) by
-`src/lib/theme.ts`. Owners pick two colors; the site derives a coherent palette
-from them and works with a light or a dark secondary color.
+custom properties by `src/lib/theme.ts`. Owners pick two colors; the site
+derives a coherent palette and works with either a light or a dark secondary
+color.
+
+Readability is solved, not assumed. An owner can pick any pair, so every token
+that carries text is computed against an explicit WCAG target rather than mixed
+by eye: body copy clears 11:1 against the surface, muted copy and
+brand-colored text clear 4.5:1, and button labels pick black or white by
+measuring both. That matters for exactly the mid-tone golds and terracottas
+businesses like most — a naive "is it dark?" test puts white on a #C8A44D
+button at 2.4:1, where black would have given 8.9:1.
 
 ---
 
@@ -523,7 +535,14 @@ UI and stays consistent across tenants.
 - **Images are served directly from Supabase Storage** with Next's image
   optimizer disabled (`next.config.ts`), since uploads are already downscaled
   client-side. Enable it if you want Vercel's optimizer as well.
-- **Demo content is demo content.** Everything in `supabase/seed/bookshop.sql`
+- **Demo content is demo content.** Everything in `supabase/seed/bibliotheca.sql`
   — phone numbers (555 range, reserved for fiction), address, email, socials,
   product titles — is placeholder data, marked as such at the top of the file,
   and meant to be replaced.
+- **The shipped logo is a placeholder.** `public/demo/bibliotheca-logo.svg` is
+  a geometric stand-in drawn from the customer's own mark. Upload the real
+  artwork under Website → Logo & hero image and it replaces this everywhere,
+  including the browser tab.
+- **No hero photograph yet.** Without one the hero renders a branded gradient
+  and texture, which is a designed state rather than a gap — but a real
+  photograph is what the layout is built for.

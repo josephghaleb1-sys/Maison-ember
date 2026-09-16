@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Placeholder mark for Bibliotheca Bookshop.
+
+  A geometric reading of the customer's own logo: a classical column forming
+  the stem of a "B", with an open book seated in the lower bowl. Drawn entirely
+  in paths so it renders identically everywhere (no embedded fonts), in the
+  brand's antique gold on warm ivory.
+
+  This is a stand-in. Upload the real artwork from the dashboard under
+  Website -> Logo & hero image, and it replaces this everywhere on the site —
+  header, footer, About page and the browser tab.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512"
+     role="img" aria-label="Bibliotheca Bookshop">
+  <defs>
+    <linearGradient id="foil" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%"   stop-color="#D8BC85"/>
+      <stop offset="45%"  stop-color="#B08D57"/>
+      <stop offset="100%" stop-color="#7A5A32"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="512" height="512" fill="#F4F0E8"/>
+  <circle cx="256" cy="256" r="228" fill="none" stroke="#B08D57" stroke-width="2" opacity="0.4"/>
+
+  <g stroke="url(#foil)" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <!-- B: upper and lower bowls -->
+    <path d="M206 120 H262 A58 58 0 0 1 262 236 H206" stroke-width="21"/>
+    <path d="M206 236 H286 A72 72 0 0 1 286 380 H206" stroke-width="21"/>
+  </g>
+
+  <g fill="url(#foil)">
+    <!-- Column capital, shaft and base forming the stem of the B -->
+    <rect x="142" y="104" width="82" height="19" rx="3"/>
+    <rect x="152" y="127" width="62" height="10" rx="3"/>
+    <rect x="163" y="141" width="40" height="230"/>
+    <rect x="152" y="375" width="62" height="10" rx="3"/>
+    <rect x="142" y="389" width="82" height="19" rx="3"/>
+  </g>
+
+  <!-- Column flutes -->
+  <g stroke="#F4F0E8" stroke-width="3.5" opacity="0.55" stroke-linecap="round">
+    <path d="M176 152 V360"/>
+    <path d="M191 152 V360"/>
+  </g>
+
+  <!-- Open book seated in the lower bowl -->
+  <g stroke="url(#foil)" fill="none" stroke-width="7.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M276 300 C263 291, 244 288, 229 290 L229 336 C244 334, 263 338, 276 347 Z"/>
+    <path d="M276 300 C289 291, 308 288, 323 290 L323 336 C308 334, 289 338, 276 347 Z"/>
+    <path d="M276 300 V347"/>
+  </g>
+</svg>

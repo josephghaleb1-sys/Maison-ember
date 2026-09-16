@@ -33,18 +33,25 @@ export function Hero({
             className="object-cover"
           />
         ) : (
-          <div className="absolute inset-0 overflow-hidden bg-surface" aria-hidden>
-            {/* Soft brand-colored light, so the empty state still carries the
-                business's identity instead of a grey box. */}
-            <div className="animate-ambient-glow absolute -right-[10%] top-[-20%] size-[80vh] rounded-full bg-brand-tint blur-[120px]" />
+          <div
+            className="absolute inset-0 overflow-hidden"
+            style={{ background: "var(--hero-scrim)" }}
+            aria-hidden
+          >
+            {/* Brand-colored light on a dark ground. Starting from the surface
+                color instead meant the scrim flattened everything to neutral
+                grey — on a light palette the business's identity disappeared
+                entirely. These glows sit above a dark base so the brand hue
+                actually survives. */}
+            <div className="animate-ambient-glow absolute -right-[10%] top-[-20%] size-[80vh] rounded-full bg-brand/25 blur-[130px]" />
             <div
-              className="animate-ambient-glow absolute bottom-[-30%] left-[-10%] size-[60vh] rounded-full bg-brand-tint blur-[100px]"
+              className="animate-ambient-glow absolute bottom-[-30%] left-[-10%] size-[60vh] rounded-full bg-brand/20 blur-[110px]"
               style={{ animationDelay: "1.5s" }}
             />
             {/* Fine diagonal texture — reads as embossed paper/linen at a
                 distance and keeps large empty areas from looking flat. */}
             <div
-              className="absolute inset-0 opacity-[0.07]"
+              className="absolute inset-0 opacity-[0.10]"
               style={{
                 backgroundImage:
                   "repeating-linear-gradient(135deg, var(--brand) 0 1px, transparent 1px 14px)",
@@ -59,7 +66,21 @@ export function Hero({
         className="absolute inset-0"
         style={{
           background:
-            "linear-gradient(to top, var(--hero-scrim) 8%, color-mix(in oklab, var(--hero-scrim) 72%, transparent) 46%, color-mix(in oklab, var(--hero-scrim) 24%, transparent) 100%)",
+            "linear-gradient(to top, var(--hero-scrim) 8%, color-mix(in oklab, var(--hero-scrim) 72%, transparent) 46%, color-mix(in oklab, var(--hero-scrim) 30%, transparent) 100%)",
+        }}
+        aria-hidden
+      />
+
+      {/* A second, short gradient under the header. The site header floats
+          over this hero in white text, and the main scrim is at its weakest
+          exactly there — on a light palette that left white nav links on a
+          pale background. This band keeps that strip dark whatever the
+          business's colors or hero photo. */}
+      <div
+        className="absolute inset-x-0 top-0 h-36"
+        style={{
+          background:
+            "linear-gradient(to bottom, color-mix(in oklab, var(--hero-scrim) 70%, transparent), transparent)",
         }}
         aria-hidden
       />

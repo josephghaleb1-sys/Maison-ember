@@ -1,5 +1,5 @@
 -- ============================================================================
--- DEMO DATA — "Bookshop"
+-- DEMO DATA — "Bibliotheca Bookshop"
 -- ============================================================================
 --
 -- This file seeds the first configured business on the platform. Everything
@@ -15,10 +15,13 @@
 -- Replace all of it from the dashboard (Business info / Website / Catalog) —
 -- no code change required.
 --
--- >>> BRAND COLORS: the palette below is a PLACEHOLDER (ink + antique gold).
--- >>> Swap primary_color / secondary_color for the customer's real brand
--- >>> colors — either here before first run, or in the dashboard at any time
--- >>> under Website -> Brand colors.
+-- BRAND COLORS: antique gold on warm ivory, taken from the customer's logo
+-- (a gold-foil "B" monogram built from a classical column and an open book,
+-- printed on cream stock). The supplied artwork was photographed in low light,
+-- so the sampled values were desaturated; the hue family was kept and the
+-- chroma restored to what foil actually reads as in print. Adjust either value
+-- in the dashboard under Website -> Brand colors — every surface, border and
+-- text tone on the site is derived from these two.
 --
 -- Safe to re-run: upserts by slug/business_id, so running it twice does not
 -- duplicate rows.
@@ -34,7 +37,7 @@ declare
 begin
   -- ---- business -------------------------------------------------------------
   insert into public.businesses (slug, name, business_type, currency)
-  values ('bookshop', 'Bookshop', 'bookshop', 'USD')
+  values ('bibliotheca', 'Bibliotheca Bookshop', 'bookshop', 'USD')
   on conflict (slug) do update set
     name = excluded.name,
     business_type = excluded.business_type,
@@ -50,22 +53,22 @@ begin
   )
   values (
     biz_id,
-    'Bookshop',
-    'Books worth keeping.',
-    E'Bookshop began with a simple conviction: that a book you love deserves to be an object you keep. Not a file that disappears when a subscription lapses — a thing with weight, with a spine that creases where you stopped, with paper that takes an ink note in the margin.\n'
+    'Bibliotheca Bookshop',
+    'More Than Just Books',
+    E'Bibliotheca began with a simple conviction: that a book you love deserves to be an object you keep. Not a file that disappears when a subscription lapses — a thing with weight, with a spine that creases where you stopped, with paper that takes an ink note in the margin.\n'
       || E'\nWe stock a deliberately small selection. Every title on our shelves is one of us has read and argued for, which means we carry fewer books than a chain and can tell you something true about each one. Modern fiction sits beside essays, natural history beside design monographs, and a case of rare and collectible editions anchors the back room.\n'
       || E'\nAlongside the books we keep the things that go with them: Japanese fountain pens, linen-bound notebooks, brass bookmarks, reading lights that will outlast the shelf they clamp to. Come in, take your time, and ask us what we are reading.',
     '+1 (555) 014-2200',
     '+1 555 014 2201',
-    'hello@bookshop.example',
+    'hello@bibliotheca.example',
     '18 Quill Street, Old Town',
     '{"mon": "10:00 AM - 7:00 PM", "tue": "10:00 AM - 7:00 PM", "wed": "10:00 AM - 7:00 PM", "thu": "10:00 AM - 8:00 PM", "fri": "10:00 AM - 8:00 PM", "sat": "10:00 AM - 8:00 PM", "sun": "12:00 PM - 6:00 PM"}'::jsonb,
-    '{"instagram": "https://instagram.com/example_bookshop", "facebook": "https://facebook.com/example_bookshop"}'::jsonb,
-    '#C8A44D',
-    '#0E1420',
+    '{"instagram": "https://instagram.com/example_bibliotheca", "facebook": "https://facebook.com/example_bibliotheca"}'::jsonb,
+    '#B08D57',
+    '#F4F0E8',
     'Books worth keeping.',
     'A small, considered bookshop — modern fiction, essays and rare editions, alongside the pens, papers and reading things that belong with them.',
-    'Bookshop | Books, Rare Editions & Reading Accessories',
+    'Bibliotheca Bookshop | Books, Rare Editions & Reading Accessories',
     'A considered selection of fiction, non-fiction and rare editions, alongside fine stationery and reading accessories. Visit us in store or get in touch.'
   )
   on conflict (business_id) do update set
@@ -88,27 +91,27 @@ begin
   -- ---- categories -----------------------------------------------------------
   insert into public.categories (business_id, name, sort_order)
   values (biz_id, 'Fiction', 1)
-  on conflict do nothing;
+  on conflict (business_id, name) do nothing;
   select id into cat_fiction from public.categories where business_id = biz_id and name = 'Fiction';
 
   insert into public.categories (business_id, name, sort_order)
   values (biz_id, 'Non-Fiction', 2)
-  on conflict do nothing;
+  on conflict (business_id, name) do nothing;
   select id into cat_nonfiction from public.categories where business_id = biz_id and name = 'Non-Fiction';
 
   insert into public.categories (business_id, name, sort_order)
   values (biz_id, 'Rare & Collectible', 3)
-  on conflict do nothing;
+  on conflict (business_id, name) do nothing;
   select id into cat_rare from public.categories where business_id = biz_id and name = 'Rare & Collectible';
 
   insert into public.categories (business_id, name, sort_order)
   values (biz_id, 'Stationery', 4)
-  on conflict do nothing;
+  on conflict (business_id, name) do nothing;
   select id into cat_stationery from public.categories where business_id = biz_id and name = 'Stationery';
 
   insert into public.categories (business_id, name, sort_order)
   values (biz_id, 'Reading Accessories', 5)
-  on conflict do nothing;
+  on conflict (business_id, name) do nothing;
   select id into cat_accessories from public.categories where business_id = biz_id and name = 'Reading Accessories';
 
   -- ---- catalogue: only insert if this business has none yet (idempotent) -----
@@ -158,6 +161,6 @@ end $$;
 -- Uncomment and edit:
 --
 -- insert into public.business_domains (business_id, hostname, is_primary)
--- select id, 'bookshop.example.com', true from public.businesses where slug = 'bookshop'
+-- select id, 'bibliotheca.example.com', true from public.businesses where slug = 'bibliotheca'
 -- on conflict (hostname) do nothing;
 -- ---------------------------------------------------------------------------

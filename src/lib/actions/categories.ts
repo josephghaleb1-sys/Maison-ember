@@ -32,6 +32,10 @@ export async function createCategory(formData: FormData): Promise<{ error?: stri
     sort_order: count ?? 0,
   });
 
+  // categories_business_id_name_key — one name per business (migration 0004).
+  if (error?.code === "23505") {
+    return { error: `You already have a category called "${parsed.data.name}".` };
+  }
   if (error) return { error: `Couldn't create category: ${error.message}` };
 
   revalidateAll();
@@ -53,6 +57,9 @@ export async function renameCategory(categoryId: string, name: string): Promise<
     .eq("id", categoryId)
     .eq("business_id", business.id);
 
+  if (error?.code === "23505") {
+    return { error: `You already have a category called "${parsed.data}".` };
+  }
   if (error) return { error: `Couldn't rename category: ${error.message}` };
 
   revalidateAll();

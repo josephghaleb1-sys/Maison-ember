@@ -21,7 +21,7 @@ export default async function AboutPage() {
   const paragraphs = (settings?.about_text || "").split(/\n+/).filter(Boolean);
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-20 sm:px-6 sm:py-24">
+    <div className="mx-auto max-w-3xl px-4 pb-20 pt-32 sm:px-6 sm:pb-24 sm:pt-36">
       <Reveal className="flex flex-col items-center">
         {settings?.logo_path && (
           <div className="relative mb-8 size-24 overflow-hidden rounded-full ring-1 ring-brand-line">

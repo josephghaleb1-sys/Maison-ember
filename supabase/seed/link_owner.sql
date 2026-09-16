@@ -14,7 +14,7 @@ do $$
 declare
   -- ---- EDIT THESE TWO ------------------------------------------------------
   target_email text := 'YOUR_EMAIL_HERE';
-  target_slug  text := 'bookshop';   -- 'maison-ember' for the second demo
+  target_slug  text := 'bibliotheca';   -- 'maison-ember' for the second demo
   -- --------------------------------------------------------------------------
   target_user  uuid;
   target_biz   uuid;
